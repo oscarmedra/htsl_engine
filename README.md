@@ -135,6 +135,36 @@ Voir [`examples/browser.html`](examples/browser.html) pour une démo en direct.
 
 Combine `parse` et `render` (accepte les options des deux).
 
+### Conversion inverse : HTML → HTSL
+
+Le moteur sait aussi reconvertir du HTML en HTSL, via un petit parser HTML
+maison (zéro dépendance, Node + navigateur) :
+
+```ts
+import { fromHtml, parseHtml, toHtsl } from "htsl";
+
+fromHtml('<div class="box"><p>Salut</p></div>');
+// → "{div.box:\n  {p:Salut}\n}"
+
+const ast = parseHtml("<ul><li>a</li><li>b</li></ul>"); // HTML → AST
+toHtsl(ast, { prettyPrint: false });                    // AST → HTSL  →  "{ul:{li:a}{li:b}}"
+```
+
+| Fonction | Rôle |
+|----------|------|
+| `parseHtml(html)` | HTML → AST (`Node[]`) |
+| `toHtsl(ast, { prettyPrint? })` | AST → source HTSL |
+| `fromHtml(html, options?)` | HTML → HTSL (les deux d'un coup) |
+
+La conversion gère les éléments, les attributs (quotés, non quotés, booléens),
+les balises void, les commentaires, le doctype (ignoré) et les entités HTML
+courantes. Elle est tolérante (ne lève jamais d'exception) et referme
+automatiquement les balises laissées ouvertes.
+
+> **Limite v0.1** : les espaces purement décoratifs entre éléments inline
+> peuvent être perdus (les nœuds texte vides sont supprimés). Le contenu
+> textuel significatif et l'échappement, eux, font un aller-retour fidèle.
+
 ## L'AST
 
 Chaque nœud porte sa position (`loc: { line, col }`, 1-based). Le texte est un

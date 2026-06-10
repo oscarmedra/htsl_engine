@@ -45,6 +45,17 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Bundle global renommé : `globalName: "htsl_engine"` + footer exposant `globalThis.htsl_engine` et l'alias majuscule `globalThis.HTSL_ENGINE` (même objet moteur, sans `default`).
 - Vérifié : global navigateur `htsl_engine.compile` / `HTML_ENGINE.compile`, et ESM `import htsl_engine`, `import { htsl_engine }`, fonctions nommées.
 - `examples/browser.html` et `README.md` mis à jour pour `htsl_engine`.
+- Alias global renommé `HTML_ENGINE` → `HTSL_ENGINE` (majuscule de `htsl_engine`), même objet.
+
+### Conversion inverse HTML → HTSL
+
+- `src/from-html.ts` : mini-parser HTML maison (zéro dépendance) → AST, puis sérialiseur AST → HTSL.
+- Nouvelles fonctions exposées (API + objet `htsl_engine`) : `parseHtml`, `toHtsl`, `fromHtml`.
+- Gère éléments, attributs (quotés/non quotés/booléens), balises void, commentaires, doctype ignoré, entités HTML ; tolérant (ne lève jamais), auto-fermeture des balises ouvertes.
+- `tests/from-html.test.ts` : 19 tests (conversion, AST, options, round-trip HTML→HTSL→HTML). Total : **74 tests** verts.
+- Bug corrigé : boucle infinie sur un `<` littéral isolé dans `readText` (détecté par le test de robustesse).
+- Bundles régénérés (`npm run build` + `npm run build:min`) : `fromHtml` disponible en ESM et via les globals navigateur.
+- README et `.docs/02-conversion-html-vers-htsl.md` ajoutés/mis à jour.
 
 
 

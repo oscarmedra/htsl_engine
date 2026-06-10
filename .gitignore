@@ -4,3 +4,6 @@ dist-min/
 *.log
 .DS_Store
 coverage/
+
+# Page de test locale (usage personnel, non versionnée)
+teste.html

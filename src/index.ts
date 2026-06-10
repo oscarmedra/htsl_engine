@@ -12,12 +12,15 @@
 import { parse } from "./parser.js";
 import { render } from "./renderer.js";
 import { tokenize } from "./lexer.js";
+import { fromHtml, parseHtml, toHtsl } from "./from-html.js";
 import { HTSLError } from "./errors.js";
 import type { CompileOptions, Node } from "./types.js";
 
 export { parse } from "./parser.js";
 export { render } from "./renderer.js";
 export { tokenize } from "./lexer.js";
+export { fromHtml, parseHtml, toHtsl } from "./from-html.js";
+export type { ToHtslOptions } from "./from-html.js";
 export { HTSLError } from "./errors.js";
 
 export type {
@@ -53,6 +56,9 @@ export const htsl_engine = {
   render,
   compile,
   tokenize,
+  fromHtml,
+  parseHtml,
+  toHtsl,
   HTSLError,
 } as const;
 
