@@ -30,3 +30,13 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Ajout de `@types/node` en devDependency pour le typecheck des tests/scripts.
 - Vérification finale : `npm run typecheck` OK, `npm run build` OK, `npm test` 55/55 verts, `npm run demo` OK.
 
+### Build minifié (test sur projet externe)
+
+- Ajout de `tsup.min.config.ts` et du script `npm run build:min` produisant dans `dist-min/` :
+  - `htsl.min.js` — ESM minifié (~9.6 Ko) pour `import` dans un projet avec bundler.
+  - `htsl.global.js` — IIFE minifié (~10 Ko) exposant un global `HTSL` pour usage via `<script>`.
+- Vérification des deux bundles : ESM (`compile`/`parse` + échappement XSS) et IIFE (global `HTSL` exposant `parse/render/compile/tokenize/HTSLError`).
+- Ajout de `examples/browser.html` : page de démonstration navigateur (édition en direct) chargeant le bundle global.
+- `dist-min/` ajouté au `.gitignore` (artefact de build, régénérable via `npm run build:min`).
+
+

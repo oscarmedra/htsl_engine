@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "build:min": "tsup --config tsup.min.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
