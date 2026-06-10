@@ -105,13 +105,13 @@ npm run build:min   # génère dist-min/htsl.min.js (ESM) + dist-min/htsl.global
 ```
 
 Dans une page HTML, le bundle global expose `htsl_engine` (et l'alias
-`HTML_ENGINE`) :
+majuscule `HTSL_ENGINE`) :
 
 ```html
 <script src="htsl.global.js"></script>
 <script>
   document.body.innerHTML = htsl_engine.compile("{p.box:Bonjour}", { prettyPrint: true });
-  // HTML_ENGINE.compile(...) fonctionne aussi
+  // HTSL_ENGINE.compile(...) fonctionne aussi (même objet)
 </script>
 ```
 

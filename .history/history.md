@@ -42,7 +42,7 @@ Les entrées les plus récentes sont ajoutées en bas.
 ### Objet moteur nommé `htsl_engine`
 
 - Ajout dans `src/index.ts` d'un objet moteur `htsl_engine` (`{ parse, render, compile, tokenize, HTSLError }`), exporté en nommé **et** en défaut, pour un usage `htsl_engine.compile(...)`.
-- Bundle global renommé : `globalName: "htsl_engine"` + footer exposant `globalThis.htsl_engine` et l'alias `globalThis.HTML_ENGINE` (objet moteur propre, sans `default`).
+- Bundle global renommé : `globalName: "htsl_engine"` + footer exposant `globalThis.htsl_engine` et l'alias majuscule `globalThis.HTSL_ENGINE` (même objet moteur, sans `default`).
 - Vérifié : global navigateur `htsl_engine.compile` / `HTML_ENGINE.compile`, et ESM `import htsl_engine`, `import { htsl_engine }`, fonctions nommées.
 - `examples/browser.html` et `README.md` mis à jour pour `htsl_engine`.
 

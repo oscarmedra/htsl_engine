@@ -6,7 +6,7 @@ import { defineConfig } from "tsup";
  * Produces, in dist-min/:
  *   - htsl.min.js     ESM, minified  (import htsl_engine from ".../htsl.min.js")
  *   - htsl.global.js  IIFE, minified, exposes the globals `htsl_engine` and
- *                     `HTML_ENGINE`  (<script> tag → htsl_engine.compile(...))
+ *                     `HTSL_ENGINE`  (<script> tag → htsl_engine.compile(...))
  */
 export default defineConfig([
   {
@@ -34,7 +34,7 @@ export default defineConfig([
     // The default export carries the engine object; expose it (and an alias)
     // directly as the global instead of as `htsl_engine.default`.
     footer: {
-      js: "if(typeof htsl_engine!=='undefined'&&htsl_engine.default){htsl_engine=htsl_engine.default;}globalThis.htsl_engine=htsl_engine;globalThis.HTML_ENGINE=htsl_engine;",
+      js: "if(typeof htsl_engine!=='undefined'&&htsl_engine.default){htsl_engine=htsl_engine.default;}globalThis.htsl_engine=htsl_engine;globalThis.HTSL_ENGINE=htsl_engine;",
     },
   },
 ]);
