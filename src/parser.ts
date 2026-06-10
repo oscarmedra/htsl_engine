@@ -1,0 +1,316 @@
+/**
+ * HTSL parser — a hand-written recursive-descent parser turning a token stream
+ * into an AST.
+ *
+ * Grammar (reference):
+ *
+ *   document   = { node } ;
+ *   node       = element | comment | text ;
+ *   element    = "{" tag [ id ] { class } [ attrs ] ( ":" content | "/" ) "}" ;
+ *   comment    = "{!--" any "--}" ;
+ *   attrs      = "[" attr { "," attr } "]" ;
+ *   attr       = identifier "=" value ;
+ *   content    = { node } ;
+ *   identifier = letter { letter | digit | "-" | "_" } ;
+ *
+ * In `strict` mode the first error throws an {@link HTSLError}. In `tolerant`
+ * mode an {@link ErrorNode} is inserted into the AST and parsing resumes.
+ */
+import { HTSLError } from "./errors.js";
+import { tokenize } from "./lexer.js";
+import type {
+  ElementNode,
+  ErrorNode,
+  Loc,
+  Node,
+  ParseOptions,
+  Token,
+} from "./types.js";
+
+const DEFAULT_MAX_DEPTH = 256;
+const VALID_IDENT = /^[A-Za-z][A-Za-z0-9_-]*$/;
+
+export function parse(source: string, options: ParseOptions = {}): Node[] {
+  const mode = options.mode ?? "strict";
+  const maxDepth = options.maxDepth ?? DEFAULT_MAX_DEPTH;
+  const tokens = tokenize(source, mode);
+  return new Parser(source, tokens, mode === "tolerant", maxDepth).parseDocument();
+}
+
+class Parser {
+  private pos = 0;
+
+  constructor(
+    private readonly src: string,
+    private readonly tokens: Token[],
+    private readonly tolerant: boolean,
+    private readonly maxDepth: number,
+  ) {}
+
+  parseDocument(): Node[] {
+    const nodes: Node[] = [];
+    while (!this.check("EOF")) {
+      const before = this.pos;
+      const node = this.parseNode(1);
+      this.collect(nodes, node);
+      // Defensive: never spin without consuming a token.
+      if (this.pos === before) this.advance();
+    }
+    return nodes;
+  }
+
+  /* ----------------------------------------------------------------------- */
+  /* Nodes                                                                   */
+  /* ----------------------------------------------------------------------- */
+
+  private parseNode(depth: number): Node | null {
+    const t = this.peek();
+    switch (t.type) {
+      case "COMMENT":
+        this.advance();
+        return { type: "comment", value: t.value, loc: t.loc };
+      case "TEXT":
+        this.advance();
+        return { type: "text", value: t.value, loc: t.loc };
+      case "LBRACE":
+        return this.parseElementSafe(depth);
+      case "RBRACE":
+        return this.recoverable("accolade fermante orpheline.", t.loc, () =>
+          this.advance(),
+        );
+      case "EOF":
+        return null;
+      default:
+        return this.recoverable(`jeton inattendu : "${t.value}".`, t.loc, () =>
+          this.advance(),
+        );
+    }
+  }
+
+  /** Wraps {@link parseElement} so that, in tolerant mode, a thrown error is
+   * turned into an {@link ErrorNode} and parsing resumes after the next `}`. */
+  private parseElementSafe(depth: number): Node {
+    if (!this.tolerant) return this.parseElement(depth);
+    const start = this.peek().loc;
+    try {
+      return this.parseElement(depth);
+    } catch (err) {
+      if (!(err instanceof HTSLError)) throw err;
+      this.skipToClosing();
+      return { type: "error", message: stripPrefix(err.message), loc: start };
+    }
+  }
+
+  private parseElement(depth: number): ElementNode {
+    const startLoc = this.peek().loc; // location of "{"
+    this.advance(); // consume "{"
+
+    if (depth > this.maxDepth) {
+      this.fail(
+        `profondeur d'imbrication maximale (${this.maxDepth}) dépassée.`,
+        startLoc,
+      );
+    }
+
+    const tag = this.parseTag(startLoc);
+
+    let id: string | null = null;
+    const classes: string[] = [];
+    const attrs: Record<string, string> = {};
+
+    // [ id ] { class } [ attrs ] — order-tolerant loop
+    loop: for (;;) {
+      const t = this.peek();
+      switch (t.type) {
+        case "HASH": {
+          this.advance();
+          id = this.parseIdent("identifiant");
+          break;
+        }
+        case "DOT": {
+          this.advance();
+          classes.push(this.parseIdent("classe"));
+          break;
+        }
+        case "LBRACKET": {
+          this.parseAttrs(attrs);
+          break;
+        }
+        default:
+          break loop;
+      }
+    }
+
+    const t = this.peek();
+    if (t.type === "SLASH") {
+      this.advance();
+      this.expect("RBRACE", `balise "{${tag}" jamais fermée.`, startLoc);
+      return this.element(tag, id, classes, attrs, true, [], startLoc);
+    }
+
+    if (t.type === "COLON") {
+      this.advance();
+      const children = this.parseContent(depth);
+      if (this.check("EOF")) {
+        this.fail(`balise "{${tag}" jamais fermée.`, startLoc);
+      }
+      this.advance(); // consume "}"
+      return this.element(tag, id, classes, attrs, false, children, startLoc);
+    }
+
+    if (t.type === "EOF") {
+      this.fail(`balise "{${tag}" jamais fermée.`, startLoc);
+    }
+    this.fail(`attendu ":" ou "/" pour fermer la balise "{${tag}".`, t.loc);
+  }
+
+  private parseContent(depth: number): Node[] {
+    const children: Node[] = [];
+    while (!this.check("RBRACE") && !this.check("EOF")) {
+      const before = this.pos;
+      const node = this.parseNode(depth + 1);
+      this.collect(children, node);
+      if (this.pos === before) this.advance();
+    }
+    return children;
+  }
+
+  private parseTag(startLoc: Loc): string {
+    const t = this.peek();
+    if (t.type === "EOF") {
+      this.fail(`balise jamais fermée.`, startLoc);
+    }
+    if (t.type !== "IDENT") {
+      this.fail(`nom de balise attendu après "{".`, t.loc);
+    }
+    if (!VALID_IDENT.test(t.value)) {
+      this.fail(`identifiant de balise invalide : "${t.value}".`, t.loc);
+    }
+    this.advance();
+    return t.value;
+  }
+
+  private parseIdent(kind: string): string {
+    const t = this.peek();
+    if (t.type !== "IDENT") {
+      this.fail(`nom de ${kind} attendu.`, t.loc);
+    }
+    if (!VALID_IDENT.test(t.value)) {
+      this.fail(`identifiant de ${kind} invalide : "${t.value}".`, t.loc);
+    }
+    this.advance();
+    return t.value;
+  }
+
+  private parseAttrs(attrs: Record<string, string>): void {
+    const open = this.peek().loc;
+    this.advance(); // consume "["
+    if (this.check("RBRACKET")) {
+      this.advance();
+      return;
+    }
+    for (;;) {
+      const name = this.peek();
+      if (name.type !== "IDENT" || !VALID_IDENT.test(name.value)) {
+        this.fail(`attribut malformé : nom d'attribut invalide.`, name.loc);
+      }
+      this.advance();
+
+      this.expect(
+        "EQUALS",
+        `attribut malformé : "=" attendu après "${name.value}".`,
+        this.peek().loc,
+      );
+
+      const value = this.peek();
+      if (value.type === "STRING" || value.type === "IDENT") {
+        this.advance();
+        attrs[name.value] = value.value;
+      } else {
+        this.fail(
+          `attribut malformé : valeur attendue pour "${name.value}".`,
+          value.loc,
+        );
+      }
+
+      if (this.check("COMMA")) {
+        this.advance();
+        continue;
+      }
+      break;
+    }
+    this.expect("RBRACKET", `attribut malformé : "]" attendu.`, open);
+  }
+
+  /* ----------------------------------------------------------------------- */
+  /* Helpers                                                                 */
+  /* ----------------------------------------------------------------------- */
+
+  private element(
+    tag: string,
+    id: string | null,
+    classes: string[],
+    attrs: Record<string, string>,
+    selfClosing: boolean,
+    children: Node[],
+    loc: Loc,
+  ): ElementNode {
+    return { type: "element", tag, id, classes, attrs, selfClosing, children, loc };
+  }
+
+  /** Push a node, dropping whitespace-only text nodes (insignificant layout). */
+  private collect(target: Node[], node: Node | null): void {
+    if (node === null) return;
+    if (node.type === "text" && node.value.trim() === "") return;
+    target.push(node);
+  }
+
+  private peek(): Token {
+    return this.tokens[this.pos] ?? this.tokens[this.tokens.length - 1]!;
+  }
+
+  private check(type: Token["type"]): boolean {
+    return this.peek().type === type;
+  }
+
+  private advance(): Token {
+    const t = this.peek();
+    if (this.pos < this.tokens.length - 1) this.pos++;
+    return t;
+  }
+
+  private expect(type: Token["type"], message: string, loc: Loc): void {
+    if (this.check(type)) {
+      this.advance();
+      return;
+    }
+    this.fail(message, loc);
+  }
+
+  /** Always throws an {@link HTSLError}. Used inside element parsing, where the
+   * tolerant-mode catch lives in {@link parseElementSafe}. */
+  private fail(message: string, loc: Loc): never {
+    throw new HTSLError(message, loc, this.src);
+  }
+
+  /** Mode-aware error used at content/document level, where there is no
+   * surrounding try/catch. Throws in strict mode, recovers in tolerant mode. */
+  private recoverable(message: string, loc: Loc, recover: () => void): ErrorNode {
+    if (!this.tolerant) throw new HTSLError(message, loc, this.src);
+    recover();
+    return { type: "error", message, loc };
+  }
+
+  /** Tolerant-mode recovery: advance past the next unmatched "}" (or EOF). */
+  private skipToClosing(): void {
+    while (!this.check("EOF") && !this.check("RBRACE")) this.advance();
+    if (this.check("RBRACE")) this.advance();
+  }
+}
+
+/** Removes the "HTSL Error (...) : " prefix, keeping the bare message. */
+function stripPrefix(message: string): string {
+  const idx = message.indexOf(" : ");
+  const firstLine = message.split("\n", 1)[0] ?? message;
+  return idx >= 0 ? firstLine.slice(idx + 3) : firstLine;
+}

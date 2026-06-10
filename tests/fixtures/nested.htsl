@@ -1,0 +1,4 @@
+{div.box:
+  {h1:Titre}
+  {p:Un paragraphe avec du {strong:texte fort} dedans.}
+}

@@ -13,3 +13,20 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Création du dossier `.docs/` avec `README.md` et `00-initialisation.md`.
 - Création du dossier `.history/` avec ce fichier `history.md`.
 - Mise en place de la convention permanente : tenir à jour `.docs/` et `.history/` tout au long du développement.
+
+### Développement du moteur HTSL v0.1
+
+- Configuration du projet : `package.json` (scripts build/test/demo/typecheck), `tsconfig.json` (mode strict + options strictes), `tsup.config.ts` (ESM, plateforme neutre), `.gitignore`.
+- `src/types.ts` : types des tokens et de l'AST (union discriminée `Node` : `ElementNode`, `TextNode`, `CommentNode`, `ErrorNode`) + types d'options.
+- `src/errors.ts` : `HTSLError` avec message localisé (ligne/col) et extrait du source avec curseur `^`.
+- `src/lexer.ts` : lexer à modes (content/header), suivi ligne/colonne, échappements, gestion stricte/tolérante.
+- `src/parser.ts` : parser descendant récursif suivant la grammaire formelle ; modes strict (throw) et tolerant (nœud `error`) ; détection des erreurs du §5 ; suppression des nœuds texte blancs.
+- `src/renderer.ts` : rendu AST→HTML avec échappement XSS par défaut, balises void, `prettyPrint`, `allowedTags`.
+- `src/index.ts` : API publique `parse()`, `render()`, `compile()` + exports de types.
+- Tests Vitest : `tests/lexer.test.ts`, `tests/parser.test.ts`, `tests/renderer.test.ts` (55 tests).
+- 6 golden files dans `tests/fixtures/` (`.htsl` → `.html`), générés via `scripts/gen-fixtures.ts`.
+- `demo.htsl` + `scripts/demo.ts` (script `npm run demo`).
+- `README.md` complet (présentation, syntaxe, grammaire, API, sécurité, erreurs, tests).
+- Ajout de `@types/node` en devDependency pour le typecheck des tests/scripts.
+- Vérification finale : `npm run typecheck` OK, `npm run build` OK, `npm test` 55/55 verts, `npm run demo` OK.
+

@@ -1,0 +1,11 @@
+{!-- Démonstration du moteur HTSL --}
+{article.post:
+  {h1#titre:Bienvenue sur HTSL}
+  {p:HTSL transforme un balisage léger en {strong:HTML} valide.}
+  {ul.features:
+    {li:Syntaxe concise : {code:\{tag.classe:contenu\}}}
+    {li:Échappement XSS par défaut}
+    {li:Zéro dépendance}
+  }
+  {a[href="https://example.com", title="En savoir plus"]:Documentation}
+}

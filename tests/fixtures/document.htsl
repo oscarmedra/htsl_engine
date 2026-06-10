@@ -1,0 +1,10 @@
+{!-- Un petit document de démonstration --}
+{article.post:
+  {h1#title:HTSL en action}
+  {p:Bienvenue dans {strong:HTSL}.}
+  {ul:
+    {li:Léger}
+    {li:Sûr}
+    {li:Sans dépendance}
+  }
+}
