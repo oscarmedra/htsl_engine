@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Démo HTSL (navigateur)</title>
-    <!-- Bundle minifié : expose un global `HTSL` -->
+    <!-- Bundle minifié : expose les globals `htsl_engine` et `HTML_ENGINE` -->
     <script src="../dist-min/htsl.global.js"></script>
     <style>
       body { font: 16px/1.5 system-ui, sans-serif; margin: 2rem; }
@@ -35,7 +35,7 @@
 
       function update() {
         try {
-          const html = HTSL.compile(srcEl.value, { prettyPrint: true });
+          const html = htsl_engine.compile(srcEl.value, { prettyPrint: true });
           rendered.innerHTML = html;
           source.textContent = html;
         } catch (err) {

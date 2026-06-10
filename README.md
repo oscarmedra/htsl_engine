@@ -84,6 +84,39 @@ const html = render(ast, { prettyPrint: true });
 const out = compile("{p:Bonjour}");
 ```
 
+### Objet moteur `htsl_engine`
+
+Pour un usage en namespace (`htsl_engine.compile(...)`), le moteur est aussi
+exposé comme objet — disponible en ESM comme export par défaut **et** nommé :
+
+```ts
+import htsl_engine from "htsl";        // export par défaut
+// ou : import { htsl_engine } from "htsl";
+
+htsl_engine.compile("{p:Bonjour}");
+htsl_engine.parse("{p:x}");
+htsl_engine.render(ast, { prettyPrint: true });
+```
+
+### Build minifié & usage navigateur
+
+```bash
+npm run build:min   # génère dist-min/htsl.min.js (ESM) + dist-min/htsl.global.js (IIFE)
+```
+
+Dans une page HTML, le bundle global expose `htsl_engine` (et l'alias
+`HTML_ENGINE`) :
+
+```html
+<script src="htsl.global.js"></script>
+<script>
+  document.body.innerHTML = htsl_engine.compile("{p.box:Bonjour}", { prettyPrint: true });
+  // HTML_ENGINE.compile(...) fonctionne aussi
+</script>
+```
+
+Voir [`examples/browser.html`](examples/browser.html) pour une démo en direct.
+
 ### `parse(source, options?)` → `Node[]`
 
 | Option | Type | Défaut | Description |

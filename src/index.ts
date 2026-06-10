@@ -11,6 +11,8 @@
  */
 import { parse } from "./parser.js";
 import { render } from "./renderer.js";
+import { tokenize } from "./lexer.js";
+import { HTSLError } from "./errors.js";
 import type { CompileOptions, Node } from "./types.js";
 
 export { parse } from "./parser.js";
@@ -38,3 +40,20 @@ export function compile(source: string, options: CompileOptions = {}): string {
   const ast: Node[] = parse(source, options);
   return render(ast, options);
 }
+
+/**
+ * The HTSL engine as a single namespace object.
+ *
+ * Lets you call `htsl_engine.compile(...)`, `htsl_engine.parse(...)`, etc.
+ * Exposed in the browser bundle as the globals `htsl_engine` and `HTML_ENGINE`,
+ * and available in ESM as both a named and the default export.
+ */
+export const htsl_engine = {
+  parse,
+  render,
+  compile,
+  tokenize,
+  HTSLError,
+} as const;
+
+export default htsl_engine;
