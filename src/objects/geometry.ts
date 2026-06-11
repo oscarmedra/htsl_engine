@@ -7,7 +7,12 @@
  *
  * Context rule: a geometric object *inside* a scene becomes a Plotly trace;
  * *outside* a scene it falls back to its LaTeX notation ({@link latexOfGeometry}).
+ *
+ * Décor vs. actors: inside a scene, a *décor* object (a frame/space) configures
+ * the mathematical frame — at most one per scene (a second one is a localized
+ * error) — while *actor* objects (point, circle, plane, sphere…) are drawn.
  */
+import { HTSLError } from "../errors.js";
 import type { ObjectNode } from "../types.js";
 
 export type Trace = Record<string, unknown>;
@@ -51,6 +56,40 @@ function label(attrs: Attrs): string {
   return attrs["label"] ?? attrs["name"] ?? "";
 }
 
+function bool(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined) return fallback;
+  return value !== "false" && value !== "0" && value !== "no";
+}
+
+/** Parse a complex affix (a+bi, a-bi, bi, a, -i, …) into [re, im]. */
+export function parseComplex(input: string): [number, number] {
+  const s = input.replace(/\s+/g, "");
+  let re = 0;
+  let im = 0;
+  const m = s.match(/([+-]?)(\d*\.?\d*)i/);
+  let rest = s;
+  if (m) {
+    const sign = m[1] === "-" ? -1 : 1;
+    const mag = m[2] === "" || m[2] === undefined ? 1 : Number(m[2]);
+    im = sign * (Number.isFinite(mag) ? mag : 1);
+    rest = s.replace(m[0], "");
+  }
+  if (rest !== "" && rest !== "+" && rest !== "-") {
+    const n = Number(rest);
+    if (Number.isFinite(n)) re = n;
+  }
+  return [re, im];
+}
+
+function complexLatex(re: number, im: number): string {
+  if (im === 0) return `${re}`;
+  const imPart = im === 1 ? "i" : im === -1 ? "-i" : `${im}i`;
+  if (re === 0) return imPart;
+  const sign = im < 0 ? "-" : "+";
+  const mag = Math.abs(im) === 1 ? "i" : `${Math.abs(im)}i`;
+  return `${re} ${sign} ${mag}`;
+}
+
 function cross(a: number[], b: number[]): number[] {
   return [
     (a[1] ?? 0) * (b[2] ?? 0) - (a[2] ?? 0) * (b[1] ?? 0),
@@ -76,54 +115,195 @@ export function isScenePath(path: string): boolean {
   return path === "math.geometry.2d.scene" || path === "math.geometry.3d.scene";
 }
 
+const DECOR_2D = "math.geometry.2d.frame";
+const DECOR_3D = "math.geometry.3d.space";
+
+/** Décor objects configure the frame; they are not drawn as actors. */
+export function isDecorPath(path: string): boolean {
+  return path === DECOR_2D || path === DECOR_3D;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Scene assembly                                                             */
 /* -------------------------------------------------------------------------- */
 
-export function sceneSpec(scene: ObjectNode): SceneSpec {
+export function sceneSpec(scene: ObjectNode, source?: string): SceneSpec {
   const dim: "2d" | "3d" = scene.path.includes(".3d.") ? "3d" : "2d";
-  const data: Trace[] = [];
+  const decorPath = dim === "3d" ? DECOR_3D : DECOR_2D;
+
+  // A scene has at most one décor (frame/space); a second is a localized error.
+  let decor: ObjectNode | null = null;
   for (const child of scene.children) {
-    if (child.type === "object" && isGeometryPath(child.path)) {
+    if (child.type === "object" && child.path === decorPath) {
+      if (decor) {
+        throw new HTSLError(
+          `une scène ne peut contenir qu'un seul ${dim === "3d" ? "repère (space)" : "repère (frame)"}.`,
+          child.loc,
+          source,
+        );
+      }
+      decor = child;
+    }
+  }
+
+  const data: Trace[] = [];
+  if (decor) for (const t of decorTraces(decor)) data.push(t);
+  for (const child of scene.children) {
+    if (child.type === "object" && isGeometryPath(child.path) && !isDecorPath(child.path)) {
       for (const trace of toPlotly(child, dim)) data.push(trace);
     }
   }
+
   const width = num(scene.attrs["width"], 600);
   const height = num(scene.attrs["height"], 400);
+  const layout =
+    dim === "3d"
+      ? build3dLayout(decor, width, height)
+      : build2dLayout(decor, scene, width, height);
 
-  if (dim === "3d") {
+  return { data, layout };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Frames / spaces (décor)                                                    */
+/* -------------------------------------------------------------------------- */
+
+function axis2d(opts: {
+  range?: number[] | undefined;
+  scaleanchor?: string | undefined;
+  grid: boolean;
+  ticks: number | undefined;
+  title?: string | undefined;
+  axes: boolean;
+}): Record<string, unknown> {
+  const ax: Record<string, unknown> = { zeroline: true, showgrid: opts.grid };
+  if (opts.range) ax["range"] = opts.range;
+  if (opts.scaleanchor) ax["scaleanchor"] = opts.scaleanchor;
+  if (opts.ticks !== undefined) ax["dtick"] = opts.ticks;
+  if (opts.title) ax["title"] = { text: opts.title };
+  if (!opts.axes) ax["visible"] = false;
+  return ax;
+}
+
+function build2dLayout(
+  decor: ObjectNode | null,
+  scene: ObjectNode,
+  width: number,
+  height: number,
+): Record<string, unknown> {
+  const base = {
+    width,
+    height,
+    margin: { l: 44, r: 14, t: 14, b: 40 },
+    showlegend: false,
+  };
+
+  if (!decor) {
+    // Unchanged default: square view from finite objects + orthonormal scaling.
+    const b = bounds2d(scene);
+    const xaxis: Record<string, unknown> = { scaleanchor: "y", zeroline: true };
+    const yaxis: Record<string, unknown> = { zeroline: true };
+    if (b) {
+      xaxis["range"] = [b.cx - b.h, b.cx + b.h];
+      yaxis["range"] = [b.cy - b.h, b.cy + b.h];
+    }
+    return { ...base, xaxis, yaxis };
+  }
+
+  const a = decor.attrs;
+  const equal = bool(a["equal"], true);
+  const grid = bool(a["grid"], true);
+  const ticks = a["ticks"] !== undefined ? num(a["ticks"], 1) : undefined;
+  const axes = bool(a["axes"], true);
+
+  if (a["type"] === "complex") {
+    const r = num(a["range"], 4);
     return {
-      data,
-      layout: {
-        width,
-        height,
-        margin: { l: 0, r: 0, t: 0, b: 0 },
-        showlegend: false,
-        scene: { aspectmode: "data" },
-      },
+      ...base,
+      xaxis: axis2d({ range: [-r, r], scaleanchor: equal ? "y" : undefined, grid, ticks, title: "Re(z)", axes }),
+      yaxis: axis2d({ range: [-r, r], grid, ticks, title: "Im(z)", axes }),
     };
   }
 
-  // 2D: derive a square view from the finite objects so an "infinite" droite
-  // does not blow up the auto-range; it gets clipped to the visible window.
-  const b = bounds2d(scene);
-  const xaxis: Record<string, unknown> = { scaleanchor: "y", zeroline: true };
-  const yaxis: Record<string, unknown> = { zeroline: true };
-  if (b) {
-    xaxis["range"] = [b.cx - b.h, b.cx + b.h];
-    yaxis["range"] = [b.cy - b.h, b.cy + b.h];
-  }
+  const labels = (a["labels"] ?? "x,y").split(",");
   return {
-    data,
-    layout: {
-      width,
-      height,
-      margin: { l: 36, r: 12, t: 12, b: 36 },
-      showlegend: false,
-      xaxis,
-      yaxis,
+    ...base,
+    xaxis: axis2d({
+      range: a["xrange"] !== undefined ? vec(a["xrange"]) : undefined,
+      scaleanchor: equal ? "y" : undefined,
+      grid,
+      ticks,
+      title: labels[0]?.trim(),
+      axes,
+    }),
+    yaxis: axis2d({
+      range: a["yrange"] !== undefined ? vec(a["yrange"]) : undefined,
+      grid,
+      ticks,
+      title: labels[1]?.trim(),
+      axes,
+    }),
+  };
+}
+
+function build3dLayout(
+  decor: ObjectNode | null,
+  width: number,
+  height: number,
+): Record<string, unknown> {
+  const base = { width, height, margin: { l: 0, r: 0, t: 0, b: 0 }, showlegend: false };
+  if (!decor) return { ...base, scene: { aspectmode: "data" } };
+
+  const a = decor.attrs;
+  const equal = bool(a["equal"], true);
+  const grid = bool(a["grid"], true);
+  const ticks = a["ticks"] !== undefined ? num(a["ticks"], 1) : undefined;
+  const labels = (a["labels"] ?? "x,y,z").split(",");
+
+  const axis3 = (range: number[] | undefined, title: string | undefined): Record<string, unknown> => {
+    const ax: Record<string, unknown> = { showgrid: grid };
+    if (range) ax["range"] = range;
+    if (ticks !== undefined) ax["dtick"] = ticks;
+    if (title) ax["title"] = { text: title };
+    return ax;
+  };
+
+  return {
+    ...base,
+    scene: {
+      aspectmode: equal ? "data" : "auto",
+      xaxis: axis3(a["xrange"] !== undefined ? vec(a["xrange"]) : undefined, labels[0]?.trim()),
+      yaxis: axis3(a["yrange"] !== undefined ? vec(a["yrange"]) : undefined, labels[1]?.trim()),
+      zaxis: axis3(a["zrange"] !== undefined ? vec(a["zrange"]) : undefined, labels[2]?.trim()),
     },
   };
+}
+
+/** Extra traces contributed by a décor (e.g. the complex-plane unit circle). */
+function decorTraces(decor: ObjectNode): Trace[] {
+  const a = decor.attrs;
+  if (a["type"] === "complex" && bool(a["unitcircle"], false)) {
+    const x: number[] = [];
+    const y: number[] = [];
+    const N = 72;
+    for (let i = 0; i <= N; i++) {
+      const th = (2 * Math.PI * i) / N;
+      x.push(Math.cos(th));
+      y.push(Math.sin(th));
+    }
+    return [
+      {
+        type: "scatter",
+        mode: "lines",
+        x,
+        y,
+        line: { color: "#94a3b8", width: 1.5, dash: "dot" },
+        hoverinfo: "skip",
+        name: "|z| = 1",
+      },
+    ];
+  }
+  return [];
 }
 
 /** Bounding box of the *finite* 2D objects (ignores the infinite droite). */
@@ -149,6 +329,11 @@ function bounds2d(scene: ObjectNode): { cx: number; cy: number; h: number } | nu
       case "math.geometry.2d.point": {
         const p = a["x"] !== undefined ? [num(a["x"], 0), num(a["y"], 0)] : vec(a["at"], [0, 0]);
         add(p[0]!, p[1]!);
+        break;
+      }
+      case "math.geometry.2d.cpoint": {
+        const [re, im] = parseComplex(a["z"] ?? "0");
+        add(re, im);
         break;
       }
       case "math.geometry.2d.circle": {
@@ -205,6 +390,8 @@ export function toPlotly(node: ObjectNode, _dim: "2d" | "3d" = "3d"): Trace[] {
       return sphere3d(a);
     case "math.geometry.2d.point":
       return point2d(a);
+    case "math.geometry.2d.cpoint":
+      return cpoint2d(a);
     case "math.geometry.2d.segment":
       return segment2d(a);
     case "math.geometry.2d.circle":
@@ -416,6 +603,23 @@ function point2d(a: Attrs): Trace[] {
   ];
 }
 
+function cpoint2d(a: Attrs): Trace[] {
+  const [re, im] = parseComplex(a["z"] ?? "0");
+  const name = a["name"] ?? a["label"] ?? "";
+  return [
+    {
+      type: "scatter",
+      mode: name ? "markers+text" : "markers",
+      x: [re],
+      y: [im],
+      marker: { size: 9, color: color(a, "#7c3aed") },
+      text: name ? [name] : [],
+      textposition: "top center",
+      name,
+    },
+  ];
+}
+
 function segment2d(a: Attrs): Trace[] {
   const from = vec(a["from"], [0, 0]);
   const to = vec(a["to"], [0, 0]);
@@ -511,6 +715,18 @@ function sub(a: number[], b: number[]): number[] {
 export function latexOfGeometry(node: ObjectNode): string {
   const a = node.attrs;
   switch (node.path) {
+    case "math.geometry.2d.frame":
+      return a["type"] === "complex"
+        ? `(\\mathbb{C})`
+        : `(O;\\ \\vec{\\imath},\\ \\vec{\\jmath})`;
+    case "math.geometry.3d.space":
+      return `(O;\\ \\vec{\\imath},\\ \\vec{\\jmath},\\ \\vec{k})`;
+    case "math.geometry.2d.cpoint": {
+      const [re, im] = parseComplex(a["z"] ?? "0");
+      const affix = complexLatex(re, im);
+      const name = a["name"] ?? a["label"];
+      return name ? `${name}(${affix})` : `z = ${affix}`;
+    }
     case "math.geometry.3d.point":
     case "math.geometry.2d.point": {
       const coords =

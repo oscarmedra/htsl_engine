@@ -202,9 +202,39 @@ d'appel de fonction : c'est le conteneur qui déclenche le rendu graphique.
 Plotly ; *hors* scène, il rend sa **notation LaTeX** (ex. un plan →
 `2x - y + 3z = 5`). Aucune régression LaTeX.
 
-| Collection | Objets |
-|------------|--------|
-| `mg2.scene` (2D) | `point`, `segment`, `circle`, `polygon`, `droite` |
+### Décor vs. acteurs
+
+Dans une scène, on distingue deux familles :
+
+- **Décor** — configure le *cadre mathématique* : `mg2.frame` (alias `repere`)
+  et `mg3.space`. **Au plus un par scène** (un second est une erreur localisée).
+  Pris en compte quelle que soit sa position parmi les enfants. Sans décor, la
+  scène garde des défauts raisonnables (comportement inchangé).
+- **Acteurs** — sont *dessinés* : `point`, `circle`, `plane`, `sphere`, etc.
+
+Le repère est un **objet structuré déclaratif** qui décrit le cadre ; sa
+traduction Plotly (ranges, `scaleanchor`, `aspectmode`, gridlines…) n'est qu'un
+rendu parmi d'autres.
+
+```htsl
+{@mg2.scene:
+  {@mg2.frame[xrange="(-4,4)", yrange="(-3,3)", grid=true, ticks=1, equal=true]/}
+  {@mg2.circle[center="(0,0)", radius=2]/}
+}
+```
+
+| Décor | Attributs |
+|-------|-----------|
+| `mg2.frame` / `repere` | `xrange`, `yrange`, `grid`, `ticks`, `equal` (défaut **true** = orthonormé, un cercle reste rond), `axes`, `labels` |
+| `mg2.frame[type=complex]` | plan complexe : axes `Re(z)`/`Im(z)`, `range`, `unitcircle=true` (cercle unité en pointillés) |
+| `mg3.space` | `xrange`, `yrange`, `zrange`, `grid`, `ticks`, `equal` (aspectmode), `labels` (défaut `"x,y,z"`) |
+
+L'acteur `mg2.cpoint[z="3+2i", name=A]` place un point d'affixe complexe
+(formes `a+bi`, `a-bi`, `bi`, `a`, signes négatifs).
+
+| Collection | Objets (acteurs) |
+|------------|------------------|
+| `mg2.scene` (2D) | `point`, `cpoint`, `segment`, `circle`, `polygon`, `droite` |
 | `mg3.scene` (3D) | `point`, `vector` (flèche + cône), `segment`, `line`, `plane` (surface), `sphere` (surface paramétrique) |
 
 Attributs visuels communs : `color`, `opacity`, `label`/`name`.

@@ -102,5 +102,18 @@ Les entrées les plus récentes sont ajoutées en bas.
 - `demo-geometry.htsl` + `npm run demo:geometry` ; `examples/geometry.html` (Plotly CDN) ; `teste.html` enrichi de 2 scènes. Rendu 2D et 3D confirmé en navigateur (plan, sphère, point, vecteur, cercle, polygone, droite).
 - Bundles régénérés ; README, `.docs/05-geometrie-plotly.md` ajoutés.
 
+### Repères de scène (décor / acteur)
+
+- Règle d'architecture : dans une scène, un objet **décor** (frame/space) configure le cadre (au plus un, erreur localisée si doublon, pris en compte où qu'il soit) ; les **acteurs** sont dessinés. `plane` reste l'acteur `mg3.plane`.
+- Objets : `math.geometry.2d.frame` (alias `mg2.frame`, `repere`), `math.geometry.3d.space` (`mg3.space`), `math.geometry.2d.cpoint` (affixe complexe).
+- `frame` 2D : `xrange`/`yrange`/`grid`/`ticks`/`equal` (défaut true = orthonormé, scaleanchor)/`axes`/`labels` ; variante `type=complex` (axes Re(z)/Im(z), `range`, `unitcircle` en pointillés).
+- `space` 3D : `xrange`/`yrange`/`zrange`/`grid`/`ticks`/`equal` (aspectmode)/`labels` (défaut "x,y,z").
+- `cpoint` : `parseComplex` (a+bi, a-bi, bi, a, négatifs, décimales).
+- `sceneSpec(scene, source?)` : sépare décor/acteurs, erreur localisée si deux repères, `build2dLayout`/`build3dLayout` ; sans décor, comportement inchangé. Hors-scène, `latexOfGeometry` rend une notation de repère.
+- Lexer inchangé (les décimales étaient déjà gérées) ; `renderScene` reçoit `source`.
+- `tests/frame.test.ts` : 18 tests. Total : **146 tests** verts, zéro régression.
+- `demo-geometry.htsl` et `examples/geometry.html` mis à jour (repère gradué, plan complexe + cercle unité + affixes, space 3D) ; rendu confirmé en navigateur (cercle unité pointillé, affixes A/B/i, axes Re(z)/Im(z)).
+- Bundles régénérés ; README (règle décor/acteur) et `.docs/06-reperes-scene.md` ajoutés.
+
 
 

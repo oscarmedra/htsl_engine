@@ -21,6 +21,7 @@ const ALIASES: Record<string, string> = {
   mtc: "math.text.cases",
   mts: "math.text.system",
   mof: "math.object.fraction",
+  repere: "math.geometry.2d.frame", // alias français du repère 2D
 };
 
 /** Collection-prefix aliases: first dotted segment is expanded. */
@@ -46,7 +47,9 @@ const CONTENT: Record<string, ContentModel> = {
 
   // 2D geometry
   "math.geometry.2d.scene": "html",
+  "math.geometry.2d.frame": "void", // décor (repère cartésien / plan complexe)
   "math.geometry.2d.point": "void",
+  "math.geometry.2d.cpoint": "void", // point d'affixe complexe
   "math.geometry.2d.segment": "void",
   "math.geometry.2d.circle": "void",
   "math.geometry.2d.polygon": "void",
@@ -54,6 +57,7 @@ const CONTENT: Record<string, ContentModel> = {
 
   // 3D geometry
   "math.geometry.3d.scene": "html",
+  "math.geometry.3d.space": "void", // décor (repère 3D)
   "math.geometry.3d.point": "void",
   "math.geometry.3d.vector": "void",
   "math.geometry.3d.segment": "void",

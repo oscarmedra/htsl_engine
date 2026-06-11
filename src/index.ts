@@ -27,7 +27,7 @@ export type { ToHtslOptions } from "./from-html.js";
 export { expand } from "./components/expand.js";
 export type { ExpandOptions } from "./components/expand.js";
 export { latexOfObject, latexOfNode } from "./objects/math.js";
-export { toPlotly, sceneSpec, latexOfGeometry, isGeometryPath, isScenePath } from "./objects/geometry.js";
+export { toPlotly, sceneSpec, latexOfGeometry, isGeometryPath, isScenePath, isDecorPath, parseComplex } from "./objects/geometry.js";
 export type { Trace, SceneSpec } from "./objects/geometry.js";
 export { hydrateScenes } from "./scene-client.js";
 export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";

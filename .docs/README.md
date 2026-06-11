@@ -16,3 +16,4 @@ décrivant ce qui a été fait, pourquoi, et comment cela fonctionne.
 | `03-collection-math-text.md` | Fondation des objets `{@...}` + collection math.text.* (LaTeX/KaTeX, numérotation, refs) |
 | `04-composants-et-variables.md` | Composants `{!define}`/`{@use}` et variables `{!set}`/`{$var}` par expansion d'AST |
 | `05-geometrie-plotly.md` | Objets géométriques (mg2/mg3) rendus en traces Plotly via un conteneur `scene` |
+| `06-reperes-scene.md` | Objets de repère (décor) : `mg2.frame`/`repere`, `mg3.space`, plan complexe + `cpoint` |

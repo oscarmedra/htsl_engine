@@ -149,7 +149,7 @@ export function renderMathObject(
       return reference(node, ctx, options.source);
     case "math.geometry.2d.scene":
     case "math.geometry.3d.scene":
-      return renderScene(node);
+      return renderScene(node, options.source);
     default:
       return inline(latexOfObject(node), katex);
   }
@@ -160,8 +160,8 @@ export function renderMathObject(
  * attribute, plus a fallback message. Call `hydrateScenes()` in the browser to
  * draw them with Plotly when it is available.
  */
-function renderScene(node: ObjectNode): string {
-  const spec = sceneSpec(node);
+function renderScene(node: ObjectNode, source: string | undefined): string {
+  const spec = sceneSpec(node, source);
   const width = typeof spec.layout["width"] === "number" ? spec.layout["width"] : 600;
   const height = typeof spec.layout["height"] === "number" ? spec.layout["height"] : 400;
   const json = escapeHtml(JSON.stringify(spec));
