@@ -8,15 +8,15 @@ export const examples: Example[] = [
   {
     id: "formules",
     label: "Galerie de formules (composant card)",
-    src: String.raw`{!-- Une carte réutilisable, définie une seule fois --}
+    src: String.raw`{!-- Une carte Tailwind réutilisable, définie une seule fois --}
 {!define card[title, color=indigo]:
-  {div.card:
-    {h2.card-title:{$title}}
-    {div.card-body:{$children}}
+  {div[class="bg-white ring-1 ring-slate-200 rounded-xl p-4 mb-3 shadow-sm"]:
+    {h2[class="text-lg font-semibold mb-2 text-{$color}-600"]:{$title}}
+    {div[class="text-slate-700"]:{$children}}
   }
 }
 
-{h1:Galerie de formules}
+{h1[class="text-2xl font-bold mb-4"]:Galerie de formules}
 
 {@card[title="Théorème de Pythagore"]:
   {@mtb: a^2 + b^2 = c^2}
@@ -28,6 +28,40 @@ export const examples: Example[] = [
 
 {@card[title="Objets imbriqués", color="emerald"]:
   {@mtb: {@mof:{num:1}{den:2}} \cdot {@mc.pi/} = \frac{\pi}{2}}
+}
+`,
+  },
+  {
+    id: "tailwind",
+    label: "Mise en page Tailwind",
+    src: String.raw`{!-- Tailwind est disponible : écrivez les classes dans [class="…"].
+     Les classes à variantes (hover:, md:, w-1/2) passent aussi par l'attribut. --}
+{!set accent: indigo}
+
+{div[class="max-w-2xl mx-auto p-4"]:
+  {h1[class="text-2xl font-bold text-slate-800 mb-1"]:Tableau de bord}
+  {p[class="text-slate-500 mb-4"]:Mise en page composée d'utilitaires Tailwind.}
+
+  {div[class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4"]:
+    {div[class="bg-{$accent}-50 ring-1 ring-{$accent}-200 rounded-xl p-4"]:
+      {div[class="text-3xl font-bold text-{$accent}-700"]:128}
+      {div[class="text-sm text-slate-500"]:Documents}
+    }
+    {div[class="bg-emerald-50 ring-1 ring-emerald-200 rounded-xl p-4"]:
+      {div[class="text-3xl font-bold text-emerald-700"]:97%}
+      {div[class="text-sm text-slate-500"]:Couverture}
+    }
+    {div[class="bg-rose-50 ring-1 ring-rose-200 rounded-xl p-4"]:
+      {div[class="text-3xl font-bold text-rose-700"]:3}
+      {div[class="text-sm text-slate-500"]:Alertes}
+    }
+  }
+
+  {div[class="bg-white ring-1 ring-slate-200 rounded-xl p-5"]:
+    {h2[class="text-lg font-semibold text-slate-800 mb-2"]:Formule du jour}
+    {@mtb: e^{i\pi} + 1 = 0}
+    {a[class="inline-block mt-3 px-3 py-1.5 rounded-lg bg-{$accent}-600 text-white text-sm hover:bg-{$accent}-700", href="#"]:En savoir plus}
+  }
 }
 `,
   },

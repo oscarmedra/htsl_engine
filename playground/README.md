@@ -39,3 +39,22 @@ Le moteur est importé depuis `../src` via un alias Vite (rechargement à chaud)
   (architecture peerDependency).
 - **Exemples préchargés**, boutons **Copier HTML** / **Télécharger** / **Partager**
   (lien par hash d'URL, rechargé à l'ouverture).
+
+## Tailwind
+
+Le **Tailwind Play CDN** (JIT au runtime) est chargé : les classes Tailwind
+écrites dans le HTSL sont stylées dans le panneau de rendu. Écrivez-les via
+l'attribut `class` (chaîne entre guillemets), car le raccourci `.classe` n'accepte
+que des identifiants simples (pas de `:` ni `/`) :
+
+```htsl
+{div[class="bg-white ring-1 ring-slate-200 rounded-xl p-4 hover:shadow-md"]:
+  {h2[class="text-lg font-semibold text-indigo-600"]:Titre}
+}
+```
+
+Les variantes (`hover:`, `md:`, `w-1/2`, valeurs arbitraires `p-[10px]`) passent
+toutes par `[class="…"]`. Le *Preflight* (reset global) est désactivé pour ne pas
+perturber l'interface du playground — utilisez `ring-1` plutôt que `border` pour
+les contours. Voir l'exemple « Mise en page Tailwind ».
+

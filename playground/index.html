@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HTSL · Playground</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <!-- Tailwind Play CDN : génère à l'exécution les classes utilitaires
+         écrites dans le HTSL (JIT). Preflight désactivé pour ne pas réinitialiser
+         le style de l'interface du playground. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = { corePlugins: { preflight: false } };
+    </script>
   </head>
   <body>
     <div id="app">
