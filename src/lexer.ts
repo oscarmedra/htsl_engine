@@ -25,8 +25,11 @@ const PATH_CHAR = /[A-Za-z0-9_.-]/;
 
 type Frame =
   | { kind: "content" }
-  | { kind: "header"; path: string | null }
+  | { kind: "header"; path: string | null; tag?: string }
   | { kind: "math"; closer: "brace" | "dollar" | "ddollar"; depth: number };
+
+/** Plain element tags whose body is read as LaTeX (math container rows). */
+const MATH_ROW_TAGS = new Set(["line", "case"]);
 
 export function tokenize(source: string, mode: ParseMode = "strict"): Token[] {
   return new Lexer(source, mode).run();
@@ -164,7 +167,7 @@ class Lexer {
   /* Header frame                                                            */
   /* ----------------------------------------------------------------------- */
 
-  private lexHeader(frame: { kind: "header"; path: string | null }): void {
+  private lexHeader(frame: { kind: "header"; path: string | null; tag?: string }): void {
     const ch = this.peek();
     if (ch === " " || ch === "\t" || ch === "\n" || ch === "\r") {
       this.advance();
@@ -181,7 +184,9 @@ class Lexer {
         this.advance();
         this.push("COLON", ":", loc);
         this.stack.pop(); // leave header
-        if (frame.path !== null && contentModelOf(frame.path) === "math") {
+        const objectMath = frame.path !== null && contentModelOf(frame.path) === "math";
+        const rowMath = frame.path === null && frame.tag !== undefined && MATH_ROW_TAGS.has(frame.tag);
+        if (objectMath || rowMath) {
           this.stack.push({ kind: "math", closer: "brace", depth: 0 });
         } else {
           this.stack.push({ kind: "content" });
@@ -221,6 +226,10 @@ class Lexer {
       default:
         if (IDENT_CHAR.test(ch)) {
           this.lexIdent();
+          // The first identifier in a plain-element header is its tag name.
+          if (frame.path === null && frame.tag === undefined) {
+            frame.tag = this.tokens[this.tokens.length - 1]!.value;
+          }
           return;
         }
         if (this.tolerant) {

@@ -61,13 +61,12 @@ et `{@math.text.block:...}` → un seul chemin de rendu, zéro duplication.
 | `math.object.fraction` | `mof` | html (`{num}`/`{den}`) | `\frac{}{}` |
 | `math.constant.pi` | `mc.pi` | void | `\pi` |
 
-## Limite connue
+## Contenu des lignes
 
-Le contenu des `{line:...}`/`{case:...}` (align/cases/system) est parsé en mode
-HTSL : les **accolades LaTeX** y sont interdites (`\text{...}`, `\frac{...}{...}`).
-Utiliser du LaTeX sans accolades (comme dans les exemples du cahier des charges)
-ou des objets imbriqués `{@...}`. Les modes `inline`/`block`/`equation`, eux,
-acceptent les accolades LaTeX librement.
+Le contenu des `{line:...}`/`{case:...}` (align/cases/system) est lu en **mode
+math** (règle du lexer : les tags `line`/`case` ont un corps LaTeX). Les
+accolades LaTeX (`\text{...}`, `\frac{...}{...}`) et les objets imbriqués
+`{@...}` y sont donc permis, exactement comme dans inline/block/equation.
 
 ## Tests (`tests/math.test.ts`, 18)
 

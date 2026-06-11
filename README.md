@@ -180,10 +180,9 @@ import { compile, mathCss } from "htsl";
 compile("{@mte[label=e]: E = mc^2}", { katex });
 ```
 
-> **Limite** : le contenu des `{line}`/`{case}` (align/cases/system) est lu en
-> HTSL — pas d'accolades LaTeX brutes (`\text{...}`) à cet endroit ; utilisez du
-> LaTeX sans accolades ou des objets `{@...}`. Les modes inline/block/equation
-> acceptent les accolades LaTeX librement.
+Le contenu des lignes `{line}`/`{case}` (align/cases/system) est lu en **mode
+math** : les accolades LaTeX (`\text{...}`, `\frac{...}{...}`) et les objets
+`{@...}` y sont permis, comme dans inline/block/equation.
 
 ### Conversion inverse : HTML → HTSL
 
