@@ -1,14 +1,15 @@
 import { defineConfig } from "vite";
 import { fileURLToPath } from "node:url";
 
-// Import the engine straight from source for hot reload during development.
-const htslSrc = fileURLToPath(new URL("../src/index.ts", import.meta.url));
+// Import the engine and the editor package straight from source (hot reload).
+const fromHere = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
   base: "./",
   resolve: {
     alias: {
-      htsl: htslSrc,
+      htsl: fromHere("../packages/core/src/index.ts"),
+      "@htsl/codemirror": fromHere("../packages/codemirror/src/index.ts"),
     },
   },
   build: {

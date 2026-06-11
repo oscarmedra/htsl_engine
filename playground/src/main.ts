@@ -5,14 +5,15 @@ import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirro
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { bracketMatching } from "@codemirror/language";
 import { autocompletion, completionKeymap, closeBrackets } from "@codemirror/autocomplete";
-import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
+import { lintGutter } from "@codemirror/lint";
 
-import { parse, render, mathCss, HTSLError } from "htsl";
+import { parse, render, registry, mathCss, HTSLError } from "htsl";
 import type { Node } from "htsl";
 import katex from "katex";
 
-import { htslLanguage } from "./htsl-lang";
-import { htslCompletions } from "./complete";
+// Editor behaviour comes entirely from the reusable @htsl/codemirror package.
+import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
+
 import { examples } from "./examples";
 import { buildFrameDoc } from "./frame-doc";
 
@@ -34,13 +35,6 @@ const toggleAst = $<HTMLInputElement>("toggle-ast");
 /* -------------------------------------------------------------------------- */
 
 let latestHtml = "";
-let diagnostics: Diagnostic[] = [];
-
-function posFromLineCol(doc: EditorState["doc"], line: number, col: number): number {
-  if (line < 1 || line > doc.lines) return 0;
-  const l = doc.line(line);
-  return Math.min(l.from + Math.max(0, col - 1), l.to);
-}
 
 function collectErrorNodes(nodes: Node[], out: { line: number; col: number; message: string }[]): void {
   for (const n of nodes) {
@@ -88,7 +82,7 @@ function run(view: EditorView): void {
   // AST panel
   astEl.textContent = JSON.stringify(ast, null, 2);
 
-  // Banner + diagnostics
+  // Banner summary (the underlines are handled by htslLinter).
   if (errors.length === 0) {
     bannerEl.hidden = true;
     bannerEl.textContent = "";
@@ -98,10 +92,6 @@ function run(view: EditorView): void {
     bannerEl.textContent =
       `${errors.length} erreur${errors.length > 1 ? "s" : ""} — ligne ${first.line}, col ${first.col} : ${first.message}`;
   }
-  diagnostics = errors.map((err) => {
-    const from = posFromLineCol(view.state.doc, err.line, err.col);
-    return { from, to: Math.min(from + 1, view.state.doc.length), severity: "error", message: err.message } as Diagnostic;
-  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -122,10 +112,10 @@ const extensions: Extension[] = [
   bracketMatching(),
   closeBrackets(),
   lintGutter(),
-  linter(() => diagnostics, { delay: 120 }),
   keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap]),
   htslLanguage(),
-  autocompletion({ override: [htslCompletions()], activateOnTyping: true }),
+  htslLinter(parse),
+  autocompletion({ override: [htslCompletion(registry)], activateOnTyping: true }),
   updateListener,
   EditorView.theme({ "&": { height: "100%" }, ".cm-scroller": { overflow: "auto" } }),
 ];

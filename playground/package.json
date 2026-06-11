@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "htsl": "*",
+    "@htsl/codemirror": "*",
     "@codemirror/autocomplete": "^6.18.0",
     "@codemirror/commands": "^6.6.0",
     "@codemirror/language": "^6.10.0",
     "@codemirror/lint": "^6.8.0",
     "@codemirror/state": "^6.4.0",
     "@codemirror/view": "^6.30.0",
+    "@lezer/highlight": "^1.2.0",
     "codemirror": "^6.0.1",
     "katex": "^0.16.9",
     "plotly.js-dist-min": "^2.27.0"

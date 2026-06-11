@@ -136,5 +136,15 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Tailwind n'est plus codé en dur ; exemples mis à jour pour charger leur framework eux-mêmes ; nouvel exemple **Bootstrap**.
 - Vérifié en navigateur : Bootstrap (alerte/cartes/boutons) et Tailwind chargés depuis le document, scène 3D Plotly dans l'iframe, UI du playground intacte.
 
+### Restructuration en monorepo + paquet @htsl/codemirror
+
+- **Monorepo npm workspaces** : moteur déménagé (`git mv`) vers `packages/core/` (paquet `htsl`, 157 tests à l'identique) ; nouveau `packages/codemirror/` (`@htsl/codemirror`) ; `playground/` privé. `package.json` racine (workspaces + scripts globaux `npm test`/`build`/`typecheck`/`dev`). README racine = monorepo, README moteur dans core.
+- **@htsl/codemirror** : extensions CodeMirror 6 réutilisables extraites du playground — `htslLanguage()` (StreamLanguage maison, thème inline auto-suffisant), `htslCompletion(registry)` (autocomplétion branchée sur l'introspection), `htslLinter(parse)` (+ helper `htslDiagnostics`). Peer deps `@codemirror/*`/`@lezer/highlight`/`htsl`. README d'intégration < 10 lignes. 21 tests (tokenisation, complétion via CompletionContext, diagnostics).
+- **Bug réel corrigé (avec test)** : le tokenizer de coloration avalait les `.classes` (le regex du tag incluait `.`) — corrigé (tag sans point hors crochets, valeurs avec point dans `[...]`).
+- **Playground** rebranché sur `@htsl/codemirror` (alias Vite/TS vers les sources) : ne réimplémente plus rien de l'éditeur ; supprime `htsl-lang.ts`/`complete.ts` locaux. Build des 3 paquets OK (core tsup, codemirror tsup externalisé, playground vite 666 Ko).
+- `teste.html` : chemin du bundle mis à jour (`packages/core/dist-min/`).
+- Vérifié en navigateur : coloration, autocomplétion (`{@mg2.`) et soulignement d'erreurs (ligne/col) fournis par le paquet ; rendu Tailwind/KaTeX dans l'iframe.
+- Total : **178 tests** verts (core 157 + codemirror 21). `.docs/08-monorepo-et-codemirror.md` ajouté.
+
 
 

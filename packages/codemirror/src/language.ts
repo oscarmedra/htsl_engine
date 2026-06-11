@@ -10,9 +10,9 @@ import {
   HighlightStyle,
   LanguageSupport,
   StreamLanguage,
+  StringStream,
   syntaxHighlighting,
 } from "@codemirror/language";
-import type { StringStream } from "@codemirror/language";
 import { Tag } from "@lezer/highlight";
 import { contentModelOf } from "htsl";
 
@@ -135,10 +135,18 @@ function headerToken(
       stream.next();
       return "brace";
     case "#":
+      if (frame.inBracket) {
+        stream.next();
+        return frame.afterEq ? "value" : "attr";
+      }
       stream.next();
       stream.eatWhile(IDENT);
       return "id";
     case ".":
+      if (frame.inBracket) {
+        stream.next();
+        return frame.afterEq ? "value" : "attr";
+      }
       stream.next();
       stream.eatWhile(IDENT);
       return "class";
@@ -173,7 +181,10 @@ function headerToken(
       return "string";
     }
     default: {
-      const m = stream.match(/^[A-Za-z0-9_.-]+/);
+      // Inside [attrs], values may contain dots (e.g. 0.5); tag/class/id outside
+      // brackets must stop at the structural "." so classes stay separate.
+      const re = frame.inBracket ? /^[A-Za-z0-9_.-]+/ : /^[A-Za-z0-9_-]+/;
+      const m = stream.match(re);
       if (!Array.isArray(m)) {
         stream.next();
         return null;
@@ -259,10 +270,10 @@ const T = {
   escape: Tag.define(),
 };
 
-const language = StreamLanguage.define<State>({
+const streamParser = {
   name: "htsl",
-  startState: () => ({ stack: [{ mode: "content" }], comment: false }),
-  copyState: (s) => ({ stack: s.stack.map((f) => ({ ...f })), comment: s.comment }),
+  startState: (): State => ({ stack: [{ mode: "content" }], comment: false }),
+  copyState: (s: State): State => ({ stack: s.stack.map((f) => ({ ...f })), comment: s.comment }),
   token,
   tokenTable: {
     brace: T.brace,
@@ -279,24 +290,57 @@ const language = StreamLanguage.define<State>({
     comment: T.comment,
     escape: T.escape,
   },
-});
+};
 
+const language = StreamLanguage.define<State>(streamParser);
+
+// Self-contained default theme (inline styles), so the extension colours HTSL
+// out of the box without requiring the host to ship CSS.
 const highlight = HighlightStyle.define([
-  { tag: T.brace, class: "tok-brace" },
-  { tag: T.tag, class: "tok-tag" },
-  { tag: T.cls, class: "tok-class" },
-  { tag: T.id, class: "tok-id" },
-  { tag: T.attr, class: "tok-attr" },
-  { tag: T.value, class: "tok-value" },
-  { tag: T.string, class: "tok-string" },
-  { tag: T.object, class: "tok-object" },
-  { tag: T.directive, class: "tok-directive" },
-  { tag: T.variable, class: "tok-var" },
-  { tag: T.math, class: "tok-math" },
-  { tag: T.comment, class: "tok-comment" },
-  { tag: T.escape, class: "tok-escape" },
+  { tag: T.brace, color: "#868e96" },
+  { tag: T.tag, color: "#1c7ed6", fontWeight: "600" },
+  { tag: T.cls, color: "#2f9e44" },
+  { tag: T.id, color: "#e8590c" },
+  { tag: T.attr, color: "#5f3dc4" },
+  { tag: T.value, color: "#0c8599" },
+  { tag: T.string, color: "#c2255c" },
+  { tag: T.object, color: "#1971c2", fontWeight: "600" },
+  { tag: T.directive, color: "#ae3ec9", fontWeight: "600" },
+  { tag: T.variable, color: "#d6336c" },
+  { tag: T.math, color: "#0b7285", backgroundColor: "#e7f5f8" },
+  { tag: T.comment, color: "#adb5bd", fontStyle: "italic" },
+  { tag: T.escape, color: "#f08c00" },
 ]);
 
 export function htslLanguage(): LanguageSupport {
   return new LanguageSupport(language, [syntaxHighlighting(highlight)]);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Test/inspection helper                                                     */
+/* -------------------------------------------------------------------------- */
+
+export interface HtslToken {
+  text: string;
+  type: string;
+}
+
+/**
+ * Run the HTSL stream tokenizer over a source string and return the non-blank
+ * tokens with their type. Mainly for tests and tooling.
+ */
+export function htslTokens(src: string): HtslToken[] {
+  const out: HtslToken[] = [];
+  const state = streamParser.startState();
+  for (const line of src.split("\n")) {
+    const stream = new StringStream(line, 2, 2);
+    while (!stream.eol()) {
+      stream.start = stream.pos;
+      const type = streamParser.token(stream, state);
+      if (stream.pos === stream.start) stream.pos++; // guard against stalls
+      const text = line.slice(stream.start, stream.pos);
+      if (type) out.push({ text, type });
+    }
+  }
+  return out;
 }

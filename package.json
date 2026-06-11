@@ -1,52 +1,19 @@
 {
-  "name": "htsl",
+  "name": "htsl-monorepo",
   "version": "0.1.0",
-  "description": "HTSL (HyperText Structured Language) — a lightweight markup language that compiles to HTML through an AST.",
+  "private": true,
+  "description": "Monorepo HTSL : moteur (packages/core), extensions CodeMirror (@htsl/codemirror) et playground.",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md"
-  ],
   "workspaces": [
+    "packages/core",
+    "packages/codemirror",
     "playground"
   ],
   "scripts": {
-    "build": "tsup",
-    "build:min": "tsup --config tsup.min.config.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "demo": "tsx scripts/demo.ts",
-    "demo:formulas": "tsx scripts/demo-formulas.ts",
-    "demo:geometry": "tsx scripts/demo-geometry.ts",
-    "playground": "npm run dev --workspace playground",
-    "playground:build": "npm run build --workspace playground"
+    "test": "npm test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev": "npm run dev --workspace playground"
   },
-  "keywords": [
-    "htsl",
-    "markup",
-    "html",
-    "parser",
-    "ast",
-    "lexer",
-    "renderer"
-  ],
-  "license": "MIT",
-  "sideEffects": false,
-  "devDependencies": {
-    "@types/node": "^25.9.2",
-    "tsup": "^8.0.0",
-    "tsx": "^4.7.0",
-    "typescript": "^5.4.0",
-    "vitest": "^1.4.0"
-  }
+  "license": "MIT"
 }

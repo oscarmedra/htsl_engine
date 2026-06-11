@@ -1,0 +1,48 @@
+{
+  "name": "@htsl/codemirror",
+  "version": "0.1.0",
+  "description": "Extensions CodeMirror 6 pour HTSL : coloration, autocomplétion, linter.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["htsl", "codemirror", "editor", "syntax", "autocomplete"],
+  "license": "MIT",
+  "sideEffects": false,
+  "peerDependencies": {
+    "@codemirror/autocomplete": "^6",
+    "@codemirror/language": "^6",
+    "@codemirror/lint": "^6",
+    "@codemirror/state": "^6",
+    "@codemirror/view": "^6",
+    "@lezer/highlight": "^1",
+    "htsl": "*"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "^6.18.0",
+    "@codemirror/language": "^6.10.0",
+    "@codemirror/lint": "^6.8.0",
+    "@codemirror/state": "^6.4.0",
+    "@codemirror/view": "^6.30.0",
+    "@lezer/highlight": "^1.2.0",
+    "htsl": "*",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}
