@@ -15,6 +15,7 @@ import { tokenize } from "./lexer.js";
 import { fromHtml, parseHtml, toHtsl } from "./from-html.js";
 import { expand } from "./components/expand.js";
 import { hydrateScenes } from "./scene-client.js";
+import { registry } from "./introspect.js";
 import { mathCss } from "./objects/css.js";
 import { HTSLError } from "./errors.js";
 import type { CompileOptions, Node } from "./types.js";
@@ -31,6 +32,9 @@ export { toPlotly, sceneSpec, latexOfGeometry, isGeometryPath, isScenePath, isDe
 export type { Trace, SceneSpec } from "./objects/geometry.js";
 export { hydrateScenes } from "./scene-client.js";
 export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";
+export { registry, documentComponents, documentVariables } from "./introspect.js";
+export type { ComponentInfo } from "./introspect.js";
+export type { ObjectMeta, AttrSchema, AttrType, RegistryEntry, ContentModel } from "./objects/registry.js";
 export { mathCss } from "./objects/css.js";
 export { HTSLError } from "./errors.js";
 
@@ -80,6 +84,7 @@ export const htsl_engine = {
   toHtsl,
   expand,
   hydrateScenes,
+  registry,
   mathCss,
   HTSLError,
 } as const;
