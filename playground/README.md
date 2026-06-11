@@ -40,12 +40,23 @@ Le moteur est importé depuis `../src` via un alias Vite (rechargement à chaud)
 - **Exemples préchargés**, boutons **Copier HTML** / **Télécharger** / **Partager**
   (lien par hash d'URL, rechargé à l'ouverture).
 
-## Tailwind
+## Frameworks CSS (Tailwind, Bootstrap, …)
 
-Le **Tailwind Play CDN** (JIT au runtime) est chargé : les classes Tailwind
-écrites dans le HTSL sont stylées dans le panneau de rendu. Écrivez-les via
-l'attribut `class` (chaîne entre guillemets), car le raccourci `.classe` n'accepte
-que des identifiants simples (pas de `:` ni `/`) :
+Le rendu se fait dans une **iframe isolée** : chargez n'importe quel framework
+**directement depuis votre document HTSL**, il s'applique au rendu sans toucher à
+l'interface du playground.
+
+```htsl
+{!-- Bootstrap --}
+{link[rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]/}
+
+{!-- ou Tailwind (Play CDN) --}
+{script[src="https://cdn.tailwindcss.com"]/}
+```
+
+Écrivez les classes via l'attribut `class` (chaîne entre guillemets) ; le
+raccourci `.classe` n'accepte que des identifiants simples, donc les variantes à
+`:` `/` `[]` (`hover:`, `md:`, `w-1/2`, `p-[10px]`) passent par `[class="…"]` :
 
 ```htsl
 {div[class="bg-white ring-1 ring-slate-200 rounded-xl p-4 hover:shadow-md"]:
@@ -53,8 +64,7 @@ que des identifiants simples (pas de `:` ni `/`) :
 }
 ```
 
-Les variantes (`hover:`, `md:`, `w-1/2`, valeurs arbitraires `p-[10px]`) passent
-toutes par `[class="…"]`. Le *Preflight* (reset global) est désactivé pour ne pas
-perturber l'interface du playground — utilisez `ring-1` plutôt que `border` pour
-les contours. Voir l'exemple « Mise en page Tailwind ».
+KaTeX (formules) est toujours disponible dans l'iframe ; Plotly (scènes) y est
+chargé automatiquement quand une scène est présente. Voir les exemples « Mise en
+page Tailwind » et « Bootstrap ».
 

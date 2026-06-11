@@ -4,15 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HTSL · Playground</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
-    <!-- Tailwind Play CDN : génère à l'exécution les classes utilitaires
-         écrites dans le HTSL (JIT). Preflight désactivé pour ne pas réinitialiser
-         le style de l'interface du playground. -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      window.tailwind = window.tailwind || {};
-      window.tailwind.config = { corePlugins: { preflight: false } };
-    </script>
   </head>
   <body>
     <div id="app">
@@ -39,8 +30,8 @@
         </section>
         <div class="gutter" data-gutter="1"></div>
         <section class="panel" id="panel-render">
-          <div class="panel-head">Rendu</div>
-          <div id="render" class="panel-body render"></div>
+          <div class="panel-head">Rendu <span class="hint">(iframe isolée · vos {link}/{script} y sont chargés)</span></div>
+          <iframe id="render" class="panel-body render-frame" title="rendu HTSL"></iframe>
         </section>
         <div class="gutter" data-gutter="2"></div>
         <section class="panel" id="panel-ast">

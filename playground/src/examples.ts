@@ -8,7 +8,10 @@ export const examples: Example[] = [
   {
     id: "formules",
     label: "Galerie de formules (composant card)",
-    src: String.raw`{!-- Une carte Tailwind réutilisable, définie une seule fois --}
+    src: String.raw`{!-- Chargez le framework CSS depuis votre document (iframe isolée) --}
+{script[src="https://cdn.tailwindcss.com"]/}
+
+{!-- Une carte Tailwind réutilisable, définie une seule fois --}
 {!define card[title, color=indigo]:
   {div[class="bg-white ring-1 ring-slate-200 rounded-xl p-4 mb-3 shadow-sm"]:
     {h2[class="text-lg font-semibold mb-2 text-{$color}-600"]:{$title}}
@@ -34,8 +37,11 @@ export const examples: Example[] = [
   {
     id: "tailwind",
     label: "Mise en page Tailwind",
-    src: String.raw`{!-- Tailwind est disponible : écrivez les classes dans [class="…"].
-     Les classes à variantes (hover:, md:, w-1/2) passent aussi par l'attribut. --}
+    src: String.raw`{!-- On charge Tailwind ici même, dans le document --}
+{script[src="https://cdn.tailwindcss.com"]/}
+
+{!-- Écrivez les classes dans [class="…"] ; les variantes (hover:, md:, w-1/2)
+     y passent aussi car . n'accepte que des identifiants simples. --}
 {!set accent: indigo}
 
 {div[class="max-w-2xl mx-auto p-4"]:
@@ -62,6 +68,41 @@ export const examples: Example[] = [
     {@mtb: e^{i\pi} + 1 = 0}
     {a[class="inline-block mt-3 px-3 py-1.5 rounded-lg bg-{$accent}-600 text-white text-sm hover:bg-{$accent}-700", href="#"]:En savoir plus}
   }
+}
+`,
+  },
+  {
+    id: "bootstrap",
+    label: "Bootstrap (n'importe quel framework)",
+    src: String.raw`{!-- N'importe quel framework CSS : ici Bootstrap, chargé via {link} --}
+{link[rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]/}
+
+{div[class="container py-4"]:
+  {h1[class="mb-3"]:Bootstrap dans HTSL}
+  {div[class="alert alert-primary"]:Le framework est chargé depuis le document.}
+
+  {div[class="row g-3"]:
+    {div[class="col-md-4"]:
+      {div[class="card"]:{div[class="card-body"]:
+        {h5[class="card-title"]:Carte A}
+        {p[class="card-text"]:Stylée par Bootstrap.}
+      }}
+    }
+    {div[class="col-md-4"]:
+      {div[class="card text-bg-primary"]:{div[class="card-body"]:
+        {h5[class="card-title"]:Carte B}
+        {p[class="card-text"]:Variante colorée.}
+      }}
+    }
+    {div[class="col-md-4"]:
+      {div[class="card border-success"]:{div[class="card-body"]:
+        {h5[class="card-title text-success"]:Carte C}
+        {p[class="card-text"]:Bordure de succès.}
+      }}
+    }
+  }
+
+  {p[class="mt-3"]:{a[class="btn btn-primary", href="#"]:Bouton} {span[class="badge bg-secondary"]:badge}}
 }
 `,
   },

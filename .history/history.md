@@ -129,5 +129,12 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Vérifié en navigateur : coloration, rendu KaTeX, scène 3D Plotly, AST, bandeau + soulignement d'erreur (page vivante), autocomplétion (objets, attributs avec défauts, variables en direct).
 - `.gitignore` : `playground/dist/` ; scripts racine `playground` / `playground:build` ; `.docs/07-introspection-et-playground.md`.
 
+### Playground : rendu en iframe isolée (frameworks CSS au choix)
+
+- Panneau de rendu passé en **iframe sandbox** (`frame-doc.ts` + `srcdoc`) : l'utilisateur charge n'importe quel framework depuis son HTSL (`{link[rel="stylesheet", href="…bootstrap"]/}`, `{script[src="…tailwindcss"]/}`), exécuté dans l'iframe et isolé de l'UI du playground.
+- KaTeX CSS toujours fourni dans l'iframe ; Plotly chargé seulement si une scène est présente (hydratation inline). Plotly retiré du bundle parent.
+- Tailwind n'est plus codé en dur ; exemples mis à jour pour charger leur framework eux-mêmes ; nouvel exemple **Bootstrap**.
+- Vérifié en navigateur : Bootstrap (alerte/cartes/boutons) et Tailwind chargés depuis le document, scène 3D Plotly dans l'iframe, UI du playground intacte.
+
 
 

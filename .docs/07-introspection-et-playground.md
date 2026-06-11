@@ -48,8 +48,21 @@ bandeau + soulignement d'erreur (page vivante), autocomplétion : objets après
 `{@` (16 `mg2.*`), attributs après `[` (center/radius/color/opacity avec
 défauts), variables après `{$` (mises à jour en direct).
 
+### Rendu en iframe isolée (frameworks CSS)
+
+Le panneau de rendu est une **iframe sandbox** (`frame-doc.ts` construit le
+document, injecté via `srcdoc`). Conséquence : l'utilisateur peut charger
+**n'importe quel framework** directement depuis son HTSL —
+`{link[rel="stylesheet", href="…bootstrap.css"]/}` ou
+`{script[src="…tailwindcss"]/}` — ces balises s'exécutent dans le document
+(contrairement à `innerHTML` qui n'exécute pas les `<script>`) et restent
+**isolées de l'interface du playground**. KaTeX CSS est toujours fourni ; Plotly
+n'est chargé dans l'iframe que si la sortie contient une scène. Le moteur ne
+dépend plus de Plotly côté playground (bundle allégé).
+
 ## Correctif
 
-Le parser n'avait pas de régression ; le seul ajustement playground a été de
+Le parser n'avait pas de régression ; les seuls ajustements playground ont été :
 faire parser le document à la volée dans la source d'autocomplétion (l'AST
-debouncé accusait un retard).
+debouncé accusait un retard), et passer le rendu en iframe pour permettre
+n'importe quel framework CSS sans polluer l'UI.

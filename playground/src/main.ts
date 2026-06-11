@@ -1,5 +1,4 @@
 import "./style.css";
-import "katex/dist/katex.min.css";
 
 import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
@@ -8,14 +7,14 @@ import { bracketMatching } from "@codemirror/language";
 import { autocompletion, completionKeymap, closeBrackets } from "@codemirror/autocomplete";
 import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
 
-import { parse, render, hydrateScenes, HTSLError } from "htsl";
+import { parse, render, mathCss, HTSLError } from "htsl";
 import type { Node } from "htsl";
 import katex from "katex";
-import Plotly from "plotly.js-dist-min";
 
 import { htslLanguage } from "./htsl-lang";
 import { htslCompletions } from "./complete";
 import { examples } from "./examples";
+import { buildFrameDoc } from "./frame-doc";
 
 /* -------------------------------------------------------------------------- */
 /* DOM                                                                        */
@@ -23,7 +22,7 @@ import { examples } from "./examples";
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 const editorEl = $("editor");
-const renderEl = $<HTMLDivElement>("render");
+const renderFrame = $<HTMLIFrameElement>("render");
 const astEl = $<HTMLPreElement>("ast");
 const bannerEl = $<HTMLDivElement>("banner");
 const panelsEl = $<HTMLElement>("panels");
@@ -74,8 +73,9 @@ function run(view: EditorView): void {
   try {
     const html = render(ast, { katex, source: src });
     latestHtml = html;
-    renderEl.innerHTML = html;
-    hydrateScenes(renderEl, Plotly as unknown as Parameters<typeof hydrateScenes>[1]);
+    // Render in a sandboxed iframe: the user's {link}/{script} (any CSS/JS
+    // framework) execute there, isolated from the playground UI.
+    renderFrame.srcdoc = buildFrameDoc(html, mathCss);
   } catch (e) {
     if (e instanceof HTSLError) {
       errors.push({ line: e.line, col: e.col, message: e.message.split("\n")[0] ?? e.message });
