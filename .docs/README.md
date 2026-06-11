@@ -13,3 +13,4 @@ décrivant ce qui a été fait, pourquoi, et comment cela fonctionne.
 | `00-initialisation.md` | Initialisation du dépôt git et mise en place des conventions |
 | `01-moteur-htsl-v0.1.md` | Première version fonctionnelle du moteur HTSL (lexer, parser, renderer, API, tests) |
 | `02-conversion-html-vers-htsl.md` | Conversion inverse HTML → HTSL (parseHtml, toHtsl, fromHtml) |
+| `03-collection-math-text.md` | Fondation des objets `{@...}` + collection math.text.* (LaTeX/KaTeX, numérotation, refs) |

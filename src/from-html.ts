@@ -10,7 +10,7 @@
  * (ignored) and the common HTML entities. It is lenient (never throws) and
  * auto-closes any element left open at end of input.
  */
-import type { ElementNode, Loc, Node } from "./types.js";
+import type { ElementNode, Loc, Node, ObjectNode } from "./types.js";
 
 const VOID_TAGS = new Set([
   "area",
@@ -302,6 +302,8 @@ function serializePretty(node: Node, indent: number): string {
       return `${pad}{!--${node.value}--}`;
     case "error":
       return `${pad}{!--${node.message}--}`;
+    case "object":
+      return pad + serializeObject(node, serializeCompact);
     case "element": {
       const header = "{" + selector(node);
       const children = node.children.filter(notBlank);
@@ -328,6 +330,8 @@ function serializeCompact(node: Node): string {
       return `{!--${node.value}--}`;
     case "error":
       return `{!--${node.message}--}`;
+    case "object":
+      return serializeObject(node, serializeCompact);
     case "element": {
       const header = "{" + selector(node);
       const children = node.children.filter(notBlank);
@@ -335,6 +339,20 @@ function serializeCompact(node: Node): string {
       return `${header}:${children.map(serializeCompact).join("")}}`;
     }
   }
+}
+
+/** Serialize an object node back to `{@path[attrs]:...}` / `{@path[attrs]/}`. */
+function serializeObject(
+  node: ObjectNode,
+  child: (n: Node) => string,
+): string {
+  let header = `{@${node.rawPath || node.path}`;
+  const entries = Object.entries(node.attrs);
+  if (entries.length > 0) {
+    header += "[" + entries.map(([k, v]) => `${k}=${valueLiteral(v)}`).join(", ") + "]";
+  }
+  if (node.selfClosing || node.children.length === 0) return `${header}/}`;
+  return `${header}:${node.children.map(child).join("")}}`;
 }
 
 function selector(node: ElementNode): string {

@@ -6,7 +6,15 @@
  * `allowedTags` is provided, any element whose tag is not listed is serialized
  * and emitted as escaped text rather than as a live HTML element.
  */
-import type { ElementNode, Node, RenderOptions } from "./types.js";
+import { escapeHtml } from "./escape.js";
+import {
+  buildMathContext,
+  renderMathObject,
+  type MathContext,
+} from "./objects/math.js";
+import type { ElementNode, Node, ObjectNode, RenderOptions } from "./types.js";
+
+export { escapeHtml } from "./escape.js";
 
 /** HTML void elements: rendered without a closing tag and never with children. */
 const VOID_TAGS = new Set([
@@ -34,18 +42,29 @@ export function render(ast: Node | Node[], options: RenderOptions = {}): string 
 class Renderer {
   private readonly pretty: boolean;
   private readonly allowedTags: Set<string> | null;
+  private readonly options: RenderOptions;
+  private ctx: MathContext = { numbers: new Map(), labels: new Map() };
 
   constructor(options: RenderOptions) {
+    this.options = options;
     this.pretty = options.prettyPrint ?? false;
     this.allowedTags = options.allowedTags ? new Set(options.allowedTags) : null;
   }
 
   renderTop(nodes: Node[]): string {
+    this.ctx = buildMathContext(nodes);
     const visible = nodes.filter((n) => n.type !== "comment");
     if (this.pretty) {
       return visible.map((n) => this.pretty0(n, 0)).join("\n");
     }
     return visible.map((n) => this.compact(n)).join("");
+  }
+
+  private math(node: ObjectNode): string {
+    return renderMathObject(node, this.ctx, {
+      ...(this.options.katex !== undefined ? { katex: this.options.katex } : {}),
+      ...(this.options.source !== undefined ? { source: this.options.source } : {}),
+    });
   }
 
   /* ----------------------------------------------------------------------- */
@@ -60,6 +79,8 @@ class Renderer {
         return "";
       case "error":
         return htmlComment(node.message);
+      case "object":
+        return this.math(node);
       case "element":
         return this.compactElement(node);
     }
@@ -91,6 +112,8 @@ class Renderer {
         return "";
       case "error":
         return pad + htmlComment(node.message);
+      case "object":
+        return pad + this.math(node);
       case "element":
         return this.prettyElement(node, indent);
     }
@@ -149,6 +172,7 @@ function rawHtml(node: Node): string {
       return node.value;
     case "comment":
     case "error":
+    case "object":
       return "";
     case "element": {
       let s = `<${node.tag}`;
@@ -163,14 +187,6 @@ function rawHtml(node: Node): string {
       return `${s}${inner}</${node.tag}>`;
     }
   }
-}
-
-export function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 /** Render a recovered ErrorNode as a safe HTML comment. */

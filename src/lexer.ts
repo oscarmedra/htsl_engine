@@ -1,19 +1,32 @@
 /**
  * HTSL lexer.
  *
- * The lexer is mode-aware. It starts in `content` mode (raw text + element/
- * comment boundaries) and switches to `header` mode between `{` and the `:` /
- * `/}` that ends an element header, where it emits structural tokens
- * (identifiers, `.`, `#`, `[`, `]`, `=`, `,`, strings).
+ * The lexer is context-aware via a frame stack:
  *
- * In `strict` mode purely lexical problems (unterminated comment / string)
- * throw an {@link HTSLError}. In `tolerant` mode the lexer recovers so it never
- * throws, leaving structural error reporting to the parser.
+ *   - "content" : ordinary HTSL content (text + element/object/comment boundaries)
+ *   - "header"  : inside an element/object header, between `{`(or `{@path`) and
+ *                 the `:` / `/}` that closes it — emits structural tokens
+ *   - "math"    : the body of a math object, read as raw LaTeX (literal `{}` are
+ *                 LaTeX groups) with nested `{@...}` objects recognised
+ *
+ * Objects use `{@path...}`; the shorthands `$...$` and `$$...$$` are lexed into
+ * the exact same token shape as `{@math.text.inline:...}` /
+ * `{@math.text.block:...}` so there is a single downstream path.
+ *
+ * In `strict` mode purely lexical problems (unterminated comment / string /
+ * formula) throw an {@link HTSLError}; in `tolerant` mode the lexer recovers.
  */
 import { HTSLError } from "./errors.js";
+import { contentModelOf } from "./objects/registry.js";
 import type { Loc, ParseMode, Token, TokenType } from "./types.js";
 
 const IDENT_CHAR = /[A-Za-z0-9_-]/;
+const PATH_CHAR = /[A-Za-z0-9_.-]/;
+
+type Frame =
+  | { kind: "content" }
+  | { kind: "header"; path: string | null }
+  | { kind: "math"; closer: "brace" | "dollar" | "ddollar"; depth: number };
 
 export function tokenize(source: string, mode: ParseMode = "strict"): Token[] {
   return new Lexer(source, mode).run();
@@ -23,9 +36,9 @@ class Lexer {
   private pos = 0;
   private line = 1;
   private col = 1;
-  private mode: "content" | "header" = "content";
   private readonly tokens: Token[] = [];
   private readonly tolerant: boolean;
+  private readonly stack: Frame[] = [{ kind: "content" }];
 
   constructor(
     private readonly src: string,
@@ -36,15 +49,21 @@ class Lexer {
 
   run(): Token[] {
     while (!this.eof()) {
-      if (this.mode === "content") this.lexContent();
-      else this.lexHeader();
+      const before = this.pos;
+      const depth = this.stack.length;
+      const frame = this.top();
+      if (frame.kind === "content") this.lexContent();
+      else if (frame.kind === "header") this.lexHeader(frame);
+      else this.lexMath(frame);
+      // Safety: guarantee forward progress.
+      if (this.pos === before && this.stack.length === depth) this.advance();
     }
     this.push("EOF", "");
     return this.tokens;
   }
 
   /* ----------------------------------------------------------------------- */
-  /* Content mode                                                            */
+  /* Content frame                                                           */
   /* ----------------------------------------------------------------------- */
 
   private lexContent(): void {
@@ -54,20 +73,49 @@ class Lexer {
     }
     const ch = this.peek();
     if (ch === "{") {
-      const loc = this.loc();
-      this.advance();
-      this.push("LBRACE", "{", loc);
-      this.mode = "header";
+      const braceLoc = this.loc();
+      if (this.peek(1) === "@") {
+        this.advance(); // {
+        this.advance(); // @
+        const path = this.readPath();
+        this.push("OBJOPEN", path, braceLoc);
+        this.stack.push({ kind: "header", path });
+      } else {
+        this.advance();
+        this.push("LBRACE", "{", braceLoc);
+        this.stack.push({ kind: "header", path: null });
+      }
       return;
     }
     if (ch === "}") {
       const loc = this.loc();
       this.advance();
       this.push("RBRACE", "}", loc);
-      this.mode = "content";
+      this.popContent();
+      return;
+    }
+    if (ch === "$") {
+      this.openDollar();
       return;
     }
     this.lexText();
+  }
+
+  /** Emit the object header for a `$...$` / `$$...$$` shorthand. */
+  private openDollar(): void {
+    const loc = this.loc();
+    if (this.peek(1) === "$") {
+      this.advance();
+      this.advance();
+      this.push("OBJOPEN", "math.text.block", loc);
+      this.push("COLON", ":", loc);
+      this.stack.push({ kind: "math", closer: "ddollar", depth: 0 });
+    } else {
+      this.advance();
+      this.push("OBJOPEN", "math.text.inline", loc);
+      this.push("COLON", ":", loc);
+      this.stack.push({ kind: "math", closer: "dollar", depth: 0 });
+    }
   }
 
   private lexText(): void {
@@ -77,7 +125,7 @@ class Lexer {
       const ch = this.peek();
       if (ch === "\\") {
         const next = this.peek(1);
-        if (next === "{" || next === "}" || next === ":") {
+        if (next === "{" || next === "}" || next === ":" || next === "$") {
           this.advance(); // backslash
           value += this.advance(); // the escaped character, taken literally
           continue;
@@ -85,7 +133,7 @@ class Lexer {
         value += this.advance(); // lone backslash, kept as-is
         continue;
       }
-      if (ch === "{" || ch === "}") break;
+      if (ch === "{" || ch === "}" || ch === "$") break;
       value += this.advance();
     }
     this.push("TEXT", value, loc);
@@ -93,36 +141,30 @@ class Lexer {
 
   private lexComment(): void {
     const loc = this.loc();
-    // consume "{!--"
-    this.advance();
-    this.advance();
-    this.advance();
-    this.advance();
+    this.advance(); // {
+    this.advance(); // !
+    this.advance(); // -
+    this.advance(); // -
     let value = "";
-    while (!this.eof() && !this.startsWith("--}")) {
-      value += this.advance();
-    }
+    while (!this.eof() && !this.startsWith("--}")) value += this.advance();
     if (this.eof()) {
       if (this.tolerant) {
         this.push("COMMENT", value, loc);
-        this.mode = "content";
         return;
       }
       throw new HTSLError("commentaire jamais fermé.", loc, this.src);
     }
-    // consume "--}"
     this.advance();
     this.advance();
     this.advance();
     this.push("COMMENT", value, loc);
-    this.mode = "content";
   }
 
   /* ----------------------------------------------------------------------- */
-  /* Header mode                                                             */
+  /* Header frame                                                            */
   /* ----------------------------------------------------------------------- */
 
-  private lexHeader(): void {
+  private lexHeader(frame: { kind: "header"; path: string | null }): void {
     const ch = this.peek();
     if (ch === " " || ch === "\t" || ch === "\n" || ch === "\r") {
       this.advance();
@@ -133,12 +175,17 @@ class Lexer {
       case "}":
         this.advance();
         this.push("RBRACE", "}", loc);
-        this.mode = "content";
+        this.stack.pop();
         return;
       case ":":
         this.advance();
         this.push("COLON", ":", loc);
-        this.mode = "content";
+        this.stack.pop(); // leave header
+        if (frame.path !== null && contentModelOf(frame.path) === "math") {
+          this.stack.push({ kind: "math", closer: "brace", depth: 0 });
+        } else {
+          this.stack.push({ kind: "content" });
+        }
         return;
       case "/":
         this.advance();
@@ -177,11 +224,11 @@ class Lexer {
           return;
         }
         if (this.tolerant) {
-          this.advance(); // drop the stray character and keep going
+          this.advance();
           return;
         }
         throw new HTSLError(
-          `caractère inattendu "${ch}" dans l'en-tête de balise.`,
+          `caractère inattendu "${ch}" dans l'en-tête.`,
           loc,
           this.src,
         );
@@ -191,9 +238,7 @@ class Lexer {
   private lexIdent(): void {
     const loc = this.loc();
     let value = "";
-    while (!this.eof() && IDENT_CHAR.test(this.peek())) {
-      value += this.advance();
-    }
+    while (!this.eof() && IDENT_CHAR.test(this.peek())) value += this.advance();
     this.push("IDENT", value, loc);
   }
 
@@ -214,13 +259,12 @@ class Lexer {
         continue;
       }
       if (ch === '"') {
-        this.advance(); // closing quote
+        this.advance();
         this.push("STRING", value, loc);
         return;
       }
       value += this.advance();
     }
-    // reached EOF without a closing quote
     if (this.tolerant) {
       this.push("STRING", value, loc);
       return;
@@ -229,14 +273,109 @@ class Lexer {
   }
 
   /* ----------------------------------------------------------------------- */
+  /* Math frame                                                              */
+  /* ----------------------------------------------------------------------- */
+
+  private lexMath(frame: { kind: "math"; closer: string; depth: number }): void {
+    const startLoc = this.loc();
+    let value = "";
+    const flush = (): void => {
+      if (value.length > 0) this.push("MATH_TEXT", value, startLoc);
+    };
+
+    while (!this.eof()) {
+      const ch = this.peek();
+
+      if (ch === "\\") {
+        // LaTeX escape: keep the backslash and the following char verbatim.
+        value += this.advance();
+        if (!this.eof()) value += this.advance();
+        continue;
+      }
+
+      if (ch === "{") {
+        if (this.peek(1) === "@") {
+          flush();
+          const braceLoc = this.loc();
+          this.advance();
+          this.advance();
+          const path = this.readPath();
+          this.push("OBJOPEN", path, braceLoc);
+          this.stack.push({ kind: "header", path });
+          return;
+        }
+        frame.depth++;
+        value += this.advance();
+        continue;
+      }
+
+      if (ch === "}") {
+        if (frame.depth > 0) {
+          frame.depth--;
+          value += this.advance();
+          continue;
+        }
+        flush();
+        const loc = this.loc();
+        this.advance();
+        this.push("RBRACE", "}", loc);
+        this.stack.pop();
+        return;
+      }
+
+      if (ch === "$") {
+        const isClose =
+          (frame.closer === "ddollar" && this.peek(1) === "$") ||
+          frame.closer === "dollar";
+        if (isClose) {
+          flush();
+          const loc = this.loc();
+          this.advance();
+          if (frame.closer === "ddollar") this.advance();
+          this.push("RBRACE", "}", loc);
+          this.stack.pop();
+          return;
+        }
+        value += this.advance();
+        continue;
+      }
+
+      value += this.advance();
+    }
+
+    // EOF reached without a closer.
+    flush();
+    if (this.tolerant) {
+      this.push("RBRACE", "}", this.loc());
+      this.stack.pop();
+      return;
+    }
+    throw new HTSLError("formule mathématique jamais fermée.", startLoc, this.src);
+  }
+
+  /* ----------------------------------------------------------------------- */
   /* Primitives                                                              */
   /* ----------------------------------------------------------------------- */
+
+  private top(): Frame {
+    return this.stack[this.stack.length - 1]!;
+  }
+
+  /** Pop a content frame on `}`, but never empty the stack (top-level orphan). */
+  private popContent(): void {
+    if (this.stack.length > 1) this.stack.pop();
+  }
+
+  private readPath(): string {
+    let path = "";
+    while (!this.eof() && PATH_CHAR.test(this.peek())) path += this.advance();
+    return path;
+  }
 
   private eof(): boolean {
     return this.pos >= this.src.length;
   }
 
-  /** Returns the character at `pos + offset`, or "" past the end of input. */
   private peek(offset = 0): string {
     return this.src[this.pos + offset] ?? "";
   }

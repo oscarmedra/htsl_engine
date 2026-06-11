@@ -57,5 +57,21 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Bundles régénérés (`npm run build` + `npm run build:min`) : `fromHtml` disponible en ESM et via les globals navigateur.
 - README et `.docs/02-conversion-html-vers-htsl.md` ajoutés/mis à jour.
 
+### Collection math.text.* + fondation des objets {@...}
+
+- Fondation : syntaxe objet `{@chemin[attrs]:...}` / `{@.../}`, nouveau nœud AST `ObjectNode`.
+- `src/objects/registry.ts` : registre + alias (plats `mti…mof` et de collection `mt`/`mc`/`mo`), modèles de contenu (math/html/void).
+- Lexer réécrit avec une pile de contextes (content/header/math) ; le mode math lit du LaTeX brut + objets imbriqués `{@...}` ; raccourcis `$...$`/`$$...$$` unifiés vers les mêmes jetons que `{@mti}`/`{@mtb}` ; échappement `\$`.
+- Parser : parsing des objets, contenu math (conserve les espaces) vs html ; erreurs « objet jamais fermé », profondeur, etc.
+- `src/objects/math.ts` : génération LaTeX (résolution récursive des objets imbriqués), environnements aligned/cases/system, fraction, constante pi ; contexte document (numérotation séquentielle des équations, table des labels, résolution des refs, label inconnu → HTSLError localisée) ; rendu KaTeX (optionnel) + fallback LaTeX brut ; numéro d'équation en HTML/CSS.
+- `src/objects/css.ts` : `mathCss` (style par défaut). `HTSLError` accepte un source optionnel (erreurs au rendu).
+- Renderer : prise en charge des nœuds `object` (compact + pretty) ; `compile` transmet le source au render.
+- `tests/math.test.ts` : 18 tests (chaque objet, numérotation, refs valides/invalides, imbrication, équivalence AST `$x$`≡`{@mti:x}` et `$$x$$`≡`{@mtb:x}`, KaTeX injecté + fallback). Total : **92 tests** verts, zéro régression.
+- Démo : `demo-formulas.htsl` + `npm run demo:formulas` ; `examples/formulas.html` (édition live, KaTeX CDN, mathCss).
+- `teste.html` (local, gitignored) enrichi : KaTeX CDN + mathCss + exemple de formules.
+- Limite documentée : pas d'accolades LaTeX brutes dans `{line}`/`{case}`.
+- Bundles régénérés (`npm run build` + `build:min`) : API math disponible en ESM et globals navigateur.
+- README et `.docs/03-collection-math-text.md` ajoutés/mis à jour.
+
 
 

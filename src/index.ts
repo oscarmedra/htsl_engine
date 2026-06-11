@@ -13,6 +13,7 @@ import { parse } from "./parser.js";
 import { render } from "./renderer.js";
 import { tokenize } from "./lexer.js";
 import { fromHtml, parseHtml, toHtsl } from "./from-html.js";
+import { mathCss } from "./objects/css.js";
 import { HTSLError } from "./errors.js";
 import type { CompileOptions, Node } from "./types.js";
 
@@ -21,6 +22,9 @@ export { render } from "./renderer.js";
 export { tokenize } from "./lexer.js";
 export { fromHtml, parseHtml, toHtsl } from "./from-html.js";
 export type { ToHtslOptions } from "./from-html.js";
+export { latexOfObject, latexOfNode } from "./objects/math.js";
+export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";
+export { mathCss } from "./objects/css.js";
 export { HTSLError } from "./errors.js";
 
 export type {
@@ -28,6 +32,7 @@ export type {
   ElementNode,
   TextNode,
   CommentNode,
+  ObjectNode,
   ErrorNode,
   Token,
   TokenType,
@@ -36,12 +41,15 @@ export type {
   ParseOptions,
   RenderOptions,
   CompileOptions,
+  KatexLike,
 } from "./types.js";
 
 /** Parse then render a HTSL source string in a single call. */
 export function compile(source: string, options: CompileOptions = {}): string {
   const ast: Node[] = parse(source, options);
-  return render(ast, options);
+  // Pass the source through so render-time errors (e.g. unknown math refs)
+  // can build a localized excerpt.
+  return render(ast, { ...options, source });
 }
 
 /**
@@ -59,6 +67,7 @@ export const htsl_engine = {
   fromHtml,
   parseHtml,
   toHtsl,
+  mathCss,
   HTSLError,
 } as const;
 

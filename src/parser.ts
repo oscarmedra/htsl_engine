@@ -18,11 +18,13 @@
  */
 import { HTSLError } from "./errors.js";
 import { tokenize } from "./lexer.js";
+import { contentModelOf, resolvePath } from "./objects/registry.js";
 import type {
   ElementNode,
   ErrorNode,
   Loc,
   Node,
+  ObjectNode,
   ParseOptions,
   Token,
 } from "./types.js";
@@ -74,6 +76,11 @@ class Parser {
         return { type: "text", value: t.value, loc: t.loc };
       case "LBRACE":
         return this.parseElementSafe(depth);
+      case "OBJOPEN":
+        return this.parseObjectSafe(depth);
+      case "MATH_TEXT":
+        this.advance();
+        return { type: "text", value: t.value, loc: t.loc };
       case "RBRACE":
         return this.recoverable("accolade fermante orpheline.", t.loc, () =>
           this.advance(),
@@ -162,6 +169,96 @@ class Parser {
       this.fail(`balise "{${tag}" jamais fermée.`, startLoc);
     }
     this.fail(`attendu ":" ou "/" pour fermer la balise "{${tag}".`, t.loc);
+  }
+
+  /* ----------------------------------------------------------------------- */
+  /* Objects                                                                 */
+  /* ----------------------------------------------------------------------- */
+
+  private parseObjectSafe(depth: number): Node {
+    if (!this.tolerant) return this.parseObject(depth);
+    const start = this.peek().loc;
+    try {
+      return this.parseObject(depth);
+    } catch (err) {
+      if (!(err instanceof HTSLError)) throw err;
+      this.skipToClosing();
+      return { type: "error", message: stripPrefix(err.message), loc: start };
+    }
+  }
+
+  private parseObject(depth: number): ObjectNode {
+    const open = this.peek(); // OBJOPEN
+    const startLoc = open.loc;
+    const rawPath = open.value;
+    this.advance();
+
+    if (depth > this.maxDepth) {
+      this.fail(
+        `profondeur d'imbrication maximale (${this.maxDepth}) dépassée.`,
+        startLoc,
+      );
+    }
+
+    const attrs: Record<string, string> = {};
+    if (this.check("LBRACKET")) this.parseAttrs(attrs);
+
+    const path = resolvePath(rawPath);
+    const t = this.peek();
+
+    if (t.type === "SLASH") {
+      this.advance();
+      this.expect("RBRACE", `objet "{@${rawPath}" jamais fermé.`, startLoc);
+      return this.object(path, rawPath, attrs, true, [], startLoc);
+    }
+
+    if (t.type === "COLON") {
+      this.advance();
+      const children =
+        contentModelOf(rawPath) === "math"
+          ? this.parseMathContent(depth)
+          : this.parseContent(depth);
+      if (this.check("EOF")) {
+        this.fail(`objet "{@${rawPath}" jamais fermé.`, startLoc);
+      }
+      this.advance(); // consume "}"
+      return this.object(path, rawPath, attrs, false, children, startLoc);
+    }
+
+    if (t.type === "EOF") {
+      this.fail(`objet "{@${rawPath}" jamais fermé.`, startLoc);
+    }
+    this.fail(`attendu ":" ou "/" pour fermer l'objet "{@${rawPath}".`, t.loc);
+  }
+
+  /** Math content keeps every text run verbatim (LaTeX whitespace matters). */
+  private parseMathContent(depth: number): Node[] {
+    const children: Node[] = [];
+    while (!this.check("RBRACE") && !this.check("EOF")) {
+      const before = this.pos;
+      const t = this.peek();
+      if (t.type === "MATH_TEXT") {
+        this.advance();
+        children.push({ type: "text", value: t.value, loc: t.loc });
+      } else if (t.type === "OBJOPEN") {
+        children.push(this.parseObjectSafe(depth + 1));
+      } else {
+        this.advance(); // defensive: skip anything unexpected
+      }
+      if (this.pos === before) this.advance();
+    }
+    return children;
+  }
+
+  private object(
+    path: string,
+    rawPath: string,
+    attrs: Record<string, string>,
+    selfClosing: boolean,
+    children: Node[],
+    loc: Loc,
+  ): ObjectNode {
+    return { type: "object", path, rawPath, attrs, selfClosing, children, loc };
   }
 
   private parseContent(depth: number): Node[] {

@@ -12,9 +12,10 @@ export class HTSLError extends Error {
   /** A multi-line excerpt of the source with a caret pointing at the error. */
   readonly excerpt: string;
 
-  constructor(message: string, loc: Loc, source: string) {
-    const excerpt = buildExcerpt(source, loc);
-    super(`HTSL Error (ligne ${loc.line}, col ${loc.col}) : ${message}\n${excerpt}`);
+  constructor(message: string, loc: Loc, source?: string) {
+    const excerpt = source ? buildExcerpt(source, loc) : "";
+    const header = `HTSL Error (ligne ${loc.line}, col ${loc.col}) : ${message}`;
+    super(excerpt ? `${header}\n${excerpt}` : header);
     this.name = "HTSLError";
     this.line = loc.line;
     this.col = loc.col;

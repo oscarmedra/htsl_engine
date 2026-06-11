@@ -135,6 +135,56 @@ Voir [`examples/browser.html`](examples/browser.html) pour une démo en direct.
 
 Combine `parse` et `render` (accepte les options des deux).
 
+## Objets & formules mathématiques
+
+Les objets utilisent la syntaxe `{@chemin[attrs]:contenu}` (ou `{@chemin/}`
+auto-fermant), avec un système d'alias. La collection **`math.text.*`** (alias
+de collection `mt`) couvre les formulations mathématiques.
+
+```htsl
+{p:Inline : {@mti: a^2 + b^2 = c^2}, ou en raccourci $e^{i\pi}+1=0$.}
+{@mtb: \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}}
+{@mte[label=euler]: e^{i\pi} + 1 = 0}
+{p:Voir {@mtr[to=euler]/}.}
+```
+
+| Objet | Alias | Description |
+|-------|-------|-------------|
+| `math.text.inline` | `mti` | formule dans le flux du texte |
+| `math.text.block` | `mtb` | formule centrée sur sa ligne |
+| `math.text.equation` | `mte` | bloc numéroté `(n)` (attr `label`) |
+| `math.text.ref` | `mtr` | référence croisée `(n)` (attr `to`) |
+| `math.text.align` | `mta` | équations alignées (`{line:...}`) |
+| `math.text.cases` | `mtc` | définition par cas (`{case:...}`, attr `intro`) |
+| `math.text.system` | `mts` | système avec accolade (`{line:...}`) |
+| `math.object.fraction` | `mof` | `\frac{}{}` (`{num:...}`/`{den:...}`) |
+| `math.constant.pi` | `mc.pi` | `\pi` |
+
+**Unification** : `$...$` et `$$...$$` produisent exactement les mêmes nœuds AST
+que `{@mti:...}` et `{@mtb:...}` (un seul chemin de rendu). `\$` échappe un
+dollar littéral.
+
+**Imbrication** : une formule peut contenir d'autres objets, résolus en LaTeX
+avant le rendu — `{@mtb: {@mof:{num:1}{den:2}} \cdot {@mc.pi/}}` produit
+`\frac{1}{2} \cdot \pi`.
+
+**Rendu** : passez le module KaTeX via `render(ast, { katex })` (peerDependency
+optionnelle) pour un rendu typographié ; sinon le LaTeX brut est affiché en
+repli. Le numéro d'équation est posé en HTML/CSS (pas via LaTeX). Injectez la
+feuille de style par défaut exportée sous `mathCss`.
+
+```ts
+import katex from "katex";
+import { compile, mathCss } from "htsl";
+
+compile("{@mte[label=e]: E = mc^2}", { katex });
+```
+
+> **Limite** : le contenu des `{line}`/`{case}` (align/cases/system) est lu en
+> HTSL — pas d'accolades LaTeX brutes (`\text{...}`) à cet endroit ; utilisez du
+> LaTeX sans accolades ou des objets `{@...}`. Les modes inline/block/equation
+> acceptent les accolades LaTeX librement.
+
 ### Conversion inverse : HTML → HTSL
 
 Le moteur sait aussi reconvertir du HTML en HTSL, via un petit parser HTML
