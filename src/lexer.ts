@@ -272,6 +272,11 @@ class Lexer {
         this.lexString();
         return;
       default:
+        if (/[0-9]/.test(ch)) {
+          // Number-like attribute value (e.g. 0.5), kept as one IDENT token.
+          this.lexNumber();
+          return;
+        }
         if (IDENT_CHAR.test(ch)) {
           this.lexIdent();
           // The first identifier in a plain-element header is its tag name.
@@ -296,6 +301,14 @@ class Lexer {
     const loc = this.loc();
     let value = "";
     while (!this.eof() && IDENT_CHAR.test(this.peek())) value += this.advance();
+    this.push("IDENT", value, loc);
+  }
+
+  /** Lex a numeric attribute value such as `5` or `0.5` (emitted as IDENT). */
+  private lexNumber(): void {
+    const loc = this.loc();
+    let value = "";
+    while (!this.eof() && /[0-9.]/.test(this.peek())) value += this.advance();
     this.push("IDENT", value, loc);
   }
 

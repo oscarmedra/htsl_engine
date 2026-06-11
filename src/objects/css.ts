@@ -43,4 +43,22 @@ export const mathCss = `
   border-radius: 4px;
   white-space: pre-wrap;
 }
+.htsl-scene {
+  display: block;
+  margin: 0.75em auto;
+  max-width: 100%;
+}
+.htsl-scene-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  color: #71717a;
+  font-size: 0.9em;
+  border: 1px dashed #d4d4d8;
+  border-radius: 8px;
+  padding: 1em;
+  text-align: center;
+}
 `.trim();

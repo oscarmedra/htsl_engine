@@ -9,6 +9,7 @@
  */
 import { HTSLError } from "../errors.js";
 import { escapeHtml } from "../escape.js";
+import { isGeometryPath, latexOfGeometry, sceneSpec } from "./geometry.js";
 import type { ElementNode, KatexLike, Node, ObjectNode } from "../types.js";
 
 /* -------------------------------------------------------------------------- */
@@ -55,6 +56,7 @@ export function latexOfObject(obj: ObjectNode): string {
     case "math.text.ref":
       return ""; // resolved at the HTML level
     default:
+      if (isGeometryPath(obj.path)) return latexOfGeometry(obj);
       return latexOfChildren(obj.children);
   }
 }
@@ -145,9 +147,31 @@ export function renderMathObject(
       return equation(node, ctx, katex);
     case "math.text.ref":
       return reference(node, ctx, options.source);
+    case "math.geometry.2d.scene":
+    case "math.geometry.3d.scene":
+      return renderScene(node);
     default:
       return inline(latexOfObject(node), katex);
   }
+}
+
+/**
+ * Render a geometry scene as a `<div>` carrying the Plotly spec in a data
+ * attribute, plus a fallback message. Call `hydrateScenes()` in the browser to
+ * draw them with Plotly when it is available.
+ */
+function renderScene(node: ObjectNode): string {
+  const spec = sceneSpec(node);
+  const width = typeof spec.layout["width"] === "number" ? spec.layout["width"] : 600;
+  const height = typeof spec.layout["height"] === "number" ? spec.layout["height"] : 400;
+  const json = escapeHtml(JSON.stringify(spec));
+  const dim = node.path.includes(".3d.") ? "3d" : "2d";
+  return (
+    `<div class="htsl-scene htsl-scene--${dim}" data-htsl-scene="${json}" ` +
+    `style="width:${width}px;height:${height}px">` +
+    `<span class="htsl-scene-fallback">Scène géométrique — Plotly requis ` +
+    `(htsl_engine.hydrateScenes()).</span></div>`
+  );
 }
 
 function equation(

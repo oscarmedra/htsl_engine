@@ -28,6 +28,8 @@ const COLLECTION_ALIASES: Record<string, string> = {
   mt: "math.text",
   mc: "math.constant",
   mo: "math.object",
+  mg2: "math.geometry.2d",
+  mg3: "math.geometry.3d",
 };
 
 /** Canonical object → content model. The set of known objects. */
@@ -41,6 +43,23 @@ const CONTENT: Record<string, ContentModel> = {
   "math.text.system": "html",
   "math.object.fraction": "html",
   "math.constant.pi": "void",
+
+  // 2D geometry
+  "math.geometry.2d.scene": "html",
+  "math.geometry.2d.point": "void",
+  "math.geometry.2d.segment": "void",
+  "math.geometry.2d.circle": "void",
+  "math.geometry.2d.polygon": "void",
+  "math.geometry.2d.droite": "void",
+
+  // 3D geometry
+  "math.geometry.3d.scene": "html",
+  "math.geometry.3d.point": "void",
+  "math.geometry.3d.vector": "void",
+  "math.geometry.3d.segment": "void",
+  "math.geometry.3d.line": "void",
+  "math.geometry.3d.plane": "void",
+  "math.geometry.3d.sphere": "void",
 };
 
 /** Resolve a written path/alias to its canonical dotted path. */

@@ -90,5 +90,17 @@ Les entrées les plus récentes sont ajoutées en bas.
 - `demo-formulas.htsl` réécrit avec un composant `card` réutilisé ; `teste.html` : 9 cartes Tailwind depuis une seule définition `card` + variable `accent` (rendu navigateur confirmé).
 - Bundles régénérés ; README et `.docs/04-composants-et-variables.md` ajoutés.
 
+### Géométrie via Plotly (mg2/mg3)
+
+- Alias de collection `mg2`→`math.geometry.2d`, `mg3`→`math.geometry.3d` ; objets enregistrés (scenes html, formes void).
+- `src/objects/geometry.ts` : `toPlotly(node, dim)` (une fonction par forme), `sceneSpec` (traces + layout, cadrage 2D depuis les objets finis, aspectmode data en 3D), `latexOfGeometry`, `isGeometryPath`/`isScenePath`.
+- Formes : 2D point/segment/circle/polygon/droite ; 3D point/vector(ligne+cone)/segment/line/plane(mesh3d)/sphere(surface).
+- `math.ts` : scenes → `renderScene` (`<div data-htsl-scene=JSON>` + repli) ; géométrie hors-scène → `latexOfGeometry` (notation LaTeX, ex. plan → `2x - y + 3z = 5`).
+- `src/scene-client.ts` : `hydrateScenes(root?, Plotly?)` (appelle `Plotly.newPlot`, no-op sans DOM/Plotly). Le cœur ne dépend jamais de Plotly.
+- Lexer : ajout d'un lexème nombre dans l'en-tête (valeurs décimales non quotées comme `opacity=0.5`).
+- `tests/geometry.test.ts` : 16 tests (structure des traces, scène 2D/3D, règle de contexte, repli sans Plotly). Total : **128 tests** verts, zéro régression.
+- `demo-geometry.htsl` + `npm run demo:geometry` ; `examples/geometry.html` (Plotly CDN) ; `teste.html` enrichi de 2 scènes. Rendu 2D et 3D confirmé en navigateur (plan, sphère, point, vecteur, cercle, polygone, droite).
+- Bundles régénérés ; README, `.docs/05-geometrie-plotly.md` ajoutés.
+
 
 

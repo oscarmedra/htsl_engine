@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HTSL — géométrie (Plotly)</title>
+
+    <!-- Moteur HTSL : globals htsl_engine / HTSL_ENGINE -->
+    <script src="../dist-min/htsl.global.js"></script>
+
+    <!-- Plotly (peerDependency optionnelle) -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+
+    <!-- KaTeX pour la notation LaTeX hors-scène -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <style>
+      body { font: 16px/1.6 system-ui, sans-serif; max-width: 980px; margin: 2rem auto; padding: 0 1rem; }
+      h1 { margin-bottom: 0.2rem; }
+      .sub { color: #71717a; margin-top: 0; }
+      .err { color: #dc2626; white-space: pre-wrap; font-family: ui-monospace, monospace; }
+    </style>
+  </head>
+  <body>
+    <h1>HTSL — objets géométriques</h1>
+    <p class="sub">Scènes 2D et 3D rendues via Plotly ; hors scène, la notation LaTeX.</p>
+
+    <div id="out"></div>
+    <p id="status" class="sub"></p>
+
+    <script type="text/htsl" id="demo-src">
+{h2:Scène 3D}
+{@mg3.scene[width=620, height=460]:
+  {@mg3.plane[normal="(2,-1,3)", d=5, color=royalblue, opacity=0.4]/}
+  {@mg3.sphere[center="(0,0,0)", radius=2, color=mediumseagreen, opacity=0.5]/}
+  {@mg3.point[name=A, x=1, y=2, z=3, color=crimson]/}
+  {@mg3.vector[from="(1,2,3)", to="(1,3,4)", color=darkorange]/}
+  {@mg3.segment[from="(-2,-2,-2)", to="(2,2,2)", color=slategray]/}
+}
+
+{h2:Scène 2D}
+{@mg2.scene[width=520, height=420]:
+  {@mg2.circle[center="(0,0)", radius=3, color=royalblue]/}
+  {@mg2.polygon[points="(-2,-2);(2,-2);(0,3)", color=darkorange, opacity=0.3]/}
+  {@mg2.segment[from="(-3,0)", to="(3,0)", color=mediumseagreen]/}
+  {@mg2.droite[point="(0,0)", dir="(1,1)", color=purple]/}
+  {@mg2.point[name=O, x=0, y=0, color=crimson]/}
+}
+
+{h2:Hors scène → notation LaTeX}
+{p:Le plan $${@mg3.plane[normal="(2,-1,3)", d=5]/}$$ et la sphère $${@mg3.sphere[center="(1,0,0)", radius=2]/}$$.}
+    </script>
+
+    <script>
+      const style = document.createElement("style");
+      style.textContent = htsl_engine.mathCss;
+      document.head.appendChild(style);
+
+      const out = document.getElementById("out");
+      const status = document.getElementById("status");
+
+      function render() {
+        try {
+          const src = document.getElementById("demo-src").textContent.trim();
+          out.innerHTML = htsl_engine.compile(src, { prettyPrint: false, katex: window.katex });
+          const n = htsl_engine.hydrateScenes(document, window.Plotly);
+          status.textContent = window.Plotly
+            ? n + " scène(s) rendue(s) avec Plotly ✓"
+            : "Plotly non chargé — message de repli affiché.";
+        } catch (err) {
+          status.innerHTML = '<span class="err">' + String((err && err.message) || err) + "</span>";
+        }
+      }
+
+      window.addEventListener("load", render);
+      render();
+    </script>
+  </body>
+</html>

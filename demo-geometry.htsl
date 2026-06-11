@@ -1,0 +1,23 @@
+{!-- Démonstration géométrie : scènes 2D et 3D rendues via Plotly --}
+{h1:Objets géométriques HTSL}
+
+{h2:Scène 3D}
+{@mg3.scene[width=620, height=460]:
+  {@mg3.plane[normal="(2,-1,3)", d=5, color=royalblue, opacity=0.4]/}
+  {@mg3.sphere[center="(0,0,0)", radius=2, color=mediumseagreen, opacity=0.5]/}
+  {@mg3.point[name=A, x=1, y=2, z=3, color=crimson]/}
+  {@mg3.vector[from="(1,2,3)", to="(1,3,4)", color=darkorange]/}
+  {@mg3.segment[from="(-2,-2,-2)", to="(2,2,2)", color=slategray]/}
+}
+
+{h2:Scène 2D}
+{@mg2.scene[width=520, height=420]:
+  {@mg2.circle[center="(0,0)", radius=3, color=royalblue]/}
+  {@mg2.polygon[points="(-2,-2);(2,-2);(0,3)", color=darkorange, opacity=0.3]/}
+  {@mg2.segment[from="(-3,0)", to="(3,0)", color=mediumseagreen]/}
+  {@mg2.droite[point="(0,0)", dir="(1,1)", color=purple]/}
+  {@mg2.point[name=O, x=0, y=0, color=crimson]/}
+}
+
+{h2:Hors scène → notation LaTeX (aucune régression)}
+{p:Le plan {@mg3.plane[normal="(2,-1,3)", d=5]/}, la sphère {@mg3.sphere[center="(1,0,0)", radius=2]/} et le point {@mg3.point[name=A, x=1, y=2, z=3]/}.}

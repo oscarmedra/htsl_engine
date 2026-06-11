@@ -184,6 +184,46 @@ Le contenu des lignes `{line}`/`{case}` (align/cases/system) est lu en **mode
 math** : les accolades LaTeX (`\text{...}`, `\frac{...}{...}`) et les objets
 `{@...}` y sont permis, comme dans inline/block/equation.
 
+## Géométrie (Plotly)
+
+Les objets géométriques se déclarent dans un conteneur `scene` (2D ou 3D). Pas
+d'appel de fonction : c'est le conteneur qui déclenche le rendu graphique.
+
+```htsl
+{@mg3.scene[width=600, height=400]:
+  {@mg3.plane[normal="(2,-1,3)", d=5, color=blue, opacity=0.5]/}
+  {@mg3.point[name=A, x=1, y=2, z=3, color=red]/}
+  {@mg3.vector[from="(1,2,3)", to="(1,3,4)"]/}
+  {@mg3.sphere[center="(0,0,0)", radius=2]/}
+}
+```
+
+**Règle de contexte** : un objet géométrique *dans* une scène devient une trace
+Plotly ; *hors* scène, il rend sa **notation LaTeX** (ex. un plan →
+`2x - y + 3z = 5`). Aucune régression LaTeX.
+
+| Collection | Objets |
+|------------|--------|
+| `mg2.scene` (2D) | `point`, `segment`, `circle`, `polygon`, `droite` |
+| `mg3.scene` (3D) | `point`, `vector` (flèche + cône), `segment`, `line`, `plane` (surface), `sphere` (surface paramétrique) |
+
+Attributs visuels communs : `color`, `opacity`, `label`/`name`.
+
+**Rendu** : le cœur ne dépend jamais de Plotly. Le renderer émet un `<div>` avec
+la description JSON des traces dans `data-htsl-scene` + un message de repli.
+Appelez `hydrateScenes(root?, Plotly?)` dans la page (après chargement de Plotly)
+pour les dessiner ; sans Plotly, le repli reste affiché.
+
+```html
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script>
+  document.body.innerHTML = htsl_engine.compile(source);
+  htsl_engine.hydrateScenes(document, window.Plotly);
+</script>
+```
+
+L'API expose aussi `toPlotly(node, dim)` et `sceneSpec(node)` (JSON pur).
+
 ## Composants & variables
 
 Fidèles à la philosophie « tout est objet structuré », les composants et les

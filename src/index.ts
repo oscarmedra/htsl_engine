@@ -14,6 +14,7 @@ import { render } from "./renderer.js";
 import { tokenize } from "./lexer.js";
 import { fromHtml, parseHtml, toHtsl } from "./from-html.js";
 import { expand } from "./components/expand.js";
+import { hydrateScenes } from "./scene-client.js";
 import { mathCss } from "./objects/css.js";
 import { HTSLError } from "./errors.js";
 import type { CompileOptions, Node } from "./types.js";
@@ -26,6 +27,9 @@ export type { ToHtslOptions } from "./from-html.js";
 export { expand } from "./components/expand.js";
 export type { ExpandOptions } from "./components/expand.js";
 export { latexOfObject, latexOfNode } from "./objects/math.js";
+export { toPlotly, sceneSpec, latexOfGeometry, isGeometryPath, isScenePath } from "./objects/geometry.js";
+export type { Trace, SceneSpec } from "./objects/geometry.js";
+export { hydrateScenes } from "./scene-client.js";
 export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";
 export { mathCss } from "./objects/css.js";
 export { HTSLError } from "./errors.js";
@@ -75,6 +79,7 @@ export const htsl_engine = {
   parseHtml,
   toHtsl,
   expand,
+  hydrateScenes,
   mathCss,
   HTSLError,
 } as const;

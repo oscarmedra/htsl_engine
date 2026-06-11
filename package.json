@@ -23,7 +23,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "demo": "tsx scripts/demo.ts",
-    "demo:formulas": "tsx scripts/demo-formulas.ts"
+    "demo:formulas": "tsx scripts/demo-formulas.ts",
+    "demo:geometry": "tsx scripts/demo-geometry.ts"
   },
   "keywords": [
     "htsl",
