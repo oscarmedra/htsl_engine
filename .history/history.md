@@ -115,5 +115,19 @@ Les entrées les plus récentes sont ajoutées en bas.
 - `demo-geometry.htsl` et `examples/geometry.html` mis à jour (repère gradué, plan complexe + cercle unité + affixes, space 3D) ; rendu confirmé en navigateur (cercle unité pointillé, affixes A/B/i, axes Re(z)/Im(z)).
 - Bundles régénérés ; README (règle décor/acteur) et `.docs/06-reperes-scene.md` ajoutés.
 
+### API d'introspection + Playground web
+
+- Registre refondu en `registerObject(meta)` : description, schéma d'attributs (nom/type/requis/défaut/description/enum), exemple ; renseigné pour les 25 objets. Rétrocompatible (resolvePath/isKnownObject/contentModelOf).
+- `src/introspect.ts` : `registry.list()`/`describe()` + `documentComponents()`/`documentVariables()` (introspection des {!define}/{!set} après parsing). Exposé via `registry` (named + htsl_engine).
+- `tests/introspect.test.ts` : 11 tests. Total : **157 tests** verts, zéro régression.
+- Playground `playground/` (Vite + TypeScript, workspace npm, moteur importé via alias `../src`) :
+  - 3 panneaux redimensionnables (éditeur CodeMirror 6 · rendu · AST masquable).
+  - Rendu à la frappe (debounce 150 ms), parser tolerant ; erreurs en bandeau + soulignées (lint, ligne/col → offset) ; dernière sortie valide conservée → la page ne casse jamais.
+  - `htsl-lang.ts` : StreamLanguage CodeMirror écrite à la main (content/header/math) ; coloration complète.
+  - `complete.ts` : autocomplétion contextuelle (objets/composants après {@, attributs après [, variables après {$, directives après {!) parsant le document à la volée (suggestions à jour).
+  - KaTeX + Plotly chargés et injectés (peerDependency) ; exemples préchargés ; boutons copier/télécharger/partage par hash d'URL ; `npm run playground:build` → dist statique.
+- Vérifié en navigateur : coloration, rendu KaTeX, scène 3D Plotly, AST, bandeau + soulignement d'erreur (page vivante), autocomplétion (objets, attributs avec défauts, variables en direct).
+- `.gitignore` : `playground/dist/` ; scripts racine `playground` / `playground:build` ; `.docs/07-introspection-et-playground.md`.
+
 
 

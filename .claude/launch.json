@@ -9,6 +9,12 @@
         "const http=require('http'),fs=require('fs'),path=require('path');http.createServer((req,res)=>{let u=decodeURIComponent(req.url.split('?')[0]);if(u==='/')u='/teste.html';const f=path.join(process.cwd(),u);fs.readFile(f,(e,d)=>{if(e){res.statusCode=404;res.end('404');return}const ext=path.extname(f);const t={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.map':'application/json'}[ext]||'application/octet-stream';res.setHeader('content-type',t);res.end(d)})}).listen(8123,()=>console.log('listening on 8123'))"
       ],
       "port": 8123
+    },
+    {
+      "name": "playground",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "playground", "--port", "5180", "--strictPort"],
+      "port": 5180
     }
   ]
 }

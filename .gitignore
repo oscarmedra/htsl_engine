@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-min/
+playground/dist/
 *.log
 .DS_Store
 coverage/

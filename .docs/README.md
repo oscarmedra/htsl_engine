@@ -17,3 +17,4 @@ décrivant ce qui a été fait, pourquoi, et comment cela fonctionne.
 | `04-composants-et-variables.md` | Composants `{!define}`/`{@use}` et variables `{!set}`/`{$var}` par expansion d'AST |
 | `05-geometrie-plotly.md` | Objets géométriques (mg2/mg3) rendus en traces Plotly via un conteneur `scene` |
 | `06-reperes-scene.md` | Objets de repère (décor) : `mg2.frame`/`repere`, `mg3.space`, plan complexe + `cpoint` |
+| `07-introspection-et-playground.md` | API d'introspection (registry.list/describe) + playground web Vite/CodeMirror |

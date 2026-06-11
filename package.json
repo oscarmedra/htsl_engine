@@ -16,6 +16,9 @@
     "dist",
     "README.md"
   ],
+  "workspaces": [
+    "playground"
+  ],
   "scripts": {
     "build": "tsup",
     "build:min": "tsup --config tsup.min.config.ts",
@@ -24,7 +27,9 @@
     "typecheck": "tsc --noEmit",
     "demo": "tsx scripts/demo.ts",
     "demo:formulas": "tsx scripts/demo-formulas.ts",
-    "demo:geometry": "tsx scripts/demo-geometry.ts"
+    "demo:geometry": "tsx scripts/demo-geometry.ts",
+    "playground": "npm run dev --workspace playground",
+    "playground:build": "npm run build --workspace playground"
   },
   "keywords": [
     "htsl",

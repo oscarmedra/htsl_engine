@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HTSL · Playground</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo">HTSL</span>
+          <span class="tagline">playground</span>
+        </div>
+        <div class="toolbar">
+          <select id="examples" title="Exemples préchargés"></select>
+          <button id="btn-copy" title="Copier le HTML rendu">Copier HTML</button>
+          <button id="btn-download" title="Télécharger le .htsl">Télécharger</button>
+          <button id="btn-share" title="Copier un lien de partage">Partager</button>
+          <label class="toggle"><input type="checkbox" id="toggle-ast" checked /> AST</label>
+        </div>
+      </header>
+
+      <div id="banner" class="banner" hidden></div>
+
+      <main id="panels">
+        <section class="panel" id="panel-editor">
+          <div class="panel-head">Éditeur HTSL</div>
+          <div id="editor" class="panel-body"></div>
+        </section>
+        <div class="gutter" data-gutter="1"></div>
+        <section class="panel" id="panel-render">
+          <div class="panel-head">Rendu</div>
+          <div id="render" class="panel-body render"></div>
+        </section>
+        <div class="gutter" data-gutter="2"></div>
+        <section class="panel" id="panel-ast">
+          <div class="panel-head">AST</div>
+          <pre id="ast" class="panel-body ast"></pre>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
