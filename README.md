@@ -184,6 +184,50 @@ Le contenu des lignes `{line}`/`{case}` (align/cases/system) est lu en **mode
 math** : les accolades LaTeX (`\text{...}`, `\frac{...}{...}`) et les objets
 `{@...}` y sont permis, comme dans inline/block/equation.
 
+## Composants & variables
+
+Fidèles à la philosophie « tout est objet structuré », les composants et les
+variables sont **résolus par expansion d'AST avant le rendu** (le renderer ne
+voit que des nœuds normaux).
+
+### Composants
+
+```htsl
+{!define card[title, color=indigo]:
+  {div[class="card text-{$color}-600"]:
+    {h2:{$title}}
+    {div.body:{$children}}
+  }
+}
+
+{@card[title="Bonjour"]:contenu injecté dans {$children}}
+```
+
+- Paramètres avec valeurs par défaut (`color=indigo`) ; un paramètre obligatoire
+  manquant est une **erreur localisée**.
+- `{$children}` reçoit le contenu passé à l'usage.
+- Un composant peut en utiliser d'autres ; la **récursion infinie est détectée**
+  (profondeur max 64).
+- Un composant peut être **utilisé avant sa définition** (les `!define` sont
+  collectés en première passe).
+- Les noms de composants partagent le registre `@` : une **collision avec un
+  objet enregistré** (ex. `mti`) est une erreur.
+
+### Variables
+
+```htsl
+{!set theme-color: indigo}
+{p[class="text-{$theme-color}-600"]:{$theme-color}}
+```
+
+- `{$name}` s'interpole dans le texte, les **valeurs d'attributs** et les corps
+  de composants.
+- Portée document, redéfinition autorisée (**dernière valeur au point d'usage**).
+- Une **variable inconnue** est une erreur localisée.
+
+L'expansion est exposée via `expand(ast, { source? })` ; `compile`/`render`
+l'exécutent automatiquement avant le rendu.
+
 ### Conversion inverse : HTML → HTSL
 
 Le moteur sait aussi reconvertir du HTML en HTSL, via un petit parser HTML

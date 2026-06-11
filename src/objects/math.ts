@@ -25,6 +25,9 @@ export function latexOfNode(node: Node): string {
       return latexOfChildren(node.children);
     case "comment":
     case "error":
+    case "define":
+    case "set":
+    case "var":
       return "";
   }
 }

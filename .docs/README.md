@@ -14,3 +14,4 @@ décrivant ce qui a été fait, pourquoi, et comment cela fonctionne.
 | `01-moteur-htsl-v0.1.md` | Première version fonctionnelle du moteur HTSL (lexer, parser, renderer, API, tests) |
 | `02-conversion-html-vers-htsl.md` | Conversion inverse HTML → HTSL (parseHtml, toHtsl, fromHtml) |
 | `03-collection-math-text.md` | Fondation des objets `{@...}` + collection math.text.* (LaTeX/KaTeX, numérotation, refs) |
+| `04-composants-et-variables.md` | Composants `{!define}`/`{@use}` et variables `{!set}`/`{$var}` par expansion d'AST |

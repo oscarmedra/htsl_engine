@@ -20,12 +20,15 @@ import { HTSLError } from "./errors.js";
 import { tokenize } from "./lexer.js";
 import { contentModelOf, resolvePath } from "./objects/registry.js";
 import type {
+  DefineNode,
   ElementNode,
   ErrorNode,
   Loc,
   Node,
   ObjectNode,
+  Param,
   ParseOptions,
+  SetNode,
   Token,
 } from "./types.js";
 
@@ -78,6 +81,13 @@ class Parser {
         return this.parseElementSafe(depth);
       case "OBJOPEN":
         return this.parseObjectSafe(depth);
+      case "DEFINE_OPEN":
+        return this.parseDefine(depth);
+      case "SET_OPEN":
+        return this.parseSet(depth);
+      case "VARREF":
+        this.advance();
+        return { type: "var", name: t.value, loc: t.loc };
       case "MATH_TEXT":
         this.advance();
         return { type: "text", value: t.value, loc: t.loc };
@@ -242,12 +252,94 @@ class Parser {
         children.push({ type: "text", value: t.value, loc: t.loc });
       } else if (t.type === "OBJOPEN") {
         children.push(this.parseObjectSafe(depth + 1));
+      } else if (t.type === "VARREF") {
+        this.advance();
+        children.push({ type: "var", name: t.value, loc: t.loc });
       } else {
         this.advance(); // defensive: skip anything unexpected
       }
       if (this.pos === before) this.advance();
     }
     return children;
+  }
+
+  /* ----------------------------------------------------------------------- */
+  /* Components & variables                                                  */
+  /* ----------------------------------------------------------------------- */
+
+  private parseDefine(depth: number): DefineNode {
+    const open = this.peek(); // DEFINE_OPEN
+    const startLoc = open.loc;
+    const name = open.value;
+    this.advance();
+
+    if (name === "") {
+      this.fail(`nom de composant attendu après "{!define".`, startLoc);
+    }
+
+    const params = this.check("LBRACKET") ? this.parseParams() : [];
+
+    this.expect("COLON", `attendu ":" dans la définition du composant "${name}".`, this.peek().loc);
+    const body = this.parseContent(depth);
+    if (this.check("EOF")) {
+      this.fail(`composant "{!define ${name}" jamais fermé.`, startLoc);
+    }
+    this.advance(); // consume "}"
+    return { type: "define", name, params, body, loc: startLoc };
+  }
+
+  private parseParams(): Param[] {
+    const params: Param[] = [];
+    this.advance(); // consume "["
+    if (this.check("RBRACKET")) {
+      this.advance();
+      return params;
+    }
+    for (;;) {
+      const name = this.peek();
+      if (name.type !== "IDENT") {
+        this.fail(`nom de paramètre attendu.`, name.loc);
+      }
+      this.advance();
+      let def: string | null = null;
+      if (this.check("EQUALS")) {
+        this.advance();
+        const value = this.peek();
+        if (value.type === "STRING" || value.type === "IDENT") {
+          this.advance();
+          def = value.value;
+        } else {
+          this.fail(`valeur par défaut attendue pour "${name.value}".`, value.loc);
+        }
+      }
+      params.push({ name: name.value, default: def });
+      if (this.check("COMMA")) {
+        this.advance();
+        continue;
+      }
+      break;
+    }
+    this.expect("RBRACKET", `"]" attendu dans la liste des paramètres.`, this.peek().loc);
+    return params;
+  }
+
+  private parseSet(depth: number): SetNode {
+    const open = this.peek(); // SET_OPEN
+    const startLoc = open.loc;
+    const name = open.value;
+    this.advance();
+
+    if (name === "") {
+      this.fail(`nom de variable attendu après "{!set".`, startLoc);
+    }
+
+    this.expect("COLON", `attendu ":" dans l'affectation "{!set ${name}".`, this.peek().loc);
+    const value = this.parseContent(depth);
+    if (this.check("EOF")) {
+      this.fail(`affectation "{!set ${name}" jamais fermée.`, startLoc);
+    }
+    this.advance(); // consume "}"
+    return { type: "set", name, value, loc: startLoc };
   }
 
   private object(

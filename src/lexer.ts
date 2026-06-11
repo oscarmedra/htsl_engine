@@ -25,7 +25,7 @@ const PATH_CHAR = /[A-Za-z0-9_.-]/;
 
 type Frame =
   | { kind: "content" }
-  | { kind: "header"; path: string | null; tag?: string }
+  | { kind: "header"; path: string | null; tag?: string; directive?: boolean }
   | { kind: "math"; closer: "brace" | "dollar" | "ddollar"; depth: number };
 
 /** Plain element tags whose body is read as LaTeX (math container rows). */
@@ -77,12 +77,17 @@ class Lexer {
     const ch = this.peek();
     if (ch === "{") {
       const braceLoc = this.loc();
-      if (this.peek(1) === "@") {
+      const next = this.peek(1);
+      if (next === "@") {
         this.advance(); // {
         this.advance(); // @
         const path = this.readPath();
         this.push("OBJOPEN", path, braceLoc);
         this.stack.push({ kind: "header", path });
+      } else if (next === "$") {
+        this.lexVarRef(braceLoc);
+      } else if (next === "!") {
+        this.lexDirective(braceLoc); // {!-- already handled above
       } else {
         this.advance();
         this.push("LBRACE", "{", braceLoc);
@@ -119,6 +124,44 @@ class Lexer {
       this.push("COLON", ":", loc);
       this.stack.push({ kind: "math", closer: "dollar", depth: 0 });
     }
+  }
+
+  private lexVarRef(braceLoc: Loc): void {
+    this.advance(); // {
+    this.advance(); // $
+    const name = this.readVarName();
+    if (this.peek() === "}") {
+      this.advance();
+    } else if (!this.tolerant) {
+      throw new HTSLError("référence de variable malformée (} attendu).", braceLoc, this.src);
+    }
+    this.push("VARREF", name, braceLoc);
+  }
+
+  private lexDirective(braceLoc: Loc): void {
+    this.advance(); // {
+    this.advance(); // !
+    const keyword = this.readKeyword();
+    if (keyword === "define") {
+      this.skipSpaces();
+      const name = this.readPath();
+      this.push("DEFINE_OPEN", name, braceLoc);
+      this.stack.push({ kind: "header", path: null, directive: true });
+      return;
+    }
+    if (keyword === "set") {
+      this.skipSpaces();
+      const name = this.readVarName();
+      this.push("SET_OPEN", name, braceLoc);
+      this.stack.push({ kind: "header", path: null, directive: true });
+      return;
+    }
+    if (this.tolerant) {
+      while (!this.eof() && this.peek() !== "}") this.advance();
+      if (this.peek() === "}") this.advance();
+      return;
+    }
+    throw new HTSLError(`directive inconnue : "!${keyword}".`, braceLoc, this.src);
   }
 
   private lexText(): void {
@@ -167,7 +210,12 @@ class Lexer {
   /* Header frame                                                            */
   /* ----------------------------------------------------------------------- */
 
-  private lexHeader(frame: { kind: "header"; path: string | null; tag?: string }): void {
+  private lexHeader(frame: {
+    kind: "header";
+    path: string | null;
+    tag?: string;
+    directive?: boolean;
+  }): void {
     const ch = this.peek();
     if (ch === " " || ch === "\t" || ch === "\n" || ch === "\r") {
       this.advance();
@@ -227,7 +275,7 @@ class Lexer {
         if (IDENT_CHAR.test(ch)) {
           this.lexIdent();
           // The first identifier in a plain-element header is its tag name.
-          if (frame.path === null && frame.tag === undefined) {
+          if (frame.path === null && !frame.directive && frame.tag === undefined) {
             frame.tag = this.tokens[this.tokens.length - 1]!.value;
           }
           return;
@@ -313,6 +361,11 @@ class Lexer {
           this.stack.push({ kind: "header", path });
           return;
         }
+        if (this.peek(1) === "$") {
+          flush();
+          this.lexVarRef(this.loc());
+          return; // resume the math frame on the next dispatch
+        }
         frame.depth++;
         value += this.advance();
         continue;
@@ -379,6 +432,22 @@ class Lexer {
     let path = "";
     while (!this.eof() && PATH_CHAR.test(this.peek())) path += this.advance();
     return path;
+  }
+
+  private readVarName(): string {
+    let name = "";
+    while (!this.eof() && IDENT_CHAR.test(this.peek())) name += this.advance();
+    return name;
+  }
+
+  private readKeyword(): string {
+    let kw = "";
+    while (!this.eof() && /[A-Za-z]/.test(this.peek())) kw += this.advance();
+    return kw;
+  }
+
+  private skipSpaces(): void {
+    while (this.peek() === " " || this.peek() === "\t") this.advance();
   }
 
   private eof(): boolean {

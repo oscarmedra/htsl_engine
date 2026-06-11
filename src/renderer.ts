@@ -7,6 +7,7 @@
  * and emitted as escaped text rather than as a live HTML element.
  */
 import { escapeHtml } from "./escape.js";
+import { expand } from "./components/expand.js";
 import {
   buildMathContext,
   renderMathObject,
@@ -36,7 +37,12 @@ const VOID_TAGS = new Set([
 
 export function render(ast: Node | Node[], options: RenderOptions = {}): string {
   const nodes = Array.isArray(ast) ? ast : [ast];
-  return new Renderer(options).renderTop(nodes);
+  // Expand components & variables first, so the renderer only sees normal nodes.
+  const expanded = expand(
+    nodes,
+    options.source !== undefined ? { source: options.source } : {},
+  );
+  return new Renderer(options).renderTop(expanded);
 }
 
 class Renderer {
@@ -83,6 +89,10 @@ class Renderer {
         return this.math(node);
       case "element":
         return this.compactElement(node);
+      case "define":
+      case "set":
+      case "var":
+        return ""; // removed by expansion
     }
   }
 
@@ -116,6 +126,10 @@ class Renderer {
         return pad + this.math(node);
       case "element":
         return this.prettyElement(node, indent);
+      case "define":
+      case "set":
+      case "var":
+        return ""; // removed by expansion
     }
   }
 
@@ -173,6 +187,9 @@ function rawHtml(node: Node): string {
     case "comment":
     case "error":
     case "object":
+    case "define":
+    case "set":
+    case "var":
       return "";
     case "element": {
       let s = `<${node.tag}`;

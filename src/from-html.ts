@@ -304,6 +304,10 @@ function serializePretty(node: Node, indent: number): string {
       return `${pad}{!--${node.message}--}`;
     case "object":
       return pad + serializeObject(node, serializeCompact);
+    case "define":
+    case "set":
+    case "var":
+      return "";
     case "element": {
       const header = "{" + selector(node);
       const children = node.children.filter(notBlank);
@@ -332,6 +336,10 @@ function serializeCompact(node: Node): string {
       return `{!--${node.message}--}`;
     case "object":
       return serializeObject(node, serializeCompact);
+    case "define":
+    case "set":
+    case "var":
+      return "";
     case "element": {
       const header = "{" + selector(node);
       const children = node.children.filter(notBlank);

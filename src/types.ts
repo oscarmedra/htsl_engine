@@ -28,6 +28,9 @@ export type TokenType =
   | "TEXT" // raw text content
   | "MATH_TEXT" // raw LaTeX run inside a math object's content
   | "OBJOPEN" // object opener: {@path  (value = dotted path / alias)
+  | "DEFINE_OPEN" // component definition opener: {!define name (value = name)
+  | "SET_OPEN" // variable assignment opener: {!set name (value = name)
+  | "VARREF" // variable / parameter reference: {$name} (value = name)
   | "COMMENT" // {!-- ... --}
   | "EOF"; // end of input
 
@@ -81,6 +84,36 @@ export interface ObjectNode {
   loc: Loc;
 }
 
+/** A component parameter, with an optional default value. */
+export interface Param {
+  name: string;
+  default: string | null;
+}
+
+/** A component definition: `{!define name[params]: body}`. Removed by expansion. */
+export interface DefineNode {
+  type: "define";
+  name: string;
+  params: Param[];
+  body: Node[];
+  loc: Loc;
+}
+
+/** A variable assignment: `{!set name: value}`. Removed by expansion. */
+export interface SetNode {
+  type: "set";
+  name: string;
+  value: Node[];
+  loc: Loc;
+}
+
+/** A variable / parameter reference: `{$name}` (or `{$children}`). */
+export interface VarRefNode {
+  type: "var";
+  name: string;
+  loc: Loc;
+}
+
 /** Inserted by the parser in `tolerant` mode when it recovers from an error. */
 export interface ErrorNode {
   type: "error";
@@ -89,7 +122,15 @@ export interface ErrorNode {
 }
 
 /** Discriminated union of every AST node, keyed on `type`. */
-export type Node = ElementNode | TextNode | CommentNode | ObjectNode | ErrorNode;
+export type Node =
+  | ElementNode
+  | TextNode
+  | CommentNode
+  | ObjectNode
+  | DefineNode
+  | SetNode
+  | VarRefNode
+  | ErrorNode;
 
 /* -------------------------------------------------------------------------- */
 /* Options                                                                     */

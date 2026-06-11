@@ -13,6 +13,7 @@ import { parse } from "./parser.js";
 import { render } from "./renderer.js";
 import { tokenize } from "./lexer.js";
 import { fromHtml, parseHtml, toHtsl } from "./from-html.js";
+import { expand } from "./components/expand.js";
 import { mathCss } from "./objects/css.js";
 import { HTSLError } from "./errors.js";
 import type { CompileOptions, Node } from "./types.js";
@@ -22,6 +23,8 @@ export { render } from "./renderer.js";
 export { tokenize } from "./lexer.js";
 export { fromHtml, parseHtml, toHtsl } from "./from-html.js";
 export type { ToHtslOptions } from "./from-html.js";
+export { expand } from "./components/expand.js";
+export type { ExpandOptions } from "./components/expand.js";
 export { latexOfObject, latexOfNode } from "./objects/math.js";
 export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";
 export { mathCss } from "./objects/css.js";
@@ -33,6 +36,10 @@ export type {
   TextNode,
   CommentNode,
   ObjectNode,
+  DefineNode,
+  SetNode,
+  VarRefNode,
+  Param,
   ErrorNode,
   Token,
   TokenType,
@@ -67,6 +74,7 @@ export const htsl_engine = {
   fromHtml,
   parseHtml,
   toHtsl,
+  expand,
   mathCss,
   HTSLError,
 } as const;

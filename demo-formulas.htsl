@@ -1,36 +1,39 @@
-{!-- Démonstration de la collection math.text.* --}
+{!-- Démonstration : composants + variables + collection math.text.* --}
+
+{!-- Une carte réutilisable : titre + corps, couleur paramétrable, {$children} --}
+{!define card[title, color=indigo]:
+  {div[class="card card-{$color}"]:
+    {h2[class="card-title text-{$color}-600"]:{$title}}
+    {div[class="card-body"]:{$children}}
+  }
+}
+
+{!set accent: violet}
+
 {h1:Formulations mathématiques HTSL}
 
-{h2:Formules dans le texte}
-{p:Avec accolades : {@mti: a^2 + b^2 = c^2}.}
-{p:Avec le raccourci dollar : $e^{i\pi} + 1 = 0$.}
-
-{h2:Formule centrée (bloc)}
-{@mtb: \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}}
-$$\int_0^1 x^2 \, dx = \frac{1}{3}$$
-
-{h2:Équations numérotées et références}
-{@mte[label=euler]: e^{i\pi} + 1 = 0}
-{@mte[label=mass]: E = mc^2}
-{p:L'identité d'Euler {@mtr[to=euler]/} et la relation {@mtr[to=mass]/} sont célèbres.}
-
-{h2:Objets imbriqués (résolus en LaTeX)}
-{@mtb: {@mof:{num:1}{den:2}} \cdot {@mc.pi/}}
-
-{h2:Équations alignées}
-{@mta:
-  {line: (a+b)^2 &= a^2 + 2ab + b^2}
-  {line: &= a^2 + b^2 + 2ab}
+{@card[title="Formules dans le texte"]:
+  {p:Avec accolades : {@mti: a^2 + b^2 = c^2}.}
+  {p:Avec le raccourci dollar : $e^{i\pi} + 1 = 0$.}
 }
 
-{h2:Définition par cas}
-{@mtc[intro="|x|"]:
-  {case: x & \text{si } x \geq 0}
-  {case: -x & \text{si } x < 0}
+{@card[title="Formule centrée", color="{$accent}"]:
+  {@mtb: \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}}
 }
 
-{h2:Système d'équations}
-{@mts:
-  {line: 2x + y = 5}
-  {line: x - y = 1}
+{@card[title="Équations numérotées et références"]:
+  {@mte[label=euler]: e^{i\pi} + 1 = 0}
+  {@mte[label=mass]: E = mc^2}
+  {p:L'identité d'Euler {@mtr[to=euler]/} et la relation {@mtr[to=mass]/}.}
+}
+
+{@card[title="Définition par cas"]:
+  {@mtc[intro="|x|"]:
+    {case: x & \text{si } x \geq 0}
+    {case: -x & \text{si } x < 0}
+  }
+}
+
+{@card[title="Objets imbriqués (résolus en LaTeX)"]:
+  {@mtb: {@mof:{num:1}{den:2}} \cdot {@mc.pi/}}
 }

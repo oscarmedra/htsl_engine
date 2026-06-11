@@ -73,5 +73,22 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Bundles régénérés (`npm run build` + `build:min`) : API math disponible en ESM et globals navigateur.
 - README et `.docs/03-collection-math-text.md` ajoutés/mis à jour.
 
+### Amélioration : contenu LaTeX dans {line}/{case}
+
+- Les tags `line`/`case` ont désormais un corps lu en mode math (lexer) : `\text{}`, `\frac{}{}` et objets `{@...}` y sont permis. Corrige le rendu typographique (ex. `\text{si }`).
+- `.claude/launch.json` ajouté (serveur statique local pour prévisualiser `teste.html`). Rendu confirmé en navigateur (KaTeX + Tailwind).
+
+### Composants & variables (expansion d'AST)
+
+- Syntaxe : `{!define name[params]: body}`, usage `{@name[...]:...}` avec `{$children}` ; variables `{!set name: val}` + `{$name}` (texte, attributs, corps).
+- Tokens `DEFINE_OPEN`/`SET_OPEN`/`VARREF` ; nœuds AST `DefineNode`/`SetNode`/`VarRefNode` + type `Param`.
+- Lexer : directives `{!define}`/`{!set}` et `{$...}` (contenu + math), frames `directive`.
+- Parser : `parseDefine`/`parseParams`/`parseSet`, `VARREF` dans contenu et math.
+- `src/components/expand.ts` : collecte des `!define` (1ʳᵉ passe, usage avant définition), expansion (params + défauts + `{$children}`, interpolation des attributs, portée document des variables), erreurs localisées (param manquant, variable inconnue, récursion infinie, profondeur max 64, collision registre, doublon).
+- `render` exécute `expand` en tête (le renderer ne voit que des nœuds normaux) ; `expand` exporté.
+- `tests/components.test.ts` : 20 tests. Total : **112 tests** verts, zéro régression.
+- `demo-formulas.htsl` réécrit avec un composant `card` réutilisé ; `teste.html` : 9 cartes Tailwind depuis une seule définition `card` + variable `accent` (rendu navigateur confirmé).
+- Bundles régénérés ; README et `.docs/04-composants-et-variables.md` ajoutés.
+
 
 
