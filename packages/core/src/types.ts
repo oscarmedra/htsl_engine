@@ -162,6 +162,12 @@ export interface RenderOptions {
   katex?: KatexLike;
   /** Original source, used to build localized excerpts for render-time errors. */
   source?: string;
+  /**
+   * Stamp `data-htsl-hash` (a stable subtree hash) on top-level nodes, math
+   * blocks and scenes. Off by default; hosts that morph the DOM enable it so an
+   * unchanged block can be skipped entirely. Does not affect the language.
+   */
+  hashBlocks?: boolean;
 }
 
 export type CompileOptions = ParseOptions & RenderOptions;

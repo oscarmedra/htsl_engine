@@ -146,5 +146,16 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Vérifié en navigateur : coloration, autocomplétion (`{@mg2.`) et soulignement d'erreurs (ligne/col) fournis par le paquet ; rendu Tailwind/KaTeX dans l'iframe.
 - Total : **178 tests** verts (core 157 + codemirror 21). `.docs/08-monorepo-et-codemirror.md` ajouté.
 
+### Optimisation de la réactivité du playground
+
+- Audit : `srcdoc` rechargeait toute l'iframe à chaque frappe (re-parse + KaTeX + Plotly). Garde de source ajoutée (`run()` sort si le texte est inchangé).
+- **Renderer** : option `hashBlocks` (off par défaut) → estampille `data-htsl-hash` (hash FNV-1a stable du sous-arbre, `src/hash.ts`) sur les nœuds de premier niveau, blocs math et scènes. `htslHash` exporté.
+- **Cache KaTeX** : mémoïsation LaTeX→HTML (`Map` limite 500, éviction) dans `math.ts` ; `clearKatexCache()` exporté.
+- **Préservation Plotly** : `hydrateScenes` saute les scènes inchangées (hash), utilise `Plotly.react` si seules les données changent.
+- `tests/perf.test.ts` (10 tests) : hashBlocks (stable, top-level only, math/scènes), htslHash, cache KaTeX (1 appel pour formule répétée). Total moteur : **167 tests**.
+- **Playground** : iframe persistante + `FrameRenderer` (morphdom) — `frame.ts` remplace `frame-doc.ts` ; frameworks réconciliés dans le `<head>`, blocs au hash identique sautés, scènes jamais re-plottées sans changement. Bandeau dev : temps + nœuds touchés. Exemple « Performance (30 cartes + 2 scènes) ».
+- Vérifié en navigateur : éditer un mot → **3 nœuds touchés / 2410, ~10 ms**, scènes identiques et non re-plottées (`sameSceneNodes`/`plottedSame` true).
+- `.docs/09-optimisation-playground.md` ajouté.
+
 
 

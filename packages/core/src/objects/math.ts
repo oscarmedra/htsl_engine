@@ -127,6 +127,8 @@ export function buildMathContext(nodes: Node[]): MathContext {
 export interface MathRenderOptions {
   katex?: KatexLike;
   source?: string;
+  /** Stable subtree hash → stamped as data-htsl-hash on the math/scene wrapper. */
+  hash?: string;
 }
 
 export function renderMathObject(
@@ -135,23 +137,24 @@ export function renderMathObject(
   options: MathRenderOptions,
 ): string {
   const katex = options.katex;
+  const h = options.hash ? ` data-htsl-hash="${options.hash}"` : "";
   switch (node.path) {
     case "math.text.inline":
-      return inline(latexOfObject(node), katex);
+      return inline(latexOfObject(node), katex, h);
     case "math.text.block":
     case "math.text.align":
     case "math.text.cases":
     case "math.text.system":
-      return block(latexOfObject(node), katex);
+      return block(latexOfObject(node), katex, h);
     case "math.text.equation":
-      return equation(node, ctx, katex);
+      return equation(node, ctx, katex, h);
     case "math.text.ref":
       return reference(node, ctx, options.source);
     case "math.geometry.2d.scene":
     case "math.geometry.3d.scene":
-      return renderScene(node, options.source);
+      return renderScene(node, options.source, h);
     default:
-      return inline(latexOfObject(node), katex);
+      return inline(latexOfObject(node), katex, h);
   }
 }
 
@@ -160,14 +163,14 @@ export function renderMathObject(
  * attribute, plus a fallback message. Call `hydrateScenes()` in the browser to
  * draw them with Plotly when it is available.
  */
-function renderScene(node: ObjectNode, source: string | undefined): string {
+function renderScene(node: ObjectNode, source: string | undefined, hashAttr: string): string {
   const spec = sceneSpec(node, source);
   const width = typeof spec.layout["width"] === "number" ? spec.layout["width"] : 600;
   const height = typeof spec.layout["height"] === "number" ? spec.layout["height"] : 400;
   const json = escapeHtml(JSON.stringify(spec));
   const dim = node.path.includes(".3d.") ? "3d" : "2d";
   return (
-    `<div class="htsl-scene htsl-scene--${dim}" data-htsl-scene="${json}" ` +
+    `<div class="htsl-scene htsl-scene--${dim}" data-htsl-scene="${json}"${hashAttr} ` +
     `style="width:${width}px;height:${height}px">` +
     `<span class="htsl-scene-fallback">Scène géométrique — Plotly requis ` +
     `(htsl_engine.hydrateScenes()).</span></div>`
@@ -178,13 +181,14 @@ function equation(
   node: ObjectNode,
   ctx: MathContext,
   katex: KatexLike | undefined,
+  hashAttr: string,
 ): string {
   const n = ctx.numbers.get(node) ?? 0;
   const label = node.attrs["label"];
   const id = label ? ` id="htsl-eq-${escapeHtml(label)}"` : "";
   const body = displayMath(latexOfObject(node), katex);
   return (
-    `<div class="htsl-math-equation"${id}>` +
+    `<div class="htsl-math-equation"${id}${hashAttr}>` +
     `<span class="htsl-math-body">${body}</span>` +
     `<span class="htsl-eqn-number">(${n})</span>` +
     `</div>`
@@ -208,20 +212,46 @@ function reference(
   return `<a class="htsl-math-ref" href="#htsl-eq-${escapeHtml(to ?? "")}">(${n})</a>`;
 }
 
-function inline(tex: string, katex: KatexLike | undefined): string {
-  return `<span class="htsl-math-inline">${inlineMath(tex, katex)}</span>`;
+function inline(tex: string, katex: KatexLike | undefined, hashAttr: string): string {
+  return `<span class="htsl-math-inline"${hashAttr}>${inlineMath(tex, katex)}</span>`;
 }
 
-function block(tex: string, katex: KatexLike | undefined): string {
-  return `<div class="htsl-math-block">${displayMath(tex, katex)}</div>`;
+function block(tex: string, katex: KatexLike | undefined, hashAttr: string): string {
+  return `<div class="htsl-math-block"${hashAttr}>${displayMath(tex, katex)}</div>`;
 }
 
 function inlineMath(tex: string, katex: KatexLike | undefined): string {
-  if (katex) return katex.renderToString(tex, { displayMode: false, throwOnError: false });
+  if (katex) return katexCached(tex, false, katex);
   return `<span class="htsl-math-raw">${escapeHtml(tex)}</span>`;
 }
 
 function displayMath(tex: string, katex: KatexLike | undefined): string {
-  if (katex) return katex.renderToString(tex, { displayMode: true, throwOnError: false });
+  if (katex) return katexCached(tex, true, katex);
   return `<span class="htsl-math-raw">${escapeHtml(tex)}</span>`;
+}
+
+/* -------------------------------------------------------------------------- */
+/* KaTeX memoization                                                          */
+/* -------------------------------------------------------------------------- */
+
+const KATEX_CACHE = new Map<string, string>();
+const KATEX_CACHE_MAX = 500;
+
+/** Memoize LaTeX → HTML so an already-rendered formula never re-calls KaTeX. */
+function katexCached(tex: string, displayMode: boolean, katex: KatexLike): string {
+  const key = (displayMode ? "D" : "I") + tex;
+  const hit = KATEX_CACHE.get(key);
+  if (hit !== undefined) return hit;
+  const html = katex.renderToString(tex, { displayMode, throwOnError: false });
+  if (KATEX_CACHE.size >= KATEX_CACHE_MAX) {
+    const oldest = KATEX_CACHE.keys().next().value;
+    if (oldest !== undefined) KATEX_CACHE.delete(oldest);
+  }
+  KATEX_CACHE.set(key, html);
+  return html;
+}
+
+/** Clear the KaTeX memoization cache (mainly for tests). */
+export function clearKatexCache(): void {
+  KATEX_CACHE.clear();
 }

@@ -8,6 +8,7 @@
  */
 import { escapeHtml } from "./escape.js";
 import { expand } from "./components/expand.js";
+import { htslHash } from "./hash.js";
 import {
   buildMathContext,
   renderMathObject,
@@ -61,15 +62,25 @@ class Renderer {
     this.ctx = buildMathContext(nodes);
     const visible = nodes.filter((n) => n.type !== "comment");
     if (this.pretty) {
-      return visible.map((n) => this.pretty0(n, 0)).join("\n");
+      return visible
+        .map((n) => (n.type === "element" ? this.prettyElement(n, 0, this.hashAttr(n)) : this.pretty0(n, 0)))
+        .join("\n");
     }
-    return visible.map((n) => this.compact(n)).join("");
+    return visible
+      .map((n) => (n.type === "element" ? this.compactElement(n, this.hashAttr(n)) : this.compact(n)))
+      .join("");
+  }
+
+  /** ` data-htsl-hash="…"` for a top-level node, or "" when hashing is off. */
+  private hashAttr(node: Node): string {
+    return this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "";
   }
 
   private math(node: ObjectNode): string {
     return renderMathObject(node, this.ctx, {
       ...(this.options.katex !== undefined ? { katex: this.options.katex } : {}),
       ...(this.options.source !== undefined ? { source: this.options.source } : {}),
+      ...(this.options.hashBlocks ? { hash: htslHash(node) } : {}),
     });
   }
 
@@ -96,11 +107,11 @@ class Renderer {
     }
   }
 
-  private compactElement(node: ElementNode): string {
+  private compactElement(node: ElementNode, extra = ""): string {
     if (this.isBlocked(node.tag)) {
       return escapeHtml(rawHtml(node));
     }
-    const open = openTag(node);
+    const open = openTag(node, extra);
     if (VOID_TAGS.has(node.tag)) return open;
     const inner = node.children
       .filter((c) => c.type !== "comment")
@@ -133,12 +144,12 @@ class Renderer {
     }
   }
 
-  private prettyElement(node: ElementNode, indent: number): string {
+  private prettyElement(node: ElementNode, indent: number, extra = ""): string {
     const pad = "  ".repeat(indent);
     if (this.isBlocked(node.tag)) {
       return pad + escapeHtml(rawHtml(node));
     }
-    const open = openTag(node);
+    const open = openTag(node, extra);
     if (VOID_TAGS.has(node.tag)) return pad + open;
 
     const children = node.children.filter((c) => c.type !== "comment");
@@ -165,8 +176,8 @@ class Renderer {
 /* Serialization helpers                                                      */
 /* -------------------------------------------------------------------------- */
 
-function openTag(node: ElementNode): string {
-  let s = `<${node.tag}`;
+function openTag(node: ElementNode, extra = ""): string {
+  let s = `<${node.tag}${extra}`;
   if (node.id !== null) s += ` id="${escapeHtml(node.id)}"`;
   if (node.classes.length > 0) {
     s += ` class="${escapeHtml(node.classes.join(" "))}"`;

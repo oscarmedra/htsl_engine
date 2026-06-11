@@ -4,6 +4,37 @@ export interface Example {
   src: string;
 }
 
+/** A large document (30 cards with formulas + 2 scenes) to demonstrate that
+ *  editing one word touches a single block and never re-plots the scenes. */
+function perfDoc(): string {
+  const lines: string[] = [`{script[src="https://cdn.tailwindcss.com"]/}`, ``];
+  // Each card is an INDEPENDENT top-level block: editing one word in one card
+  // changes only that block's hash, so the morpher touches a single node.
+  for (let i = 1; i <= 30; i++) {
+    lines.push(
+      `{div[class="bg-white ring-1 ring-slate-200 rounded-lg p-3 mb-2"]:` +
+        `{h3[class="font-semibold text-indigo-600"]:Carte ${i}}` +
+        `{p[class="text-slate-600"]:Paragraphe numéro ${i}, modifiez un mot ici pour tester.}` +
+        `{@mti: a_{${i}}^2 + b^2 = c^2}}`,
+    );
+  }
+  lines.push(
+    ``,
+    `{div[class="grid grid-cols-2 gap-3 mt-3"]:`,
+    `  {@mg2.scene[width=300, height=240]:`,
+    `    {@mg2.frame[xrange="(-3,3)", yrange="(-3,3)", grid=true, ticks=1]/}`,
+    `    {@mg2.circle[center="(0,0)", radius=2, color=royalblue]/}`,
+    `    {@mg2.point[name=O, x=0, y=0, color=crimson]/}`,
+    `  }`,
+    `  {@mg3.scene[width=300, height=240]:`,
+    `    {@mg3.sphere[center="(0,0,0)", radius=2, color=mediumseagreen, opacity=0.5]/}`,
+    `    {@mg3.point[name=A, x=1, y=1, z=1, color=crimson]/}`,
+    `  }`,
+    `}`,
+  );
+  return lines.join("\n");
+}
+
 export const examples: Example[] = [
   {
     id: "formules",
@@ -153,5 +184,10 @@ export const examples: Example[] = [
   {li:Formules, composants, géométrie}
 }
 `,
+  },
+  {
+    id: "perf",
+    label: "Performance (30 cartes + 2 scènes)",
+    src: perfDoc(),
   },
 ];

@@ -15,7 +15,7 @@ import katex from "katex";
 import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
 
 import { examples } from "./examples";
-import { buildFrameDoc } from "./frame-doc";
+import { FrameRenderer } from "./frame";
 
 /* -------------------------------------------------------------------------- */
 /* DOM                                                                        */
@@ -29,12 +29,21 @@ const bannerEl = $<HTMLDivElement>("banner");
 const panelsEl = $<HTMLElement>("panels");
 const examplesSel = $<HTMLSelectElement>("examples");
 const toggleAst = $<HTMLInputElement>("toggle-ast");
+const perfEl = document.getElementById("perf");
 
 /* -------------------------------------------------------------------------- */
 /* Shared state                                                               */
 /* -------------------------------------------------------------------------- */
 
 let latestHtml = "";
+let lastSrc: string | null = null;
+const frame = new FrameRenderer(renderFrame, mathCss);
+
+/** Dev-only metric: update time + how few DOM nodes were actually touched. */
+function showPerf(ms: number, touched: number, total: number): void {
+  if (!perfEl || !import.meta.env.DEV) return;
+  perfEl.textContent = `MAJ ${ms.toFixed(1)} ms · ${touched}/${total} nœuds touchés`;
+}
 
 function collectErrorNodes(nodes: Node[], out: { line: number; col: number; message: string }[]): void {
   for (const n of nodes) {
@@ -49,8 +58,13 @@ function collectErrorNodes(nodes: Node[], out: { line: number; col: number; mess
 /* Render pipeline                                                            */
 /* -------------------------------------------------------------------------- */
 
-function run(view: EditorView): void {
+function run(view: EditorView, force = false): void {
   const src = view.state.doc.toString();
+  // Guard: never recompile unless the source text actually changed.
+  if (!force && src === lastSrc) return;
+  lastSrc = src;
+
+  const t0 = performance.now();
   const errors: { line: number; col: number; message: string }[] = [];
 
   // Tolerant parse never throws.
@@ -65,11 +79,11 @@ function run(view: EditorView): void {
 
   // Render. Compile-time issues (unknown ref/var, missing param…) throw HTSLError.
   try {
-    const html = render(ast, { katex, source: src });
+    // hashBlocks lets the frame morpher skip unchanged blocks entirely.
+    const html = render(ast, { katex, source: src, hashBlocks: true });
     latestHtml = html;
-    // Render in a sandboxed iframe: the user's {link}/{script} (any CSS/JS
-    // framework) execute there, isolated from the playground UI.
-    renderFrame.srcdoc = buildFrameDoc(html, mathCss);
+    const stats = frame.apply(html);
+    showPerf(performance.now() - t0, stats.touched, stats.total);
   } catch (e) {
     if (e instanceof HTSLError) {
       errors.push({ line: e.line, col: e.col, message: e.message.split("\n")[0] ?? e.message });

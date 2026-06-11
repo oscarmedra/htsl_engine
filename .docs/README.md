@@ -19,3 +19,4 @@ décrivant ce qui a été fait, pourquoi, et comment cela fonctionne.
 | `06-reperes-scene.md` | Objets de repère (décor) : `mg2.frame`/`repere`, `mg3.space`, plan complexe + `cpoint` |
 | `07-introspection-et-playground.md` | API d'introspection (registry.list/describe) + playground web Vite/CodeMirror |
 | `08-monorepo-et-codemirror.md` | Restructuration en monorepo (packages/core, @htsl/codemirror) |
+| `09-optimisation-playground.md` | Réactivité du playground : data-htsl-hash, morphdom, cache KaTeX, préservation Plotly |
