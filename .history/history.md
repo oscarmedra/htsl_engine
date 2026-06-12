@@ -200,5 +200,11 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Validation `⌘/Ctrl+Entrée` (bindings `Mod-Enter` **et** `Ctrl-Enter` pour Mac+autres) ou perte de focus réelle (`view.hasFocus`) ; `Échap` annule (après le `completionKeymap` pour que Échap ferme d'abord le popup). Un seul éditeur de bloc à la fois.
 - Vérifié en navigateur : clic sur `{h1:…}` ouvre un CM coloré ; édité en `{h1.vedette#intro: …}` puis Ctrl+Entrée → source réécrite + rendu MAJ ; Échap annule. (Le popup d'autocomplétion exige le focus réel, non disponible dans le harness de capture, mais l'extension est identique à l'éditeur principal éprouvé.)
 
+### Éditeur de bloc translucide (retour utilisateur)
+
+- L'overlay d'édition devient **semi-transparent + flou** (`rgba(255,251,235,.55)` + `backdrop-filter: blur(4px)`, surfaces CM en `transparent`) : le **rendu reste visible dessous pendant l'édition** — pratique quand une audience suit le rendu pendant que quelqu'un édite. CSS uniquement (`playground/src/style.css`).
+- L'éditeur principal (le fichier) n'est jamais couvert par l'overlay (positionné sur le panneau de rendu) : on peut éditer indifféremment depuis le **rendu** ou depuis le **fichier** (cliquer le fichier valide l'overlay et rend la main).
+- Vérifié en navigateur : overlay translucide laissant voir le titre rendu + l'équation derrière, texte coloré lisible.
+
 
 
