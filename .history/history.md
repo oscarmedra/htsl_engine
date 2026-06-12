@@ -175,5 +175,13 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Test cible vérifié en navigateur : titre + équation numérotée (1) + scène 3D construits **à la souris** (clics palette) → rendu correct.
 - Syntaxe du langage inchangée. `.docs/11-couche-authoring.md` ajouté.
 
+### Palette retravaillée (retour utilisateur)
+
+- **Conteneurs regroupés en tête** : composants définis par l'utilisateur (lus à chaque ouverture via `registry.components(parse(doc))`) + scènes 2D/3D, séparés des objets simples. Ordre : Conteneurs, Structure, Formules, Équations, Géométrie (acteurs, scènes exclues).
+- **Aperçus en texte** au lieu de formules rendues : `compile(example)` sans KaTeX → texte du rendu (maths en LaTeX source), plus léger/clair ; scènes = « 🧊 Graphique interactif ». KaTeX retiré de la palette.
+- **Description lisible en avant**, chemin technique discret (l'éditeur est pour les power users).
+- **Contenu tampon à l'insertion** : scènes pré-remplies d'un acteur (cercle/point 2D, sphère 3D) ; composants remplis de `Contenu du conteneur.` et leurs paramètres sans défaut prennent leur nom comme valeur → HTSL valide qui **rend immédiatement** (plus d'attribut vide malformé `name=`). Snippets de scène mis à jour dans le cœur ; `componentSnippet` (palette + @htsl/codemirror) corrigé.
+- Vérifié en navigateur : groupe Conteneurs (card + scènes), aperçus texte, card inséré rend `.card` + titre + contenu, scène 3D rend 1 tracé Plotly.
+
 
 

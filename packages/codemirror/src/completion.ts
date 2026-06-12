@@ -50,10 +50,12 @@ function attrContext(before: string): { name: string; isObject: boolean } | null
 /** Build the CodeMirror `${…}` snippet template for a document component. */
 function componentSnippet(c: ComponentInfo): string {
   const params = c.params
-    .map((p, i) => p.name + "=${" + (i + 1) + ":" + (p.default ?? "") + "}")
+    // Param name as a non-empty placeholder value when there is no default, so
+    // the inserted component is valid HTSL (an empty `name=` is malformed).
+    .map((p, i) => p.name + "=${" + (i + 1) + ":" + (p.default ?? p.name) + "}")
     .join(", ");
   const head = params ? `{@${c.name}[${params}]` : `{@${c.name}`;
-  return head + ": ${" + (c.params.length + 1) + ":contenu}}";
+  return head + ": ${" + (c.params.length + 1) + ":Contenu du conteneur.}}";
 }
 
 function entryCompletion(e: RegistryEntry): Completion {

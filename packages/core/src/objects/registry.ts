@@ -283,7 +283,8 @@ registerObject({
     { name: "width", type: "number", required: false, default: "600", description: "Largeur en pixels." },
     { name: "height", type: "number", required: false, default: "400", description: "Hauteur en pixels." },
   ],
-  snippet: "{@mg2.scene:\n  {@mg2.frame[grid=true]/}\n  ${1}\n}",
+  snippet:
+    "{@mg2.scene:\n  {@mg2.frame[grid=true]/}\n  {@mg2.circle[center=\"(0,0)\", radius=2]/}\n  {@mg2.point[x=0, y=0, name=O]/}\n  ${1}\n}",
   example: "{@mg2.scene:\n  {@mg2.frame[grid=true]/}\n  {@mg2.circle[center=\"(0,0)\", radius=2]/}\n}",
 });
 registerObject({
@@ -388,7 +389,8 @@ registerObject({
     { name: "width", type: "number", required: false, default: "600", description: "Largeur en pixels." },
     { name: "height", type: "number", required: false, default: "400", description: "Hauteur en pixels." },
   ],
-  snippet: "{@mg3.scene:\n  {@mg3.space[grid=true]/}\n  ${1}\n}",
+  snippet:
+    "{@mg3.scene:\n  {@mg3.space[grid=true]/}\n  {@mg3.sphere[center=\"(0,0,0)\", radius=2]/}\n  ${1}\n}",
   example: "{@mg3.scene:\n  {@mg3.space[grid=true]/}\n  {@mg3.sphere[center=\"(0,0,0)\", radius=2]/}\n}",
 });
 registerObject({

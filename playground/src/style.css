@@ -79,11 +79,14 @@ body {
   border: 1px solid transparent; border-radius: 8px; padding: 0.4rem 0.5rem; margin-bottom: 0.2rem; background: none;
 }
 .pal-entry:hover { background: var(--accent-soft); border-color: var(--border); }
-.pal-name { font-family: var(--mono); font-size: 0.8rem; color: var(--ink); }
-.pal-name .pal-alias { color: var(--muted); font-size: 0.74rem; margin-left: 0.4rem; }
-.pal-desc { font-size: 0.74rem; color: var(--muted); margin: 0.1rem 0; }
-.pal-preview { font-size: 0.85rem; color: #333; margin-top: 0.2rem; overflow: hidden; max-height: 4.5rem; pointer-events: none; }
-.pal-preview .htsl-scene { display: none; }
+/* Friendly description leads; technical path is secondary (editor = power users). */
+.pal-name { font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+.pal-tech { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); margin-top: 0.05rem; }
+/* Plain-text preview (no rendered formulas): lighter and clearer for browsing. */
+.pal-preview {
+  font-size: 0.76rem; color: #555; margin-top: 0.25rem; font-style: italic;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; pointer-events: none;
+}
 .pal-empty { color: var(--muted); font-size: 0.8rem; padding: 1rem; text-align: center; }
 .toggle { font-size: 0.82rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
 

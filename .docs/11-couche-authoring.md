@@ -34,12 +34,28 @@ remplace depuis le `/` (qui disparaît). Le playground déclenche l'ouverture vi
 
 ## 4. Palette d'insertion (playground)
 
-Drawer repliable (bouton **➕ Insérer**), entrées **groupées par catégorie**,
-recherche insensible aux accents (nom/description). Chaque entrée affiche nom +
-description + **aperçu rendu** compilé par le moteur depuis `example` (KaTeX),
-calculé une fois et mis en cache ; les scènes affichent une pastille. Clic =
-insertion du snippet au curseur + focus rendu à l'éditeur. Généré uniquement
-depuis `registry.list()`.
+Drawer repliable (bouton **➕ Insérer**). C'est la **surface principale**
+(l'éditeur brut est pour les power users) ; aussi la **description lisible mène**
+et le chemin technique est secondaire.
+
+Organisation (retour utilisateur) :
+
+- **Conteneurs en premier** : les **composants définis par l'utilisateur**
+  (lus à chaque ouverture via `registry.components(parse(doc))`) + les **scènes**
+  2D/3D — les choses qu'on remplit. Puis Structure, Formules, Équations,
+  Géométrie (les acteurs géométriques, scènes exclues).
+- **Aperçus en texte brut** : `compile(example)` *sans* KaTeX → le texte du rendu
+  (les maths restent en LaTeX source), plus léger et plus clair que des formules
+  rendues ; les scènes affichent « 🧊 Graphique interactif ». Mis en cache.
+- **Contenu tampon à l'insertion** : un conteneur s'insère **déjà rempli** et
+  visible au rendu — un composant reçoit `Contenu du conteneur.` et ses
+  paramètres sans défaut prennent leur nom comme valeur (jamais d'attribut vide
+  malformé) ; une scène reçoit un acteur par défaut (cercle/point en 2D, sphère
+  en 3D). Rien n'est jamais une coquille vide.
+
+Recherche insensible aux accents (nom/chemin/description). Clic = insertion du
+snippet au curseur + focus rendu à l'éditeur. Généré uniquement depuis
+l'introspection (`registry.list()` + `registry.components()`).
 
 ## 5. Aide contextuelle (playground)
 
