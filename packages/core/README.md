@@ -69,6 +69,26 @@ content    = { node } ;
 identifier = letter { letter | digit | "-" | "_" } ;
 ```
 
+## Texte brut : `{script:…}` / `{style:…}`
+
+Le corps d'un `{script:…}` ou `{style:…}` est lu **verbatim** (c'est du vrai
+JS/CSS, pas du HTSL) et rendu **sans échappement** — les `{` `}` `<` `&` du code
+sont préservés.
+
+```htsl
+{script:
+  const el = document.querySelector('.x');
+  if (a < b) { el.classList.add('on'); }   // accolades, < et & intacts
+}
+{style:.x { color: red; } .y { display: none; }}
+```
+
+L'accolade fermante du `{script:…}` est celle qui **équilibre** l'ouvrante :
+les `{`/`}` imbriqués sont comptés, et ceux à l'intérieur des chaînes, gabarits
+(`` `…` ``) et commentaires (`//`, `/* */`) sont ignorés pour ne pas fausser le
+compte. (Sécurité : émettre du JS/CSS inline est volontaire ; `allowedTags` peut
+toujours interdire `script`/`style`.)
+
 ## API
 
 ```ts

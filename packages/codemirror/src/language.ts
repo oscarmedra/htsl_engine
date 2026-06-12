@@ -23,7 +23,20 @@ const PATH = /^[A-Za-z0-9_.-]+/;
 type Frame =
   | { mode: "content" }
   | { mode: "header"; path?: string; tag?: string; directive?: boolean; inBracket?: boolean; afterEq?: boolean }
-  | { mode: "math"; closer: "brace" | "dollar" | "ddollar"; depth: number };
+  | { mode: "math"; closer: "brace" | "dollar" | "ddollar"; depth: number }
+  | { mode: "raw"; lang: "js" | "css"; depth: number; block?: boolean; tmpl?: boolean };
+
+/** Tags whose body is real JS/CSS, highlighted as such (not as HTSL). */
+const RAW_TEXT_TAGS = new Set(["script", "style"]);
+
+// prettier-ignore
+const JS_KEYWORDS = new Set([
+  "const", "let", "var", "function", "return", "if", "else", "for", "while",
+  "do", "switch", "case", "break", "continue", "new", "this", "typeof",
+  "instanceof", "in", "of", "class", "extends", "super", "import", "export",
+  "from", "as", "default", "try", "catch", "finally", "throw", "await",
+  "async", "yield", "void", "delete", "null", "true", "false", "undefined",
+]);
 
 interface State {
   stack: Frame[];
@@ -48,6 +61,7 @@ function token(stream: StringStream, s: State): string | null {
   const frame = top(s);
   if (frame.mode === "content") return contentToken(stream, s);
   if (frame.mode === "header") return headerToken(stream, s, frame);
+  if (frame.mode === "raw") return rawToken(stream, s, frame);
   return mathToken(stream, s, frame);
 }
 
@@ -129,7 +143,12 @@ function headerToken(
         if (frame.path && contentModelOf(frame.path) === "math") math = true;
         else if (!frame.path && (frame.tag === "line" || frame.tag === "case")) math = true;
       }
-      s.stack.push(math ? { mode: "math", closer: "brace", depth: 0 } : { mode: "content" });
+      const raw = !frame.directive && !frame.path && frame.tag && RAW_TEXT_TAGS.has(frame.tag);
+      if (raw) {
+        s.stack.push({ mode: "raw", lang: frame.tag === "style" ? "css" : "js", depth: 0 });
+      } else {
+        s.stack.push(math ? { mode: "math", closer: "brace", depth: 0 } : { mode: "content" });
+      }
       return "brace";
     }
     case "/":
@@ -251,6 +270,103 @@ function mathToken(
   return "math";
 }
 
+/**
+ * Raw-text body of `{script:…}` / `{style:…}` — highlighted as JS/CSS. Tracks
+ * brace depth (ignoring braces in strings/comments) so the `}` at depth 0 closes
+ * the element. Strings, template literals and block comments persist across lines
+ * via the frame state.
+ */
+function rawToken(stream: StringStream, s: State, frame: Extract<Frame, { mode: "raw" }>): string | null {
+  // Resume a multi-line block comment.
+  if (frame.block) {
+    while (!stream.eol()) {
+      if (stream.match("*/")) {
+        frame.block = false;
+        return "comment";
+      }
+      stream.next();
+    }
+    return "comment";
+  }
+  // Resume a multi-line template literal.
+  if (frame.tmpl) {
+    if (scanString(stream, "`")) frame.tmpl = false;
+    return "string";
+  }
+  if (stream.eatSpace()) return null;
+  const ch = stream.peek() ?? "";
+
+  // Comments.
+  if (frame.lang === "js" && stream.match("//")) {
+    stream.skipToEnd();
+    return "comment";
+  }
+  if (stream.match("/*")) {
+    while (!stream.eol()) {
+      if (stream.match("*/")) return "comment";
+      stream.next();
+    }
+    frame.block = true;
+    return "comment";
+  }
+
+  // Strings.
+  if (ch === '"' || ch === "'") {
+    stream.next(); // opening quote
+    scanString(stream, ch);
+    return "string";
+  }
+  if (frame.lang === "js" && ch === "`") {
+    stream.next(); // opening backtick
+    if (!scanString(stream, "`")) frame.tmpl = true;
+    return "string";
+  }
+
+  // Braces drive depth; the one at depth 0 closes the element.
+  if (ch === "{") {
+    stream.next();
+    frame.depth++;
+    return "brace";
+  }
+  if (ch === "}") {
+    stream.next();
+    if (frame.depth > 0) frame.depth--;
+    else if (s.stack.length > 1) s.stack.pop();
+    return "brace";
+  }
+
+  // Numbers.
+  if (/[0-9]/.test(ch)) {
+    stream.match(/^[0-9][0-9._]*(e[+-]?[0-9]+)?/i);
+    return frame.lang === "js" ? "number" : null;
+  }
+
+  // Identifiers / keywords.
+  if (/[A-Za-z_$]/.test(ch)) {
+    const m = stream.match(/^[A-Za-z0-9_$]+/);
+    const word = Array.isArray(m) ? m[0] : "";
+    if (frame.lang === "js" && JS_KEYWORDS.has(word)) return "keyword";
+    return null;
+  }
+
+  stream.next();
+  return null;
+}
+
+/** Scan a string body (the opening quote is already consumed). Returns true if
+ *  the closing quote was found on this line (handles `\` escapes). */
+function scanString(stream: StringStream, quote: string): boolean {
+  while (!stream.eol()) {
+    const c = stream.next();
+    if (c === "\\") {
+      stream.next();
+      continue;
+    }
+    if (c === quote) return true;
+  }
+  return false;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Tags → CSS classes                                                         */
 /* -------------------------------------------------------------------------- */
@@ -269,6 +385,8 @@ const T = {
   math: Tag.define(),
   comment: Tag.define(),
   escape: Tag.define(),
+  keyword: Tag.define(), // JS keywords inside {script:…}
+  number: Tag.define(), // JS numbers inside {script:…}
 };
 
 /**
@@ -303,6 +421,8 @@ const streamParser = {
     math: T.math,
     comment: T.comment,
     escape: T.escape,
+    keyword: T.keyword,
+    number: T.number,
   },
 };
 
@@ -324,6 +444,8 @@ const highlight = HighlightStyle.define([
   { tag: T.math, color: "#0b7285", backgroundColor: "#e7f5f8" },
   { tag: T.comment, color: "#adb5bd", fontStyle: "italic" },
   { tag: T.escape, color: "#f08c00" },
+  { tag: T.keyword, color: "#1971c2", fontWeight: "600" },
+  { tag: T.number, color: "#e8590c" },
 ]);
 
 export function htslLanguage(): LanguageSupport {

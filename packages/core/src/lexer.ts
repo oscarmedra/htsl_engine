@@ -26,10 +26,14 @@ const PATH_CHAR = /[A-Za-z0-9_.-]/;
 type Frame =
   | { kind: "content" }
   | { kind: "header"; path: string | null; tag?: string; directive?: boolean }
-  | { kind: "math"; closer: "brace" | "dollar" | "ddollar"; depth: number };
+  | { kind: "math"; closer: "brace" | "dollar" | "ddollar"; depth: number }
+  | { kind: "raw"; tag: string; depth: number };
 
 /** Plain element tags whose body is read as LaTeX (math container rows). */
 const MATH_ROW_TAGS = new Set(["line", "case"]);
+
+/** Tags whose body is read verbatim (not parsed as HTSL): `<script>`/`<style>`. */
+const RAW_TEXT_TAGS = new Set(["script", "style"]);
 
 export function tokenize(source: string, mode: ParseMode = "strict"): Token[] {
   return new Lexer(source, mode).run();
@@ -57,6 +61,7 @@ class Lexer {
       const frame = this.top();
       if (frame.kind === "content") this.lexContent();
       else if (frame.kind === "header") this.lexHeader(frame);
+      else if (frame.kind === "raw") this.lexRaw(frame);
       else this.lexMath(frame);
       // Safety: guarantee forward progress.
       if (this.pos === before && this.stack.length === depth) this.advance();
@@ -235,18 +240,22 @@ class Lexer {
         this.stack.pop();
         return;
       }
-      case ":":
+      case ":": {
         this.advance();
         this.push("COLON", ":", loc);
         this.stack.pop(); // leave header
         const objectMath = frame.path !== null && contentModelOf(frame.path) === "math";
         const rowMath = frame.path === null && frame.tag !== undefined && MATH_ROW_TAGS.has(frame.tag);
+        const isRaw = frame.path === null && frame.tag !== undefined && RAW_TEXT_TAGS.has(frame.tag);
         if (objectMath || rowMath) {
           this.stack.push({ kind: "math", closer: "brace", depth: 0 });
+        } else if (isRaw) {
+          this.stack.push({ kind: "raw", tag: frame.tag!, depth: 0 });
         } else {
           this.stack.push({ kind: "content" });
         }
         return;
+      }
       case "/":
         this.advance();
         this.push("SLASH", "/", loc);
@@ -436,6 +445,99 @@ class Lexer {
       return;
     }
     throw new HTSLError("formule mathématique jamais fermée.", startLoc, this.src);
+  }
+
+  /* ----------------------------------------------------------------------- */
+  /* Raw-text frame (script / style)                                         */
+  /* ----------------------------------------------------------------------- */
+
+  /**
+   * Read a `{script:…}` / `{style:…}` body **verbatim** (it is real JS/CSS, not
+   * HTSL). The closing `}` is the one that balances the opening brace — nested
+   * `{`/`}` are tracked, while braces inside strings, template literals and
+   * comments are ignored so they never confuse the count.
+   */
+  private lexRaw(frame: Extract<Frame, { kind: "raw" }>): void {
+    const loc = this.loc();
+    const start = this.pos;
+    const js = frame.tag === "script";
+    let value = "";
+    let depth = 0;
+
+    const flush = (end: number): void => {
+      if (value.length > 0) this.tokens.push({ type: "TEXT", value, loc, start, end });
+    };
+
+    while (!this.eof()) {
+      const ch = this.peek();
+
+      // Strings & template literals — copied verbatim, braces inside ignored.
+      if (ch === '"' || ch === "'" || (js && ch === "`")) {
+        value += this.consumeRawString(ch);
+        continue;
+      }
+      // Block comments (JS and CSS).
+      if (ch === "/" && this.peek(1) === "*") {
+        value += this.advance();
+        value += this.advance();
+        while (!this.eof() && !(this.peek() === "*" && this.peek(1) === "/")) value += this.advance();
+        if (!this.eof()) {
+          value += this.advance();
+          value += this.advance();
+        }
+        continue;
+      }
+      // Line comments (JS only — `//` is not a CSS comment and may appear in URLs).
+      if (js && ch === "/" && this.peek(1) === "/") {
+        while (!this.eof() && this.peek() !== "\n") value += this.advance();
+        continue;
+      }
+
+      if (ch === "{") {
+        depth++;
+        value += this.advance();
+        continue;
+      }
+      if (ch === "}") {
+        if (depth === 0) {
+          flush(this.pos); // raw text up to (not including) the closing brace
+          const rbStart = this.pos;
+          this.advance();
+          this.push("RBRACE", "}", this.loc(), rbStart, this.pos);
+          this.stack.pop();
+          return;
+        }
+        depth--;
+        value += this.advance();
+        continue;
+      }
+      value += this.advance();
+    }
+
+    // EOF without a closing brace.
+    flush(this.pos);
+    if (this.tolerant) {
+      this.push("RBRACE", "}", this.loc(), this.pos, this.pos);
+      this.stack.pop();
+      return;
+    }
+    throw new HTSLError(`balise "{${frame.tag}" jamais fermée.`, loc, this.src);
+  }
+
+  /** Consume a JS/CSS string or template literal verbatim (handles `\` escapes). */
+  private consumeRawString(quote: string): string {
+    let s = this.advance(); // opening quote
+    while (!this.eof()) {
+      const c = this.peek();
+      if (c === "\\") {
+        s += this.advance();
+        if (!this.eof()) s += this.advance();
+        continue;
+      }
+      s += this.advance();
+      if (c === quote) break;
+    }
+    return s;
   }
 
   /* ----------------------------------------------------------------------- */

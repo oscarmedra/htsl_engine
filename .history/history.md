@@ -216,3 +216,12 @@ Les entrées les plus récentes sont ajoutées en bas.
 
 
 
+
+## Texte brut `{script:…}` / `{style:…}` + exécution des scripts inline (retour utilisateur)
+
+Le moteur cassait sur du JS dans `{script:…}` (les `{`/`}` étaient parsés comme du HTSL) et CodeMirror ne colorait pas le JS.
+
+- **Moteur** : nouvelle frame lexer `raw` pour les balises `script`/`style` (RAW_TEXT_TAGS). Le corps est lu **verbatim** jusqu'au `}` qui équilibre l'ouvrante (comptage d'accolades en ignorant chaînes, gabarits `` `…` `` et commentaires `//` `/* */`). Le renderer émet ce corps **sans échappement** (`rawTextOf`). 7 tests (`tests/raw-text.test.ts`). Core **191**.
+- **@htsl/codemirror** : frame `raw` (lang js/css) dans le StreamLanguage → coloration JS (mots-clés, nombres, chaînes, commentaires, gabarits multi-lignes via l'état), CSS minimal ; comptage d'accolades pour reprendre le HTSL après le `}`. Tags `keyword`/`number` ajoutés. 4 tests. codemirror **33**.
+- **Playground** : `FrameRenderer` n'hisse plus que `link, script[src]` dans `<head>` ; les scripts **inline sont exécutés après le morphing** (recréés car morphdom les insère inertes), une fois par contenu unique (`ranScripts`) → documents interactifs (diaporamas…).
+- Vérifié en navigateur avec l'exemple diaporama de l'utilisateur : aucune erreur de parse, JS coloré, script exécuté, clic « Suivant » qui change de slide.

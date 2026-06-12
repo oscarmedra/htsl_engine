@@ -58,6 +58,8 @@ export class FrameRenderer {
   private pending: string | null = null;
   private readonly assets = new Map<string, HTMLElement>();
   private plotlyLoading = false;
+  /** Inline script bodies already executed (run once per unique body). */
+  private readonly ranScripts = new Set<string>();
   /** Element currently highlighted on hover (block-edit affordance). */
   private hovered: HTMLElement | null = null;
 
@@ -170,7 +172,28 @@ export class FrameRenderer {
 
     const total = this.root.getElementsByTagName("*").length;
     this.hydrate();
+    this.runInlineScripts();
     return { touched, total };
+  }
+
+  /**
+   * Execute inline `{script:…}` bodies. morphdom inserts them inert (scripts set
+   * via innerHTML never run), so we recreate each one — *after* the body is in
+   * place, so the DOM it manipulates exists. Each unique body runs once; editing
+   * a script re-runs it.
+   */
+  private runInlineScripts(): void {
+    if (!this.root || !this.doc) return;
+    const doc = this.doc;
+    this.root.querySelectorAll("script:not([src])").forEach((old) => {
+      const code = old.textContent ?? "";
+      if (this.ranScripts.has(code)) return;
+      this.ranScripts.add(code);
+      const fresh = doc.createElement("script");
+      for (const attr of Array.from(old.attributes)) fresh.setAttribute(attr.name, attr.value);
+      fresh.textContent = code;
+      old.replaceWith(fresh); // appending a fresh <script> executes it
+    });
   }
 
   /* ----------------------------------------------------------------------- */
@@ -215,7 +238,9 @@ export class FrameRenderer {
   private reconcileAssets(fragment: DocumentFragment): void {
     const doc = this.doc!;
     const desired = new Map<string, Element>();
-    fragment.querySelectorAll("link, script").forEach((node) => {
+    // Only external assets are hoisted to <head> (loaded once). Inline scripts
+    // stay in the body and are executed by runInlineScripts after morphing.
+    fragment.querySelectorAll("link, script[src]").forEach((node) => {
       const key =
         node.tagName +
         "|" +

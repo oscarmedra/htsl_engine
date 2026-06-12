@@ -76,3 +76,40 @@ describe("htsl indentation", () => {
     expect(indentAt("{p:a}\nx", 2)).toBe(0);
   });
 });
+
+describe("raw-text highlighting (script / style)", () => {
+  const typeOf = (src: string, text: string) =>
+    htslTokens(src).find((t) => t.text === text)?.type;
+
+  it("colours JS keywords, numbers, strings and comments in {script:…}", () => {
+    const src = `{script:const x=1; // c\nif(a){f();}}`;
+    expect(typeOf(src, "const")).toBe("keyword");
+    expect(typeOf(src, "1")).toBe("number");
+    expect(typeOf(src, "if")).toBe("keyword");
+    expect(typeOf(src, "// c")).toBe("comment");
+  });
+
+  it("does not let a brace inside a JS string close the element", () => {
+    // The string "}" must stay a string; the two trailing } close if + script.
+    const toks = htslTokens(`{script:if(a){g("}");}}`);
+    expect(toks.find((t) => t.text === '"}"')?.type).toBe("string");
+    // HTSL fully consumed (no leftover content frame): last token closes script.
+    expect(toks[toks.length - 1]?.type).toBe("brace");
+  });
+
+  it("resumes HTSL after the script element", () => {
+    const toks = htslTokens(`{div:{script:let a={b:1};}{p:x}}`);
+    // "p" appears as an HTSL tag *after* the raw script body.
+    expect(toks.filter((t) => t.type === "tag").map((t) => t.text)).toEqual([
+      "div",
+      "script",
+      "p",
+    ]);
+  });
+
+  it("treats {style:…} as raw (no // comments, CSS braces balanced)", () => {
+    const toks = htslTokens(`{style:.a { color: red; } }`);
+    // The CSS braces are structural braces, and the element still closes.
+    expect(toks[toks.length - 1]?.type).toBe("brace");
+  });
+});

@@ -18,6 +18,9 @@ import type { ElementNode, Node, ObjectNode, RenderOptions, TextNode } from "./t
 
 export { escapeHtml } from "./escape.js";
 
+/** Raw-text elements: their body is emitted verbatim (JS/CSS), never escaped. */
+const RAW_TEXT_TAGS = new Set(["script", "style"]);
+
 /** HTML void elements: rendered without a closing tag and never with children. */
 const VOID_TAGS = new Set([
   "area",
@@ -129,6 +132,7 @@ class Renderer {
     }
     const open = openTag(node, extra + this.rangeAttr(node));
     if (VOID_TAGS.has(node.tag)) return open;
+    if (RAW_TEXT_TAGS.has(node.tag)) return `${open}${rawTextOf(node)}</${node.tag}>`;
     const inner = node.children
       .filter((c) => c.type !== "comment")
       .map((c) => this.compact(c))
@@ -167,6 +171,7 @@ class Renderer {
     }
     const open = openTag(node, extra + this.rangeAttr(node));
     if (VOID_TAGS.has(node.tag)) return pad + open;
+    if (RAW_TEXT_TAGS.has(node.tag)) return `${pad}${open}${rawTextOf(node)}</${node.tag}>`;
 
     const children = node.children.filter((c) => c.type !== "comment");
     if (children.length === 0) {
@@ -191,6 +196,14 @@ class Renderer {
 /* -------------------------------------------------------------------------- */
 /* Serialization helpers                                                      */
 /* -------------------------------------------------------------------------- */
+
+/** Concatenate a raw-text element's text children verbatim (script/style body). */
+function rawTextOf(node: ElementNode): string {
+  return node.children
+    .filter((c): c is TextNode => c.type === "text")
+    .map((c) => c.value)
+    .join("");
+}
 
 function openTag(node: ElementNode, extra = ""): string {
   let s = `<${node.tag}${extra}`;

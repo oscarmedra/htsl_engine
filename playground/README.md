@@ -101,6 +101,21 @@ Le raccourci `.classe` n'accepte que des identifiants simples ; les variantes à
 KaTeX (formules) est toujours disponible dans l'iframe ; Plotly (scènes) y est
 chargé automatiquement quand une scène est présente.
 
+## Scripts inline (documents interactifs)
+
+Un `{script:…}` est rendu verbatim **et exécuté** dans l'iframe : les scripts
+externes (`{script[src]/}`) et les `{link}` sont hissés une fois dans `<head>` ;
+les scripts inline sont lancés **après** le morphing du corps (le DOM qu'ils
+manipulent existe donc), une fois par contenu unique (éditer un script le relance).
+On peut ainsi construire des documents interactifs (diaporamas, quiz…) :
+
+```htsl
+{button#next:Suivant}
+{script:
+  document.getElementById('next').onclick = () => console.log('clic');
+}
+```
+
 ## Autres
 
 - **Exemples préchargés** (menu déroulant), dont « Mise en page Tailwind » et
