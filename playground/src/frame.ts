@@ -29,11 +29,17 @@ const BASE_CSS = `
   /* Block editing: the hovered element (its non-text region) is highlighted and
      clickable; clicking opens a full HTSL editor over it (handled by the parent). */
   .htsl-hover { box-shadow: 0 0 0 2px #93c5fd; border-radius: 4px; cursor: pointer; }
-  /* PDF export (print): drop on-screen editing affordances, keep colours. */
+  /* PDF export (print): A4 page sized for mathematical documents. */
   @media print {
-    body { padding: 0; }
+    @page { size: A4; margin: 1.8cm 2cm; }
+    body { padding: 0; width: auto; font-size: 11.5pt; line-height: 1.55; }
+    h1 { font-size: 1.9em; } h2 { font-size: 1.45em; } h3 { font-size: 1.2em; }
     .htsl-edit, .htsl-hover { background: none !important; box-shadow: none !important; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    /* Keep formulas, scenes, tables and images from splitting across pages. */
+    .htsl-math-equation, .htsl-math-block, .htsl-scene,
+    .katex-display, table, img, figure { break-inside: avoid; }
+    h1, h2, h3 { break-after: avoid; }
   }
 `;
 
