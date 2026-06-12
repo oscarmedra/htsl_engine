@@ -323,5 +323,8 @@ $("btn-insert").addEventListener("click", () => palette.toggle());
 // Exposed for debugging / scripting from the console.
 (window as unknown as { htslView: EditorView }).htslView = view;
 
+// Honour the AST checkbox's initial state (hidden by default).
+panelsEl.classList.toggle("no-ast", !toggleAst.checked);
+
 run(view);
 updateHelp(view, helpEl);
