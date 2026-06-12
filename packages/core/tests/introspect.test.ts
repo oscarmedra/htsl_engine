@@ -1,5 +1,45 @@
 import { describe, expect, it } from "vitest";
-import { registry, parse } from "../src/index.js";
+import { registry, parse, compile, isKnownObject } from "../src/index.js";
+
+describe("authoring metadata (snippets, categories, HTML elements)", () => {
+  const CATEGORIES = ["structure", "formules", "géométrie", "document"];
+
+  it("gives every entry a snippet and a valid category", () => {
+    for (const e of registry.list()) {
+      expect(e.snippet.length, e.path).toBeGreaterThan(0);
+      expect(CATEGORIES, e.path).toContain(e.category);
+    }
+  });
+
+  it("registers common HTML elements as kind=element (not @-objects)", () => {
+    for (const tag of ["h1", "p", "ul", "table", "a", "img"]) {
+      const m = registry.describe(tag);
+      expect(m, tag).not.toBeNull();
+      expect(m!.kind).toBe("element");
+      expect(m!.category).toBe("structure");
+      expect(m!.snippet.startsWith("{" + tag) || m!.snippet.startsWith("{img")).toBe(true);
+      // Elements must not affect the language (never treated as @-objects).
+      expect(isKnownObject(tag)).toBe(false);
+    }
+  });
+
+  it("uses the {@…} form for object snippets and the {tag…} form for elements", () => {
+    expect(registry.describe("mte")!.snippet.startsWith("{@mte")).toBe(true);
+    expect(registry.describe("p")!.snippet.startsWith("{p")).toBe(true);
+  });
+
+  it("compiles every metadata example (so palette previews never throw)", () => {
+    for (const e of registry.list()) {
+      expect(() => compile(e.example), e.path).not.toThrow();
+    }
+  });
+
+  it("a registered object with a snippet appears in the palette source (list)", () => {
+    const sphere = registry.list().find((e) => e.path === "math.geometry.3d.sphere");
+    expect(sphere?.snippet).toContain("{@mg3.sphere[");
+    expect(sphere?.category).toBe("géométrie");
+  });
+});
 
 describe("registry.list", () => {
   it("lists registered objects with paths, aliases and kind", () => {
@@ -8,9 +48,12 @@ describe("registry.list", () => {
     expect(paths).toContain("math.text.inline");
     expect(paths).toContain("math.geometry.3d.sphere");
     expect(paths).toContain("math.geometry.2d.frame");
+    expect(paths).toContain("h1"); // HTML elements are introspectable too
     for (const e of list) {
-      expect(e.kind).toBe("object");
+      expect(["object", "element"]).toContain(e.kind);
       expect(typeof e.description).toBe("string");
+      expect(typeof e.snippet).toBe("string");
+      expect(typeof e.category).toBe("string");
       expect(Array.isArray(e.aliases)).toBe(true);
     }
   });

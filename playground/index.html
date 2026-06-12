@@ -13,6 +13,7 @@
           <span class="tagline">playground</span>
         </div>
         <div class="toolbar">
+          <button id="btn-insert" class="primary" title="Palette d'insertion (ou tapez / en début de ligne)">➕ Insérer</button>
           <select id="examples" title="Exemples préchargés"></select>
           <button id="btn-copy" title="Copier le HTML rendu">Copier HTML</button>
           <button id="btn-download" title="Télécharger le .htsl">Télécharger</button>
@@ -27,6 +28,7 @@
         <section class="panel" id="panel-editor">
           <div class="panel-head">Éditeur HTSL</div>
           <div id="editor" class="panel-body"></div>
+          <div id="help" class="help" hidden></div>
         </section>
         <div class="gutter" data-gutter="1"></div>
         <section class="panel" id="panel-render">
@@ -39,6 +41,16 @@
           <pre id="ast" class="panel-body ast"></pre>
         </section>
       </main>
+
+      <!-- Palette d'insertion (drawer) -->
+      <aside id="palette" class="palette" hidden>
+        <div class="palette-head">
+          <strong>Insérer</strong>
+          <input id="palette-search" type="search" placeholder="Rechercher (titre, équation, scène…)" autocomplete="off" />
+          <button id="palette-close" title="Fermer">✕</button>
+        </div>
+        <div id="palette-list" class="palette-list"></div>
+      </aside>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

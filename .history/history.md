@@ -166,5 +166,14 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Vérifié en navigateur : édition d'un titre → source réécrit ; saisie `Prix: {remise} $5` → source `Prix\: \{remise\} \$5`, rendu littéral ; formules/références non éditables.
 - `.docs/10-edition-texte-depuis-rendu.md` ajouté.
 
+### Couche d'authoring (palette, snippets, slash, aide)
+
+- Cœur : métadonnées du registre étendues avec `snippet` (template à trous) + `category` (structure/formules/géométrie/document) + `kind` (object/element). Balises HTML courantes (h1, p, ul, table, a, img…) enregistrées comme `kind:"element"` — introspectables mais sans effet sur le lexer/parser (filtrés par kind). `registry.list()` renvoie les champs riches. Tests : snippets/catégories présents, éléments HTML kind=element, `isKnownObject` faux pour eux, **chaque exemple compile** (aperçus sûrs). Core : **179 tests**.
+- `@htsl/codemirror` : `htslCompletion` insère les snippets (`snippet()` de CodeMirror, trous au Tab) après `{@` ; **commande slash** `/` en début de ligne (objets + HTML + composants), filtre après le `/`, insertion remplaçant le `/`. 25 tests.
+- Playground : **palette** drawer (➕), groupée par catégorie, recherche, aperçus rendus compilés (cachés), clic = insertion du snippet ; **aide contextuelle** sous l'éditeur (describe() de l'objet au curseur : description + tableau d'attributs). Déclenchement slash via `startCompletion`.
+- Bug corrigé : le `from` du slash incluait le `/` → CM filtrait sur « /x » contre des labels sans `/` (tout exclu) ; corrigé (filtre après le `/`, apply depuis le `/`).
+- Test cible vérifié en navigateur : titre + équation numérotée (1) + scène 3D construits **à la souris** (clics palette) → rendu correct.
+- Syntaxe du langage inchangée. `.docs/11-couche-authoring.md` ajouté.
+
 
 

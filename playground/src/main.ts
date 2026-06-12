@@ -4,7 +4,7 @@ import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { bracketMatching } from "@codemirror/language";
-import { autocompletion, completionKeymap, closeBrackets } from "@codemirror/autocomplete";
+import { autocompletion, completionKeymap, closeBrackets, startCompletion } from "@codemirror/autocomplete";
 import { lintGutter } from "@codemirror/lint";
 
 import { parse, render, registry, mathCss, HTSLError } from "htsl";
@@ -16,6 +16,8 @@ import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
 
 import { examples } from "./examples";
 import { FrameRenderer } from "./frame";
+import { setupPalette } from "./palette";
+import { updateHelp } from "./help";
 
 /* -------------------------------------------------------------------------- */
 /* DOM                                                                        */
@@ -30,6 +32,7 @@ const panelsEl = $<HTMLElement>("panels");
 const examplesSel = $<HTMLSelectElement>("examples");
 const toggleAst = $<HTMLInputElement>("toggle-ast");
 const perfEl = document.getElementById("perf");
+const helpEl = $<HTMLDivElement>("help");
 
 /* -------------------------------------------------------------------------- */
 /* Shared state                                                               */
@@ -140,6 +143,17 @@ const extensions: Extension[] = [
   htslLanguage(),
   htslLinter(parse),
   autocompletion({ override: [htslCompletion(registry)], activateOnTyping: true }),
+  EditorView.updateListener.of((u) => {
+    if (u.selectionSet || u.docChanged) updateHelp(view, helpEl);
+    // Open the slash menu when "/" is typed alone at the start of a line.
+    if (u.docChanged) {
+      const pos = u.state.selection.main.head;
+      const line = u.state.doc.lineAt(pos);
+      if (/^\s*\/$/.test(u.state.sliceDoc(line.from, pos))) {
+        setTimeout(() => startCompletion(view), 0); // defer: avoid dispatch-in-update
+      }
+    }
+  }),
   updateListener,
   EditorView.theme({ "&": { height: "100%" }, ".cm-scroller": { overflow: "auto" } }),
 ];
@@ -266,7 +280,12 @@ document.querySelectorAll<HTMLElement>(".gutter").forEach((gutter) => {
 /* Boot                                                                        */
 /* -------------------------------------------------------------------------- */
 
+// Insertion palette (➕ button or slash command in the editor).
+const palette = setupPalette(view);
+$("btn-insert").addEventListener("click", () => palette.toggle());
+
 // Exposed for debugging / scripting from the console.
 (window as unknown as { htslView: EditorView }).htslView = view;
 
 run(view);
+updateHelp(view, helpEl);

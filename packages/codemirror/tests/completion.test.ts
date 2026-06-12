@@ -21,6 +21,28 @@ describe("htslCompletion", () => {
     expect(l).toContain("repere");
   });
 
+  it("inserts a hole-snippet (not just the name) after {@", () => {
+    const r = complete("{@mte");
+    const opt = r!.options.find((o) => o.label === "math.text.equation");
+    expect(opt?.apply).toBeTypeOf("function"); // snippet() apply
+    expect(r!.from).toBe(0); // replaces from the "{@"
+  });
+
+  it("does not suggest HTML elements after {@ (only @-objects)", () => {
+    expect(labels("{@")).not.toContain("h1");
+  });
+
+  it("offers a slash command at line start with objects AND HTML elements", () => {
+    const l = labels("/");
+    expect(l).toContain("h1");
+    expect(l).toContain("math.geometry.3d.sphere");
+    expect(l).toContain("math.text.equation");
+  });
+
+  it("does not trigger the slash command mid-line", () => {
+    expect(complete("{p:a/b")).toBeNull();
+  });
+
   it("suggests attributes of a known object after [", () => {
     const l = labels("{@mg3.sphere[").sort();
     expect(l).toEqual(["center", "color", "opacity", "radius"]);

@@ -34,7 +34,7 @@ new EditorView({
 | Export | Rôle |
 |--------|------|
 | `htslLanguage()` | `LanguageSupport` : coloration via un `StreamLanguage` écrit à la main (accolades, balises, `.classes`, `#id`, `[attributs]` — noms/valeurs/chaînes distingués —, `@objets`/composants, directives `{!define}`/`{!set}`, variables `{$x}`, math `$…$`/`$$…$$`, commentaires, échappements). |
-| `htslCompletion(registry)` | Source d'autocomplétion contextuelle branchée sur l'introspection : `{@`→objets/composants (avec descriptions), `[`→attributs typés de l'objet, `{$`→variables du document, `{!`→directives. Se met à jour quand l'utilisateur définit des composants. |
+| `htslCompletion(registry)` | Source d'autocomplétion contextuelle branchée sur l'introspection : `{@`→objets/composants (insérés comme **snippets à trous**), `/`→commande slash en début de ligne (objets, balises HTML, composants), `[`→attributs typés, `{$`→variables, `{!`→directives. Les snippets viennent du champ `snippet` des métadonnées. |
 | `htslLinter(parse)` | Extension `linter` : diagnostics soulignés depuis les `HTSLError` du mode tolérant (ligne/colonne + message). |
 
 Helpers : `htslTokens(src)` (tokenisation, pour tests/outils), `htslDiagnostics(text, parse)` (diagnostics bruts `{ line, col, message }`).

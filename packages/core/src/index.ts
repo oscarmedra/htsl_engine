@@ -35,7 +35,7 @@ export { hydrateScenes } from "./scene-client.js";
 export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";
 export { registry, documentComponents, documentVariables } from "./introspect.js";
 export type { ComponentInfo } from "./introspect.js";
-export type { ObjectMeta, AttrSchema, AttrType, RegistryEntry, ContentModel } from "./objects/registry.js";
+export type { ObjectMeta, AttrSchema, AttrType, RegistryEntry, ContentModel, Category, EntryKind } from "./objects/registry.js";
 export { mathCss } from "./objects/css.js";
 export { HTSLError } from "./errors.js";
 

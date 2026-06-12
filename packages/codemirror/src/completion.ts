@@ -1,15 +1,21 @@
 /**
  * Contextual autocompletion wired to the engine's introspection registry.
+ * Everything is generated from `registry.list()` / `describe()` — nothing is
+ * hard-coded.
  *
- *   {@…   → registered objects + components (paths/aliases, with descriptions)
+ *   {@…   → registered @-objects + components, inserted as hole-snippets
+ *   /…    → slash command at line start: ALL entries (objects, HTML, components)
  *   […    → attributes of the enclosing known object (types + defaults)
  *   {$…   → variables defined in the document
  *   {!…   → directives (define / set)
- *
- * Components and variables are read from a fresh tolerant parse of the document,
- * so suggestions update as the user defines new components or variables.
  */
-import type { Completion, CompletionContext, CompletionResult, CompletionSource } from "@codemirror/autocomplete";
+import {
+  snippet,
+  type Completion,
+  type CompletionContext,
+  type CompletionResult,
+  type CompletionSource,
+} from "@codemirror/autocomplete";
 import { parse } from "htsl";
 import type { ComponentInfo, Node, ObjectMeta, RegistryEntry } from "htsl";
 
@@ -21,12 +27,18 @@ export interface CompletionRegistry {
   variables(ast: Node[]): string[];
 }
 
+const CATEGORY_TYPE: Record<string, string> = {
+  structure: "type",
+  formules: "function",
+  géométrie: "class",
+  document: "keyword",
+};
+
 function attrContext(before: string): { name: string; isObject: boolean } | null {
   const lb = before.lastIndexOf("[");
   if (lb < 0) return null;
   const after = before.slice(lb + 1);
   if (after.includes("]") || after.includes("}")) return null;
-  // Typing a value (after =) rather than an attribute name.
   const seg = after.split(",").pop() ?? "";
   if (seg.includes("=")) return null;
   const head = before.slice(0, lb);
@@ -35,7 +47,25 @@ function attrContext(before: string): { name: string; isObject: boolean } | null
   return { name: m[2] ?? "", isObject: m[1] === "@" };
 }
 
-/** Build a CodeMirror completion source from an introspection registry. */
+/** Build the CodeMirror `${…}` snippet template for a document component. */
+function componentSnippet(c: ComponentInfo): string {
+  const params = c.params
+    .map((p, i) => p.name + "=${" + (i + 1) + ":" + (p.default ?? "") + "}")
+    .join(", ");
+  const head = params ? `{@${c.name}[${params}]` : `{@${c.name}`;
+  return head + ": ${" + (c.params.length + 1) + ":contenu}}";
+}
+
+function entryCompletion(e: RegistryEntry): Completion {
+  return {
+    label: e.path,
+    detail: e.aliases[0] ?? e.kind,
+    info: e.description,
+    type: CATEGORY_TYPE[e.category] ?? "text",
+    apply: snippet(e.snippet),
+  };
+}
+
 export function htslCompletion(registry: CompletionRegistry): CompletionSource {
   return (ctx: CompletionContext): CompletionResult | null => {
     const before = ctx.state.sliceDoc(0, ctx.pos);
@@ -47,21 +77,47 @@ export function htslCompletion(registry: CompletionRegistry): CompletionSource {
       ast = [];
     }
 
-    // {@ object / component
+    // {@ object / component → insert a snippet (replacing from the "{@")
     let m = /\{@([A-Za-z0-9_.-]*)$/.exec(before);
     if (m) {
       const options: Completion[] = [];
       for (const e of registry.list()) {
-        options.push({ label: e.path, type: "class", detail: "objet", info: e.description });
+        if (e.kind !== "object") continue;
+        options.push(entryCompletion(e));
         for (const a of e.aliases) {
-          options.push({ label: a, type: "class", detail: e.path, info: e.description });
+          options.push({ ...entryCompletion(e), label: a, detail: e.path });
         }
       }
       for (const c of registry.components(ast)) {
-        const params = c.params.map((p) => p.name + (p.default != null ? `=${p.default}` : "")).join(", ");
-        options.push({ label: c.name, type: "function", detail: "composant", info: params ? `[${params}]` : "composant" });
+        options.push({
+          label: c.name,
+          detail: "composant",
+          type: "function",
+          apply: snippet(componentSnippet(c)),
+        });
       }
-      return { from: ctx.pos - (m[1] ?? "").length, options, validFor: /^[A-Za-z0-9_.-]*$/ };
+      return { from: m.index, options, validFor: /^\{@[A-Za-z0-9_.-]*$/ };
+    }
+
+    // Slash command at line start → all entries (objects, HTML, components).
+    // The query filters on the text AFTER the "/", but inserting replaces from
+    // the "/" so it is removed.
+    const line = ctx.state.doc.lineAt(ctx.pos);
+    const lineBefore = ctx.state.sliceDoc(line.from, ctx.pos);
+    const slash = /^(\s*)\/[\w.-]*$/.exec(lineBefore);
+    if (slash) {
+      const slashAt = line.from + (slash[1] ?? "").length; // position of "/"
+      const withApply = (template: string, base: Completion): Completion => ({
+        ...base,
+        apply: (v, c, _from, to) => snippet(template)(v, c, slashAt, to),
+      });
+      const options: Completion[] = registry.list().map((e) => withApply(e.snippet, entryCompletion(e)));
+      for (const c of registry.components(ast)) {
+        options.push(
+          withApply(componentSnippet(c), { label: c.name, detail: "composant", type: "function" }),
+        );
+      }
+      return { from: slashAt + 1, options };
     }
 
     // {$ variable
