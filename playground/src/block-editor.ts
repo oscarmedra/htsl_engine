@@ -14,8 +14,10 @@ import { bracketMatching } from "@codemirror/language";
 import {
   autocompletion,
   completionKeymap,
+  completionStatus,
   closeBrackets,
   closeBracketsKeymap,
+  startCompletion,
 } from "@codemirror/autocomplete";
 import { parse, registry } from "htsl";
 import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
@@ -78,6 +80,16 @@ export function openBlockEditor(opts: BlockEditOptions): () => void {
         // Render popups in <body> so they escape the editor's overflow:hidden box.
         tooltips({ parent: document.body }),
         autocompletion({ override: [htslCompletion(registry)], activateOnTyping: true }),
+        // Open the slash menu when "/" is typed alone at the start of a line
+        // (parity with the main editor).
+        EditorView.updateListener.of((u) => {
+          if (!u.docChanged) return;
+          const pos = u.state.selection.main.head;
+          const line = u.state.doc.lineAt(pos);
+          if (/^\s*\/$/.test(u.state.sliceDoc(line.from, pos))) {
+            setTimeout(() => startCompletion(view), 0);
+          }
+        }),
         keymap.of([...closeBracketsKeymap, ...completionKeymap]),
         localKeys,
         keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
@@ -86,7 +98,8 @@ export function openBlockEditor(opts: BlockEditOptions): () => void {
         EditorView.domEventHandlers({
           blur: () => {
             setTimeout(() => {
-              if (!view.hasFocus) finish(true);
+              // Don't close while the autocompletion popup is open/being used.
+              if (!view.hasFocus && !completionStatus(view.state)) finish(true);
             }, 0);
             return false;
           },

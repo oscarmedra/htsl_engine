@@ -98,9 +98,11 @@ body {
   position: fixed; z-index: 200;
   background: rgba(255, 251, 235, 0.22);
   backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-  border: 2px solid rgba(245, 158, 11, 0.85); border-radius: 8px; overflow: hidden;
+  border: 2px solid rgba(245, 158, 11, 0.85); border-radius: 8px;
   box-shadow: 0 8px 26px rgba(15, 23, 42, 0.18);
 }
+/* The autocompletion popup must float above the editor and never be clipped. */
+.cm-tooltip.cm-tooltip-autocomplete { z-index: 600; }
 /* Let the translucent wrapper show through CodeMirror's own surfaces, so the
    render stays visible underneath even while someone is typing. */
 .block-editor .cm-editor,
@@ -115,6 +117,7 @@ body {
 .block-editor-hint {
   font-size: 0.68rem; color: #92760a; background: rgba(255, 250, 240, 0.4);
   padding: 0.2rem 0.55rem; border-top: 1px solid rgba(253, 233, 200, 0.6);
+  border-radius: 0 0 6px 6px;
 }
 .toggle { font-size: 0.82rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
 
