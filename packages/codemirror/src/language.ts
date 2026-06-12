@@ -8,6 +8,7 @@
  */
 import {
   HighlightStyle,
+  type IndentContext,
   LanguageSupport,
   StreamLanguage,
   StringStream,
@@ -270,11 +271,24 @@ const T = {
   escape: Tag.define(),
 };
 
+/**
+ * Indentation from the brace nesting depth: every open `{…}` / `{@…}` / math
+ * block is one frame above the root, so the indent is `(openBlocks) * unit`.
+ * A line starting with `}` dedents one level so closers line up with their open.
+ */
+function indent(state: State, textAfter: string, context: IndentContext): number {
+  const open = Math.max(0, state.stack.length - 1);
+  const closing = /^\s*\}/.test(textAfter) ? 1 : 0;
+  return Math.max(0, open - closing) * context.unit;
+}
+
 const streamParser = {
   name: "htsl",
   startState: (): State => ({ stack: [{ mode: "content" }], comment: false }),
   copyState: (s: State): State => ({ stack: s.stack.map((f) => ({ ...f })), comment: s.comment }),
   token,
+  indent,
+  languageData: { indentOnInput: /^\s*\}$/ },
   tokenTable: {
     brace: T.brace,
     tag: T.tag,

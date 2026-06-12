@@ -2,7 +2,7 @@ import "./style.css";
 
 import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { bracketMatching } from "@codemirror/language";
 import { autocompletion, completionKeymap, closeBrackets, startCompletion } from "@codemirror/autocomplete";
 import { lintGutter } from "@codemirror/lint";
@@ -175,7 +175,7 @@ const extensions: Extension[] = [
   bracketMatching(),
   closeBrackets(),
   lintGutter(),
-  keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap]),
+  keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap, indentWithTab]),
   htslLanguage(),
   htslLinter(parse),
   autocompletion({ override: [htslCompletion(registry)], activateOnTyping: true }),

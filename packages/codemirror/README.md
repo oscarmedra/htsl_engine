@@ -33,7 +33,7 @@ new EditorView({
 
 | Export | Rôle |
 |--------|------|
-| `htslLanguage()` | `LanguageSupport` : coloration via un `StreamLanguage` écrit à la main (accolades, balises, `.classes`, `#id`, `[attributs]` — noms/valeurs/chaînes distingués —, `@objets`/composants, directives `{!define}`/`{!set}`, variables `{$x}`, math `$…$`/`$$…$$`, commentaires, échappements). |
+| `htslLanguage()` | `LanguageSupport` : coloration via un `StreamLanguage` écrit à la main (accolades, balises, `.classes`, `#id`, `[attributs]` — noms/valeurs/chaînes distingués —, `@objets`/composants, directives `{!define}`/`{!set}`, variables `{$x}`, math `$…$`/`$$…$$`, commentaires, échappements). Fournit aussi l'**indentation** (profondeur d'accolades : Entrée auto-indente, `}` se réindente). Côté éditeur, ajoutez `indentWithTab` au keymap pour Tab/Shift-Tab. |
 | `htslCompletion(registry)` | Source d'autocomplétion contextuelle branchée sur l'introspection : `{@`→objets/composants (insérés comme **snippets à trous**), `/`→commande slash en début de ligne (objets, balises HTML, composants), `[`→attributs typés, `{$`→variables, `{!`→directives. Les snippets viennent du champ `snippet` des métadonnées. |
 | `htslLinter(parse)` | Extension `linter` : diagnostics soulignés depuis les `HTSLError` du mode tolérant (ligne/colonne + message). |
 

@@ -9,7 +9,7 @@
  */
 import { EditorState } from "@codemirror/state";
 import { EditorView, keymap, tooltips } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { bracketMatching } from "@codemirror/language";
 import {
   autocompletion,
@@ -80,7 +80,7 @@ export function openBlockEditor(opts: BlockEditOptions): () => void {
         autocompletion({ override: [htslCompletion(registry)], activateOnTyping: true }),
         keymap.of([...closeBracketsKeymap, ...completionKeymap]),
         localKeys,
-        keymap.of([...defaultKeymap, ...historyKeymap]),
+        keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
         // Commit when focus truly leaves (click elsewhere, into the iframe, …),
         // but ignore transient blurs from interacting with the completion popup.
         EditorView.domEventHandlers({

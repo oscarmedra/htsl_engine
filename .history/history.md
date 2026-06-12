@@ -205,6 +205,14 @@ Les entrées les plus récentes sont ajoutées en bas.
 - L'overlay d'édition devient **semi-transparent + flou** (`rgba(255,251,235,.55)` + `backdrop-filter: blur(4px)`, surfaces CM en `transparent`) : le **rendu reste visible dessous pendant l'édition** — pratique quand une audience suit le rendu pendant que quelqu'un édite. CSS uniquement (`playground/src/style.css`).
 - L'éditeur principal (le fichier) n'est jamais couvert par l'overlay (positionné sur le panneau de rendu) : on peut éditer indifféremment depuis le **rendu** ou depuis le **fichier** (cliquer le fichier valide l'overlay et rend la main).
 - Vérifié en navigateur : overlay translucide laissant voir le titre rendu + l'équation derrière, texte coloré lisible.
+- Affinage : opacité abaissée à ~22 % + halo blanc (`text-shadow`) sur le texte pour rester lisible (le rendu transparaît nettement).
+
+### Indentation (retour utilisateur : « pourquoi l'indentation ne marche pas ? »)
+
+- Cause : le `StreamLanguage` HTSL n'avait pas de méthode `indent`, et aucune touche **Tab** n'était liée → ni auto-indentation à l'Entrée, ni Tab.
+- `@htsl/codemirror` : ajout d'`indent` au parser (profondeur = nb de frames d'accolades ouvertes × `unit` ; une ligne commençant par `}` se désindente d'un niveau) + `languageData.indentOnInput = /^\s*\}$/` (réindente en tapant `}`). 4 tests via `getIndentation` (1 bloc → 2, imbriqué → 4, `}` → 0, racine → 0). codemirror **29** tests.
+- Playground : `indentWithTab` ajouté au keymap de l'éditeur principal **et** de l'éditeur de bloc (Tab indente, Shift-Tab désindente).
+- Vérifié en navigateur : `{ul:` + Entrée → `{ul:\n  ` ; Tab sur une ligne → `  …`.
 
 
 
