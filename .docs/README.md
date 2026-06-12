@@ -20,3 +20,4 @@ décrivant ce qui a été fait, pourquoi, et comment cela fonctionne.
 | `07-introspection-et-playground.md` | API d'introspection (registry.list/describe) + playground web Vite/CodeMirror |
 | `08-monorepo-et-codemirror.md` | Restructuration en monorepo (packages/core, @htsl/codemirror) |
 | `09-optimisation-playground.md` | Réactivité du playground : data-htsl-hash, morphdom, cache KaTeX, préservation Plotly |
+| `10-edition-texte-depuis-rendu.md` | Édition du texte depuis le rendu (plages source, editableText, réécriture) |

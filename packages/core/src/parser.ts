@@ -39,7 +39,7 @@ export function parse(source: string, options: ParseOptions = {}): Node[] {
   const mode = options.mode ?? "strict";
   const maxDepth = options.maxDepth ?? DEFAULT_MAX_DEPTH;
   const tokens = tokenize(source, mode);
-  return new Parser(source, tokens, mode === "tolerant", maxDepth).parseDocument();
+  return new Parser(source, tokens, mode === "tolerant", maxDepth, options.ranges ?? false).parseDocument();
 }
 
 class Parser {
@@ -50,7 +50,16 @@ class Parser {
     private readonly tokens: Token[],
     private readonly tolerant: boolean,
     private readonly maxDepth: number,
+    private readonly ranges: boolean,
   ) {}
+
+  /** Build a text node, attaching the source range when range-tracking is on. */
+  private textNode(t: Token): Node {
+    if (this.ranges && t.start !== undefined && t.end !== undefined) {
+      return { type: "text", value: t.value, loc: t.loc, range: [t.start, t.end] };
+    }
+    return { type: "text", value: t.value, loc: t.loc };
+  }
 
   parseDocument(): Node[] {
     const nodes: Node[] = [];
@@ -76,7 +85,7 @@ class Parser {
         return { type: "comment", value: t.value, loc: t.loc };
       case "TEXT":
         this.advance();
-        return { type: "text", value: t.value, loc: t.loc };
+        return this.textNode(t);
       case "LBRACE":
         return this.parseElementSafe(depth);
       case "OBJOPEN":

@@ -39,6 +39,10 @@ export interface Token {
   /** The literal slice of source the token represents (already unescaped for TEXT/STRING). */
   value: string;
   loc: Loc;
+  /** Absolute source start offset (TEXT tokens). */
+  start?: number;
+  /** Absolute source end offset (TEXT tokens). */
+  end?: number;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -49,6 +53,12 @@ export interface TextNode {
   type: "text";
   value: string;
   loc: Loc;
+  /**
+   * Absolute source `[start, end]` offsets of the raw text run, present only
+   * when parsed with `{ ranges: true }`. Enables editing the rendered text back
+   * into the source.
+   */
+  range?: [number, number];
 }
 
 export interface CommentNode {
@@ -143,6 +153,8 @@ export interface ParseOptions {
   mode?: ParseMode;
   /** Maximum nesting depth before bailing out. Default: 256. */
   maxDepth?: number;
+  /** Attach `range: [start, end]` source offsets to text nodes. Default: false. */
+  ranges?: boolean;
 }
 
 /** Minimal shape of the optional KaTeX dependency used to render formulas. */
@@ -168,6 +180,13 @@ export interface RenderOptions {
    * unchanged block can be skipped entirely. Does not affect the language.
    */
   hashBlocks?: boolean;
+  /**
+   * Wrap source-backed text runs in
+   * `<span class="htsl-edit" data-htsl-text="start-end">…</span>` so a host can
+   * make them editable and write changes back to the source. Requires the AST
+   * to be parsed with `{ ranges: true }`. Off by default.
+   */
+  editableText?: boolean;
 }
 
 export type CompileOptions = ParseOptions & RenderOptions;

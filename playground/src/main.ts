@@ -37,7 +37,16 @@ const perfEl = document.getElementById("perf");
 
 let latestHtml = "";
 let lastSrc: string | null = null;
-const frame = new FrameRenderer(renderFrame, mathCss);
+
+/** Write an edit made in the rendered preview back into the source. */
+function onTextEdit(start: number, end: number, text: string): void {
+  const escaped = text.replace(/([{}:$])/g, "\\$1"); // re-escape HTSL specials
+  if (view.state.sliceDoc(start, end) === escaped) return; // unchanged
+  view.dispatch({ changes: { from: start, to: end, insert: escaped } });
+  run(view, true); // re-render immediately so offsets stay fresh
+}
+
+const frame = new FrameRenderer(renderFrame, mathCss, onTextEdit);
 
 /** Dev-only metric: update time + how few DOM nodes were actually touched. */
 function showPerf(ms: number, touched: number, total: number): void {
@@ -67,10 +76,10 @@ function run(view: EditorView, force = false): void {
   const t0 = performance.now();
   const errors: { line: number; col: number; message: string }[] = [];
 
-  // Tolerant parse never throws.
+  // Tolerant parse never throws. `ranges` lets edited text map back to source.
   let ast: Node[] = [];
   try {
-    ast = parse(src, { mode: "tolerant" });
+    ast = parse(src, { mode: "tolerant", ranges: true });
   } catch (e) {
     // Defensive: should not happen in tolerant mode.
     errors.push({ line: 1, col: 1, message: String((e as Error).message) });
@@ -79,8 +88,9 @@ function run(view: EditorView, force = false): void {
 
   // Render. Compile-time issues (unknown ref/var, missing param…) throw HTSLError.
   try {
-    // hashBlocks lets the frame morpher skip unchanged blocks entirely.
-    const html = render(ast, { katex, source: src, hashBlocks: true });
+    // hashBlocks lets the frame morpher skip unchanged blocks; editableText
+    // makes source-backed text runs editable directly in the preview.
+    const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true });
     latestHtml = html;
     const stats = frame.apply(html);
     showPerf(performance.now() - t0, stats.touched, stats.total);

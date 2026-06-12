@@ -14,7 +14,7 @@ import {
   renderMathObject,
   type MathContext,
 } from "./objects/math.js";
-import type { ElementNode, Node, ObjectNode, RenderOptions } from "./types.js";
+import type { ElementNode, Node, ObjectNode, RenderOptions, TextNode } from "./types.js";
 
 export { escapeHtml } from "./escape.js";
 
@@ -88,10 +88,19 @@ class Renderer {
   /* Compact rendering                                                       */
   /* ----------------------------------------------------------------------- */
 
+  /** Render a text run, wrapping it in an editable span when requested. */
+  private textHtml(node: TextNode, value: string): string {
+    const escaped = escapeHtml(value);
+    if (this.options.editableText && node.range) {
+      return `<span class="htsl-edit" data-htsl-text="${node.range[0]}-${node.range[1]}">${escaped}</span>`;
+    }
+    return escaped;
+  }
+
   private compact(node: Node): string {
     switch (node.type) {
       case "text":
-        return escapeHtml(node.value);
+        return this.textHtml(node, node.value);
       case "comment":
         return "";
       case "error":
@@ -128,7 +137,7 @@ class Renderer {
     const pad = "  ".repeat(indent);
     switch (node.type) {
       case "text":
-        return pad + escapeHtml(node.value.trim());
+        return pad + this.textHtml(node, node.value.trim());
       case "comment":
         return "";
       case "error":
@@ -159,7 +168,7 @@ class Renderer {
     // Inline a lone text child for compact, readable output.
     const only = children[0];
     if (children.length === 1 && only && only.type === "text") {
-      return `${pad}${open}${escapeHtml(only.value.trim())}</${node.tag}>`;
+      return `${pad}${open}${this.textHtml(only, only.value.trim())}</${node.tag}>`;
     }
     const lines = [pad + open];
     for (const child of children) lines.push(this.pretty0(child, indent + 1));

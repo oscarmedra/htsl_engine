@@ -157,5 +157,14 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Vérifié en navigateur : éditer un mot → **3 nœuds touchés / 2410, ~10 ms**, scènes identiques et non re-plottées (`sameSceneNodes`/`plottedSame` true).
 - `.docs/09-optimisation-playground.md` ajouté.
 
+### Édition du texte depuis le rendu
+
+- Cœur (opt-in) : le lexer enregistre `start`/`end` sur les jetons TEXT ; `parse(src, { ranges: true })` attache `range: [start,end]` aux nœuds texte ; `render(ast, { editableText: true })` enveloppe les textes adossés au source dans `<span class="htsl-edit" data-htsl-text="start-end">`. Variables et math non enveloppés. AST inchangé par défaut.
+- `tests/editable.test.ts` (7) : plage = sous-chaîne brute exacte, off par défaut, offsets corrects, pas de span pour variable/math. Total core : **174 tests**.
+- Playground : parse `ranges` + render `editableText` ; `FrameRenderer` rend les spans `contenteditable=plaintext-only` et, au `focusout`, réécrit le source (ré-échappement de `{ } : $`, remplacement de `source[start:end]`, rendu immédiat). Affordance survol/focus.
+- Bug corrigé : `instanceof Element` échouait à travers l'iframe (réalmes) → duck-typing.
+- Vérifié en navigateur : édition d'un titre → source réécrit ; saisie `Prix: {remise} $5` → source `Prix\: \{remise\} \$5`, rendu littéral ; formules/références non éditables.
+- `.docs/10-edition-texte-depuis-rendu.md` ajouté.
+
 
 

@@ -22,6 +22,9 @@ const BASE_CSS = `
   *, *::before, *::after { box-sizing: border-box; }
   body { font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; color: #1f2430; margin: 0; padding: 1rem 1.1rem; }
   h1 { font-size: 1.6rem; } h2 { font-size: 1.25rem; }
+  .htsl-edit { border-radius: 3px; transition: background 0.1s, box-shadow 0.1s; }
+  .htsl-edit:hover { background: #eef2ff; box-shadow: 0 0 0 1px #c7d2fe; cursor: text; }
+  .htsl-edit:focus { outline: none; background: #fff8e1; box-shadow: 0 0 0 2px #f59e0b; }
 `;
 
 export interface MorphStats {
@@ -43,10 +46,23 @@ export class FrameRenderer {
   constructor(
     private readonly iframe: HTMLIFrameElement,
     mathCss: string,
+    private readonly onTextEdit?: (start: number, end: number, text: string) => void,
   ) {
     this.iframe.addEventListener("load", () => {
       this.doc = this.iframe.contentDocument;
       this.root = this.doc?.getElementById("htsl-root") ?? null;
+      // Delegated: when an editable text run loses focus, write it back.
+      this.doc?.addEventListener("focusout", (ev) => {
+        // Cross-realm: `instanceof Element` fails across the iframe boundary, so
+        // duck-type the target instead.
+        const t = ev.target as Element | null;
+        if (!t || !t.classList?.contains("htsl-edit")) return;
+        const span = t.getAttribute("data-htsl-text");
+        if (!span || !this.onTextEdit) return;
+        const [s, e] = span.split("-").map(Number);
+        if (s === undefined || e === undefined) return;
+        this.onTextEdit(s, e, t.textContent ?? "");
+      });
       if (this.pending !== null) {
         const html = this.pending;
         this.pending = null;
@@ -106,6 +122,13 @@ export class FrameRenderer {
         touched += 1;
       },
     });
+
+    // Make freshly inserted editable text runs editable in place.
+    if (this.onTextEdit) {
+      this.root
+        .querySelectorAll(".htsl-edit:not([contenteditable])")
+        .forEach((el) => el.setAttribute("contenteditable", "plaintext-only"));
+    }
 
     const total = this.root.getElementsByTagName("*").length;
     this.hydrate();

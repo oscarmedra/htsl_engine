@@ -166,6 +166,7 @@ class Lexer {
 
   private lexText(): void {
     const loc = this.loc();
+    const start = this.pos;
     let value = "";
     while (!this.eof()) {
       const ch = this.peek();
@@ -182,7 +183,8 @@ class Lexer {
       if (ch === "{" || ch === "}" || ch === "$") break;
       value += this.advance();
     }
-    this.push("TEXT", value, loc);
+    // Record the raw source span so the rendered text can be edited back.
+    this.tokens.push({ type: "TEXT", value, loc, start, end: this.pos });
   }
 
   private lexComment(): void {
