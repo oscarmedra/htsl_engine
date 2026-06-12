@@ -128,7 +128,9 @@ class Parser {
   }
 
   private parseElement(depth: number): ElementNode {
-    const startLoc = this.peek().loc; // location of "{"
+    const openTok = this.peek(); // "{"
+    const startLoc = openTok.loc;
+    const openStart = openTok.start;
     this.advance(); // consume "{"
 
     if (depth > this.maxDepth) {
@@ -170,8 +172,9 @@ class Parser {
     const t = this.peek();
     if (t.type === "SLASH") {
       this.advance();
+      const closeEnd = this.peek().end; // RBRACE
       this.expect("RBRACE", `balise "{${tag}" jamais fermée.`, startLoc);
-      return this.element(tag, id, classes, attrs, true, [], startLoc);
+      return this.element(tag, id, classes, attrs, true, [], startLoc, this.range(openStart, closeEnd));
     }
 
     if (t.type === "COLON") {
@@ -180,8 +183,9 @@ class Parser {
       if (this.check("EOF")) {
         this.fail(`balise "{${tag}" jamais fermée.`, startLoc);
       }
+      const closeEnd = this.peek().end; // RBRACE
       this.advance(); // consume "}"
-      return this.element(tag, id, classes, attrs, false, children, startLoc);
+      return this.element(tag, id, classes, attrs, false, children, startLoc, this.range(openStart, closeEnd));
     }
 
     if (t.type === "EOF") {
@@ -209,6 +213,7 @@ class Parser {
   private parseObject(depth: number): ObjectNode {
     const open = this.peek(); // OBJOPEN
     const startLoc = open.loc;
+    const openStart = open.start;
     const rawPath = open.value;
     this.advance();
 
@@ -227,8 +232,9 @@ class Parser {
 
     if (t.type === "SLASH") {
       this.advance();
+      const closeEnd = this.peek().end; // RBRACE
       this.expect("RBRACE", `objet "{@${rawPath}" jamais fermé.`, startLoc);
-      return this.object(path, rawPath, attrs, true, [], startLoc);
+      return this.object(path, rawPath, attrs, true, [], startLoc, this.range(openStart, closeEnd));
     }
 
     if (t.type === "COLON") {
@@ -240,8 +246,9 @@ class Parser {
       if (this.check("EOF")) {
         this.fail(`objet "{@${rawPath}" jamais fermé.`, startLoc);
       }
+      const closeEnd = this.peek().end; // RBRACE
       this.advance(); // consume "}"
-      return this.object(path, rawPath, attrs, false, children, startLoc);
+      return this.object(path, rawPath, attrs, false, children, startLoc, this.range(openStart, closeEnd));
     }
 
     if (t.type === "EOF") {
@@ -358,8 +365,14 @@ class Parser {
     selfClosing: boolean,
     children: Node[],
     loc: Loc,
+    range?: [number, number],
   ): ObjectNode {
-    return { type: "object", path, rawPath, attrs, selfClosing, children, loc };
+    return { type: "object", path, rawPath, attrs, selfClosing, children, loc, ...(range ? { range } : {}) };
+  }
+
+  /** Build a source range when range-tracking is on and both ends are known. */
+  private range(start: number | undefined, end: number | undefined): [number, number] | undefined {
+    return this.ranges && start !== undefined && end !== undefined ? [start, end] : undefined;
   }
 
   private parseContent(depth: number): Node[] {
@@ -452,8 +465,9 @@ class Parser {
     selfClosing: boolean,
     children: Node[],
     loc: Loc,
+    range?: [number, number],
   ): ElementNode {
-    return { type: "element", tag, id, classes, attrs, selfClosing, children, loc };
+    return { type: "element", tag, id, classes, attrs, selfClosing, children, loc, ...(range ? { range } : {}) };
   }
 
   /** Push a node, dropping whitespace-only text nodes (insignificant layout). */

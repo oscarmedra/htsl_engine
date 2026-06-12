@@ -77,12 +77,13 @@ class Lexer {
     const ch = this.peek();
     if (ch === "{") {
       const braceLoc = this.loc();
+      const braceStart = this.pos; // absolute offset of "{"
       const next = this.peek(1);
       if (next === "@") {
         this.advance(); // {
         this.advance(); // @
         const path = this.readPath();
-        this.push("OBJOPEN", path, braceLoc);
+        this.push("OBJOPEN", path, braceLoc, braceStart);
         this.stack.push({ kind: "header", path });
       } else if (next === "$") {
         this.lexVarRef(braceLoc);
@@ -90,15 +91,16 @@ class Lexer {
         this.lexDirective(braceLoc); // {!-- already handled above
       } else {
         this.advance();
-        this.push("LBRACE", "{", braceLoc);
+        this.push("LBRACE", "{", braceLoc, braceStart);
         this.stack.push({ kind: "header", path: null });
       }
       return;
     }
     if (ch === "}") {
       const loc = this.loc();
+      const start = this.pos; // offset of "}"
       this.advance();
-      this.push("RBRACE", "}", loc);
+      this.push("RBRACE", "}", loc, start, this.pos); // end = just after "}"
       this.popContent();
       return;
     }
@@ -112,15 +114,16 @@ class Lexer {
   /** Emit the object header for a `$...$` / `$$...$$` shorthand. */
   private openDollar(): void {
     const loc = this.loc();
+    const start = this.pos; // offset of the opening "$"
     if (this.peek(1) === "$") {
       this.advance();
       this.advance();
-      this.push("OBJOPEN", "math.text.block", loc);
+      this.push("OBJOPEN", "math.text.block", loc, start);
       this.push("COLON", ":", loc);
       this.stack.push({ kind: "math", closer: "ddollar", depth: 0 });
     } else {
       this.advance();
-      this.push("OBJOPEN", "math.text.inline", loc);
+      this.push("OBJOPEN", "math.text.inline", loc, start);
       this.push("COLON", ":", loc);
       this.stack.push({ kind: "math", closer: "dollar", depth: 0 });
     }
@@ -225,11 +228,13 @@ class Lexer {
     }
     const loc = this.loc();
     switch (ch) {
-      case "}":
+      case "}": {
+        const start = this.pos;
         this.advance();
-        this.push("RBRACE", "}", loc);
+        this.push("RBRACE", "}", loc, start, this.pos);
         this.stack.pop();
         return;
+      }
       case ":":
         this.advance();
         this.push("COLON", ":", loc);
@@ -369,10 +374,11 @@ class Lexer {
         if (this.peek(1) === "@") {
           flush();
           const braceLoc = this.loc();
+          const braceStart = this.pos;
           this.advance();
           this.advance();
           const path = this.readPath();
-          this.push("OBJOPEN", path, braceLoc);
+          this.push("OBJOPEN", path, braceLoc, braceStart);
           this.stack.push({ kind: "header", path });
           return;
         }
@@ -394,8 +400,9 @@ class Lexer {
         }
         flush();
         const loc = this.loc();
+        const start = this.pos;
         this.advance();
-        this.push("RBRACE", "}", loc);
+        this.push("RBRACE", "}", loc, start, this.pos);
         this.stack.pop();
         return;
       }
@@ -407,9 +414,10 @@ class Lexer {
         if (isClose) {
           flush();
           const loc = this.loc();
+          const start = this.pos;
           this.advance();
           if (frame.closer === "ddollar") this.advance();
-          this.push("RBRACE", "}", loc);
+          this.push("RBRACE", "}", loc, start, this.pos);
           this.stack.pop();
           return;
         }
@@ -423,7 +431,7 @@ class Lexer {
     // EOF reached without a closer.
     flush();
     if (this.tolerant) {
-      this.push("RBRACE", "}", this.loc());
+      this.push("RBRACE", "}", this.loc(), this.pos, this.pos);
       this.stack.pop();
       return;
     }
@@ -494,7 +502,19 @@ class Lexer {
     return { line: this.line, col: this.col };
   }
 
-  private push(type: TokenType, value: string, loc: Loc = this.loc()): void {
-    this.tokens.push({ type, value, loc });
+  private push(
+    type: TokenType,
+    value: string,
+    loc: Loc = this.loc(),
+    start?: number,
+    end?: number,
+  ): void {
+    this.tokens.push({
+      type,
+      value,
+      loc,
+      ...(start !== undefined ? { start } : {}),
+      ...(end !== undefined ? { end } : {}),
+    });
   }
 }

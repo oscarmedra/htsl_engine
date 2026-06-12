@@ -32,7 +32,47 @@ describe("source ranges", () => {
   });
 });
 
+describe("element source ranges", () => {
+  it("cover the whole {…} element span", () => {
+    const src = "Avant {p.box: Salut} après";
+    const el = parse(src, { ranges: true }).find((n) => n.type === "element") as ElementNode;
+    expect(el.range).toBeDefined();
+    expect(src.slice(el.range![0], el.range![1])).toBe("{p.box: Salut}");
+  });
+
+  it("cover the whole {@…} object span (including self-closing)", () => {
+    const src = "{@mtr[to=eq1]/}";
+    const obj = parse(src, { ranges: true })[0];
+    if (obj?.type !== "object") throw new Error("expected object");
+    expect(src.slice(obj.range![0], obj.range![1])).toBe("{@mtr[to=eq1]/}");
+  });
+
+  it("are absent by default", () => {
+    const el = parse("{p:hi}")[0] as ElementNode;
+    expect(el.range).toBeUndefined();
+  });
+
+  it("expose the call site (not the template) on a component instance", () => {
+    const src = "{!define card[t]:{div.card:{h2:{$t}}}}\n{@card[t=Bonjour]/}";
+    const html = render(parse(src, { ranges: true }), { editableText: true });
+    const m = html.match(/data-htsl-range="(\d+)-(\d+)"/);
+    expect(m).not.toBeNull();
+    expect(src.slice(Number(m![1]), Number(m![2]))).toBe("{@card[t=Bonjour]/}");
+    // Only one range attribute: the template internals are not separately editable.
+    expect(html.match(/data-htsl-range=/g)).toHaveLength(1);
+  });
+});
+
 describe("editableText render option", () => {
+  it("emits data-htsl-range on elements", () => {
+    const src = "{h1:Titre}";
+    const html = render(parse(src, { ranges: true }), { editableText: true });
+    const m = html.match(/data-htsl-range="(\d+)-(\d+)"/);
+    expect(m).not.toBeNull();
+    expect(src.slice(Number(m![1]), Number(m![2]))).toBe("{h1:Titre}");
+  });
+
+
   it("is off by default", () => {
     expect(render(parse("{p:hi}"), {})).not.toContain("htsl-edit");
   });
@@ -49,11 +89,13 @@ describe("editableText render option", () => {
   });
 
   it("does not wrap text without a range (e.g. from variables)", () => {
-    // Variable-derived text has no source range → not editable.
+    // Variable-derived text has no source range → the text is not wrapped in an
+    // editable span (the `{p:…}` element itself still carries its own range).
     const html = render(parse("{!set who: monde}{p:{$who}}", { ranges: true }), {
       editableText: true,
     });
-    expect(html).toBe("<p>monde</p>");
+    expect(html).not.toContain("htsl-edit");
+    expect(html).toContain(">monde</p>");
   });
 
   it("does not make math content editable", () => {

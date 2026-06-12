@@ -183,5 +183,15 @@ Les entrées les plus récentes sont ajoutées en bas.
 - **Contenu tampon à l'insertion** : scènes pré-remplies d'un acteur (cercle/point 2D, sphère 3D) ; composants remplis de `Contenu du conteneur.` et leurs paramètres sans défaut prennent leur nom comme valeur → HTSL valide qui **rend immédiatement** (plus d'attribut vide malformé `name=`). Snippets de scène mis à jour dans le cœur ; `componentSnippet` (palette + @htsl/codemirror) corrigé.
 - Vérifié en navigateur : groupe Conteneurs (card + scènes), aperçus texte, card inséré rend `.card` + titre + contenu, scène 3D rend 1 tracé Plotly.
 
+### Classification de la palette + édition d'un élément depuis le rendu (retour utilisateur)
+
+- **Palette reclassée** en 5 groupes nets : `Objets créés` (composants de l'utilisateur, avec libellé d'aide si vide) · `Textes` (structure) · `Formules` (formules + équations) · `Scènes` (conteneurs 2D/3D) · `Géométrie` (acteurs). Les scènes sont désormais séparées des composants.
+- **Édition d'un élément entier depuis le rendu** (extension de l'édition de texte) :
+  - Cœur : offsets absolus sur *tous* les jetons `{`/`{@`/`}` (lexer) ; le parser attache `range:[début,fin]` aux nœuds `element`/`object` sous `ranges:true` (couvre tout le `{…}`). L'expansion préserve la plage des éléments écrits ; pour un composant, les plages internes (template) sont retirées et la plage de l'**appel** `{@…}` est exposée sur la racine de l'instance. `render(..., {editableText:true})` émet `data-htsl-range`.
+  - Playground : survol d'un élément (hors texte) = halo bleu ; clic = textarea inline pré-remplie avec la **source HTSL** du bloc ; `⌘/Ctrl+Entrée`/blur valide (remplacement brut de `source[début:fin]`), `Échap` annule. Clic sur texte = édition de texte (les deux modes cohabitent).
+  - Bug trouvé/corrigé : seuls les `}` de `lexDefault` portaient les offsets ; ajoutés aussi aux `}` d'en-tête/math et aux OBJOPEN (sinon objets/scènes sans plage).
+- Vérifié en navigateur : `{h1:…}` → édité en `{h1.vedette:Titre modifié}` (classe+texte MAJ) ; instance de composant ouvre `{@carte[titre=Salut]: Corps.}` ; Échap annule ; édition de texte intacte.
+- Core **184** tests (10 plages d'éléments), codemirror 25. Syntaxe du langage inchangée.
+
 
 

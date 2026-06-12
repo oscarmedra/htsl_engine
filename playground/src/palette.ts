@@ -106,12 +106,19 @@ export function setupPalette(view: EditorView): { toggle: () => void } {
     requestAnimationFrame(() => view.focus());
   }
 
-  function section(label: string, items: Item[]): void {
-    if (items.length === 0) return;
+  function section(label: string, items: Item[], emptyHint?: string): void {
+    if (items.length === 0 && !emptyHint) return;
     const cat = document.createElement("div");
     cat.className = "pal-cat";
     cat.textContent = label;
     list.appendChild(cat);
+    if (items.length === 0 && emptyHint) {
+      const hint = document.createElement("div");
+      hint.className = "pal-hint";
+      hint.textContent = emptyHint;
+      list.appendChild(hint);
+      return;
+    }
     for (const it of items) {
       const btn = document.createElement("button");
       btn.className = "pal-entry";
@@ -135,25 +142,29 @@ export function setupPalette(view: EditorView): { toggle: () => void } {
     } catch {
       components = [];
     }
-    section("Conteneurs", [...components, ...scenes.map(entryItem)]);
-    section("Structure", byCat("structure").map(entryItem));
-    section("Formules", byCat("formules").map(entryItem));
-    section("Équations", byCat("document").map(entryItem));
+    // Clear classification so each kind of thing has an obvious home.
+    section("Objets créés", components, "Définissez un composant avec {!define …} pour le retrouver ici.");
+    section("Textes", byCat("structure").map(entryItem));
+    section("Formules", [...byCat("formules"), ...byCat("document")].map(entryItem));
+    section("Scènes", scenes.map(entryItem));
     section("Géométrie", byCat("géométrie").map(entryItem));
   }
 
   function filter(q: string): void {
     const needle = norm(q.trim());
+    const searching = needle !== "";
     let anyVisible = false;
     list.querySelectorAll<HTMLElement>(".pal-entry").forEach((el) => {
-      const match = needle === "" || (el.dataset.search ?? "").includes(needle);
+      const match = !searching || (el.dataset.search ?? "").includes(needle);
       el.hidden = !match;
       if (match) anyVisible = true;
     });
+    // Empty-state hints only show when not searching.
+    list.querySelectorAll<HTMLElement>(".pal-hint").forEach((h) => (h.hidden = searching));
     list.querySelectorAll<HTMLElement>(".pal-cat").forEach((cat) => {
       let n: Element | null = cat.nextElementSibling;
       let visible = false;
-      while (n && n.classList.contains("pal-entry")) {
+      while (n && (n.classList.contains("pal-entry") || n.classList.contains("pal-hint"))) {
         if (!(n as HTMLElement).hidden) visible = true;
         n = n.nextElementSibling;
       }

@@ -211,7 +211,29 @@ function expandComponent(
     stack: [...ctx.stack, key],
     source: ctx.source,
   };
-  return expandNodes(component.body, childCtx);
+  const result = expandNodes(component.body, childCtx);
+
+  // The expanded nodes are fresh copies (element/object are spread). Their
+  // source ranges point at the *template*, which would be misleading to edit
+  // from a rendered instance — drop them, then expose the call site's range on
+  // the instance roots so clicking a component edits its `{@…}` usage.
+  stripRanges(result);
+  if (usage.range) {
+    for (const node of result) {
+      if (node.type === "element" || node.type === "object") node.range = usage.range;
+    }
+  }
+  return result;
+}
+
+/** Recursively remove element/object source ranges (in place, on fresh copies). */
+function stripRanges(nodes: Node[]): void {
+  for (const node of nodes) {
+    if (node.type === "element" || node.type === "object") {
+      delete node.range;
+      stripRanges(node.children);
+    }
+  }
 }
 
 /* -------------------------------------------------------------------------- */

@@ -76,6 +76,13 @@ class Renderer {
     return this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "";
   }
 
+  /** ` data-htsl-range="start-end"` so the preview can edit an element's source. */
+  private rangeAttr(node: ElementNode): string {
+    return this.options.editableText && node.range
+      ? ` data-htsl-range="${node.range[0]}-${node.range[1]}"`
+      : "";
+  }
+
   private math(node: ObjectNode): string {
     return renderMathObject(node, this.ctx, {
       ...(this.options.katex !== undefined ? { katex: this.options.katex } : {}),
@@ -120,7 +127,7 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return escapeHtml(rawHtml(node));
     }
-    const open = openTag(node, extra);
+    const open = openTag(node, extra + this.rangeAttr(node));
     if (VOID_TAGS.has(node.tag)) return open;
     const inner = node.children
       .filter((c) => c.type !== "comment")
@@ -158,7 +165,7 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return pad + escapeHtml(rawHtml(node));
     }
-    const open = openTag(node, extra);
+    const open = openTag(node, extra + this.rangeAttr(node));
     if (VOID_TAGS.has(node.tag)) return pad + open;
 
     const children = node.children.filter((c) => c.type !== "comment");

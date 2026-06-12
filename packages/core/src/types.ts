@@ -76,6 +76,12 @@ export interface ElementNode {
   selfClosing: boolean;
   children: Node[];
   loc: Loc;
+  /**
+   * Absolute source `[start, end]` offsets of the whole `{...}` element, present
+   * only when parsed with `{ ranges: true }`. Enables editing the element's
+   * source directly from the rendered preview.
+   */
+  range?: [number, number];
 }
 
 /**
@@ -92,6 +98,9 @@ export interface ObjectNode {
   selfClosing: boolean;
   children: Node[];
   loc: Loc;
+  /** Absolute source `[start, end]` offsets of the whole `{@...}` object, present
+   *  only when parsed with `{ ranges: true }` (see {@link ElementNode.range}). */
+  range?: [number, number];
 }
 
 /** A component parameter, with an optional default value. */

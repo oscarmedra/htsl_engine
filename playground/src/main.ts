@@ -41,7 +41,7 @@ const helpEl = $<HTMLDivElement>("help");
 let latestHtml = "";
 let lastSrc: string | null = null;
 
-/** Write an edit made in the rendered preview back into the source. */
+/** Write a text edit made in the rendered preview back into the source. */
 function onTextEdit(start: number, end: number, text: string): void {
   const escaped = text.replace(/([{}:$])/g, "\\$1"); // re-escape HTSL specials
   if (view.state.sliceDoc(start, end) === escaped) return; // unchanged
@@ -49,7 +49,14 @@ function onTextEdit(start: number, end: number, text: string): void {
   run(view, true); // re-render immediately so offsets stay fresh
 }
 
-const frame = new FrameRenderer(renderFrame, mathCss, onTextEdit);
+/** Write a whole-element edit (raw HTSL) from the preview back into the source. */
+function onElementEdit(start: number, end: number, rawSource: string): void {
+  if (view.state.sliceDoc(start, end) === rawSource) return; // unchanged
+  view.dispatch({ changes: { from: start, to: end, insert: rawSource } });
+  run(view, true);
+}
+
+const frame = new FrameRenderer(renderFrame, mathCss, onTextEdit, onElementEdit);
 
 /** Dev-only metric: update time + how few DOM nodes were actually touched. */
 function showPerf(ms: number, touched: number, total: number): void {
@@ -95,7 +102,7 @@ function run(view: EditorView, force = false): void {
     // makes source-backed text runs editable directly in the preview.
     const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true });
     latestHtml = html;
-    const stats = frame.apply(html);
+    const stats = frame.apply(html, src);
     showPerf(performance.now() - t0, stats.touched, stats.total);
   } catch (e) {
     if (e instanceof HTSLError) {

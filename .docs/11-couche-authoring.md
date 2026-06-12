@@ -38,12 +38,12 @@ Drawer repliable (bouton **➕ Insérer**). C'est la **surface principale**
 (l'éditeur brut est pour les power users) ; aussi la **description lisible mène**
 et le chemin technique est secondaire.
 
-Organisation (retour utilisateur) :
-
-- **Conteneurs en premier** : les **composants définis par l'utilisateur**
-  (lus à chaque ouverture via `registry.components(parse(doc))`) + les **scènes**
-  2D/3D — les choses qu'on remplit. Puis Structure, Formules, Équations,
-  Géométrie (les acteurs géométriques, scènes exclues).
+Organisation (retour utilisateur) — **classification claire**, chaque type a sa
+place : `Objets créés` (composants définis par l'utilisateur, lus à chaque
+ouverture via `registry.components(parse(doc))` ; un libellé d'aide invite à en
+définir s'il n'y en a pas) · `Textes` (structure) · `Formules` (formules +
+équations) · `Scènes` (les conteneurs 2D/3D) · `Géométrie` (les acteurs qui vont
+dans une scène).
 - **Aperçus en texte brut** : `compile(example)` *sans* KaTeX → le texte du rendu
   (les maths restent en LaTeX source), plus léger et plus clair que des formules
   rendues ; les scènes affichent « 🧊 Graphique interactif ». Mis en cache.

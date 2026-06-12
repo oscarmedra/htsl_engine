@@ -46,3 +46,30 @@ Syntaxe du langage inchangée ; `ranges`/`editableText` sont opt-in. Tests : cor
 
 Un antislash littéral dans le texte n'est pas ré-échappé (cas rare en prose) ;
 le reste (`{ } : $`) l'est.
+
+## Extension : édition d'un **élément** entier depuis le rendu
+
+Le texte se corrige sans syntaxe ; pour changer la **structure** d'un bloc, on
+peut désormais cliquer l'élément lui-même.
+
+- **Plages d'éléments/objets** : le lexer porte des offsets absolus sur *tous*
+  les jetons `{`, `{@`, `}` (plus seulement TEXT). Le parser attache
+  `range: [début, fin]` aux nœuds `element`/`object` (sous `ranges: true`),
+  couvrant tout le `{…}`. L'expansion préserve la plage des éléments réellement
+  écrits ; pour un **composant**, les plages internes (du template) sont retirées
+  et la plage de l'**appel** `{@…}` est exposée sur la racine de l'instance, afin
+  qu'éditer un composant édite son usage, pas son modèle.
+- **Rendu** : `render(ast, { editableText: true })` émet
+  `data-htsl-range="début-fin"` sur les éléments.
+- **Playground** : survol d'un élément (hors texte) = halo bleu ; clic = la zone
+  devient une **zone d'édition** (textarea) pré-remplie avec la **source HTSL**
+  du bloc. `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est
+  remplacé tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; `Échap`
+  annule. Le clic sur un **texte** garde l'édition de texte (les deux modes
+  cohabitent : texte = sans syntaxe, élément = source du bloc).
+- Tests (`tests/editable.test.ts`) : plage = `{…}`/`{@…/}` exact, absente par
+  défaut, et instance de composant exposant l'appel (une seule plage).
+
+Vérifié en navigateur : cliquer un `{h1:…}` → l'éditer en `{h1.vedette:Titre
+modifié}` met à jour classe + texte ; cliquer une instance de composant ouvre
+`{@carte[titre=Salut]: Corps.}` ; `Échap` annule sans réécrire.
