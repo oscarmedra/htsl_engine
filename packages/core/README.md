@@ -328,13 +328,63 @@ automatiquement les balises laissées ouvertes.
 > peuvent être perdus (les nœuds texte vides sont supprimés). Le contenu
 > textuel significatif et l'échappement, eux, font un aller-retour fidèle.
 
+## Introspection & métadonnées d'authoring
+
+Le moteur tient un **registre des objets `@`** introspectable, source unique de
+vérité pour les outils (autocomplétion, palette du playground) — aucune liste
+n'est codée en dur ailleurs.
+
+```ts
+import { registry, parse } from "htsl";
+
+registry.list();            // toutes les entrées (objets + éléments HTML courants)
+registry.describe("mte");   // métadonnées d'une entrée (alias résolu)
+registry.components(ast);   // composants {!define} d'un document parsé
+registry.variables(ast);    // variables {!set} d'un document
+```
+
+Chaque entrée porte des **métadonnées riches** :
+
+| Champ | Description |
+|-------|-------------|
+| `path` / `aliases` | chemin canonique (`math.text.equation`) et alias (`mte`) |
+| `kind` | `"object"` (objet `@`) ou `"element"` (balise HTML courante : `h1`, `p`, `ul`, `table`…). Les éléments sont **introspectables mais n'affectent pas le langage** : `{h1:…}` reste une simple balise, jamais un objet `@`. |
+| `category` | `structure \| formules \| géométrie \| document` (pour classer la palette) |
+| `description` | phrase lisible |
+| `attrs` | schéma des attributs : `name`, `type`, `required`, `default`, `description` |
+| `snippet` | gabarit d'insertion avec **marqueurs de trous** CodeMirror, ex. `"{@mte[label=${1:label}]: ${2:formule}}"` |
+| `example` | exemple compilable (sert d'aperçu) |
+
+Ces métadonnées alimentent directement `@htsl/codemirror` (snippets, commande
+slash) et la palette du playground.
+
+## Plages source & rendu éditable
+
+Pour éditer le rendu et réécrire le source, le moteur peut attacher des **plages
+source absolues** aux nœuds :
+
+```ts
+const ast = parse(src, { ranges: true }); // off par défaut → AST inchangé
+// → les nœuds `text`, `element` et `object` portent `range: [start, end]`
+```
+
+- La plage d'un **texte** couvre le texte brut (échappements compris) ; celle
+  d'un **élément/objet** couvre tout le `{…}` / `{@…}`.
+- Au rendu, `render(ast, { editableText: true })` enveloppe chaque texte
+  source-backé dans `<span class="htsl-edit" data-htsl-text="start-end">` et
+  émet `data-htsl-range="start-end"` sur les éléments. Un outil (cf. le
+  playground) mappe alors un clic du rendu vers la portion de source à réécrire.
+  Les textes issus de variables/composants n'ont pas de plage (non éditables
+  individuellement) ; le contenu math n'est pas enveloppé.
+
 ## L'AST
 
 Chaque nœud porte sa position (`loc: { line, col }`, 1-based). Le texte est un
 nœud typé, pas une simple chaîne. Union discriminée `Node` sur le champ `type` :
 
 ```ts
-type Node = ElementNode | TextNode | CommentNode | ErrorNode;
+type Node = ElementNode | TextNode | CommentNode | ObjectNode
+          | DefineNode | SetNode | VarRefNode | ErrorNode;
 ```
 
 ```json
@@ -388,17 +438,21 @@ est matérialisée par un nœud `{ type: "error" }` dans l'AST.
 ## Tests
 
 ```bash
-npm test           # 55 tests : lexer, parser, renderer
+npm test           # 184 tests : lexer, parser, renderer, objets, introspection…
 ```
 
 La suite couvre chaque type de token et les positions, tous les cas de syntaxe
-et d'erreur, l'échappement XSS, les balises void, le pretty-print, et des
-**golden files** (`tests/fixtures/*.htsl` → `*.html`).
+et d'erreur, l'échappement XSS, les balises void, le pretty-print, les objets
+math/géométrie, les composants/variables, l'introspection (métadonnées + chaque
+exemple qui compile), les plages source/rendu éditable, et des **golden files**
+(`tests/fixtures/*.htsl` → `*.html`).
 
-## Hors périmètre (v0.1)
+## Hors périmètre (cœur)
 
-Objets spécialisés (`{math.vector:...}`), API de plugins, rendu LaTeX/KaTeX,
-CLI complète, playground web, export PDF/JSON.
+Le rendu KaTeX/Plotly est délégué à la page (peerDependencies, voir plus haut) ;
+le cœur n'en dépend jamais. Hors scope du paquet : API de plugins tierce, CLI
+complète, export PDF. Le playground et les extensions d'éditeur vivent dans les
+autres paquets du monorepo.
 
 ## Licence
 

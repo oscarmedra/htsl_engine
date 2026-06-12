@@ -13,6 +13,8 @@ npm install @htsl/codemirror htsl codemirror
 
 ```ts
 import { EditorView, basicSetup } from "codemirror";
+import { keymap } from "@codemirror/view";
+import { indentWithTab } from "@codemirror/commands";
 import { autocompletion } from "@codemirror/autocomplete";
 import { parse, registry } from "htsl";
 import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
@@ -22,12 +24,17 @@ new EditorView({
   doc: "{div.box:Bonjour {@mti: x^2}}",
   extensions: [
     basicSetup,
-    htslLanguage(),
-    autocompletion({ override: [htslCompletion(registry)] }),
-    htslLinter(parse),
+    htslLanguage(),                                              // coloration + indentation
+    autocompletion({ override: [htslCompletion(registry)] }),    // snippets + commande slash
+    htslLinter(parse),                                           // diagnostics
+    keymap.of([indentWithTab]),                                  // Tab / Maj-Tab
   ],
 });
 ```
+
+> Ces trois extensions alimentent **les deux éditeurs du playground** : l'éditeur
+> principal et l'éditeur de bloc flottant ouvert depuis le rendu — même
+> coloration, même autocomplétion, même indentation.
 
 ## API
 
@@ -44,5 +51,11 @@ Helpers : `htslTokens(src)` (tokenisation, pour tests/outils), `htslDiagnostics(
 - `htslCompletion` accepte n'importe quel objet d'introspection compatible
   (`list` / `describe` / `components` / `variables`) — passez `registry` de `htsl`,
   ou un registre étendu.
+- **Commande slash** : la source renvoie les entrées quand l'autocomplétion est
+  ouverte sur un `/` en début de ligne. CodeMirror n'auto-active pas sur un
+  non-mot ; l'hôte doit donc appeler `startCompletion(view)` quand l'utilisateur
+  tape `/` seul en début de ligne (un `updateListener` suffit — voir
+  `playground/src/main.ts`).
 - Le linter utilise le **mode tolérant** du parser : il ne lève jamais, et chaque
   problème de syntaxe devient un diagnostic localisé.
+- Tests : 29 (tokenisation, complétion, snippets, slash, indentation, linter).
