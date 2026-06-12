@@ -61,8 +61,8 @@ peut désormais cliquer l'élément lui-même.
   qu'éditer un composant édite son usage, pas son modèle.
 - **Rendu** : `render(ast, { editableText: true })` émet
   `data-htsl-range="début-fin"` sur les éléments.
-- **Playground** : survol d'un élément (hors texte) = halo bleu ; clic = un
-  **véritable éditeur CodeMirror HTSL** s'ouvre en superposition sur l'élément,
+- **Playground** : survol d'un élément (hors texte) = halo bleu ; **double-clic**
+  = un **véritable éditeur CodeMirror HTSL** s'ouvre en superposition sur l'élément,
   pré-rempli avec la **source HTSL** du bloc. Il a **la même expérience que
   l'éditeur principal** : coloration syntaxique, autocomplétion (`{@`, `/`,
   attributs…) et linter, via `@htsl/codemirror` (`playground/src/block-editor.ts`).

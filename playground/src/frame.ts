@@ -172,7 +172,9 @@ export class FrameRenderer {
       el?.classList.add("htsl-hover");
     });
 
-    doc.addEventListener("click", (ev) => {
+    // The block editor opens on double-click only (a single click leaves the
+    // render alone — handy when presenting, and lets text runs handle clicks).
+    doc.addEventListener("dblclick", (ev) => {
       const t = ev.target as Element | null;
       if (!t || t.closest(".htsl-edit")) return; // text runs handle their own editing
       const el = t.closest("[data-htsl-range]") as HTMLElement | null;
