@@ -205,27 +205,33 @@ export class FrameRenderer {
     this.hovered = null;
   }
 
+  /** The *outermost* editable element (top-level parent block) above `t`, so a
+   *  click deep inside many nested tags targets the parent, not a leaf like a
+   *  `{p}`. Returns null over a text run (which has its own inline editing). */
+  private parentBlock(t: Element | null): HTMLElement | null {
+    if (!t || t.closest(".htsl-edit")) return null;
+    let el = t.closest("[data-htsl-range]") as HTMLElement | null;
+    if (!el) return null;
+    for (let a = el.parentElement; a; a = a.parentElement) {
+      if (a.hasAttribute("data-htsl-range")) el = a;
+    }
+    return el;
+  }
+
   private installBlockEditing(doc: Document): void {
-    // Highlight the innermost editable element under the cursor, but never over
-    // a text run (those have their own inline text editing).
+    // Highlight the parent block under the cursor.
     doc.addEventListener("mouseover", (ev) => {
-      const t = ev.target as Element | null;
-      const el =
-        t && !t.closest(".htsl-edit")
-          ? (t.closest("[data-htsl-range]") as HTMLElement | null)
-          : null;
+      const el = this.parentBlock(ev.target as Element | null);
       if (el === this.hovered) return;
       this.clearHover();
       this.hovered = el;
       el?.classList.add("htsl-hover");
     });
 
-    // The block editor opens on double-click only (a single click leaves the
-    // render alone — handy when presenting, and lets text runs handle clicks).
+    // The block editor opens on double-click only, for the parent block only
+    // (a single click leaves the render alone; text runs handle their clicks).
     doc.addEventListener("dblclick", (ev) => {
-      const t = ev.target as Element | null;
-      if (!t || t.closest(".htsl-edit")) return; // text runs handle their own editing
-      const el = t.closest("[data-htsl-range]") as HTMLElement | null;
+      const el = this.parentBlock(ev.target as Element | null);
       if (!el || !this.onBlockClick) return;
       const [s, e] = (el.getAttribute("data-htsl-range") ?? "").split("-").map(Number);
       if (s === undefined || e === undefined) return;

@@ -61,9 +61,12 @@ peut désormais cliquer l'élément lui-même.
   qu'éditer un composant édite son usage, pas son modèle.
 - **Rendu** : `render(ast, { editableText: true })` émet
   `data-htsl-range="début-fin"` sur les éléments.
-- **Playground** : survol d'un élément (hors texte) = halo bleu ; **double-clic**
-  = un **véritable éditeur CodeMirror HTSL** s'ouvre en superposition sur l'élément,
-  pré-rempli avec la **source HTSL** du bloc. Il a **la même expérience que
+- **Playground** : seul le **bloc parent (de premier niveau)** est éditable —
+  survoler/double-cliquer à l'intérieur cible le `[data-htsl-range]` le plus
+  extérieur (`parentBlock` dans `frame.ts`), pas une feuille comme `{p}` (utile
+  quand il y a beaucoup de balises imbriquées). Survol (hors texte) = halo bleu ;
+  **double-clic** = un **véritable éditeur CodeMirror HTSL** s'ouvre en
+  superposition sur le bloc, pré-rempli avec sa **source HTSL**. Il a **la même expérience que
   l'éditeur principal** : coloration syntaxique, autocomplétion (`{@`, `/`,
   attributs…) et linter, via `@htsl/codemirror` (`playground/src/block-editor.ts`).
   `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est remplacé
