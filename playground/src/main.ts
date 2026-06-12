@@ -32,6 +32,7 @@ const bannerEl = $<HTMLDivElement>("banner");
 const panelsEl = $<HTMLElement>("panels");
 const examplesSel = $<HTMLSelectElement>("examples");
 const toggleAst = $<HTMLInputElement>("toggle-ast");
+const toggleEditor = $<HTMLInputElement>("toggle-editor");
 const perfEl = document.getElementById("perf");
 const helpEl = $<HTMLDivElement>("help");
 
@@ -264,9 +265,15 @@ $("btn-share").addEventListener("click", async () => {
   flash($("btn-share"), "Lien copié ✓");
 });
 
-toggleAst.addEventListener("change", () => {
+/** Show/hide the AST and editor panels. Class-based columns govern; any custom
+ *  drag widths are reset so the layout stays consistent across combinations. */
+function relayout(): void {
   panelsEl.classList.toggle("no-ast", !toggleAst.checked);
-});
+  panelsEl.classList.toggle("no-editor", !toggleEditor.checked);
+  panelsEl.style.gridTemplateColumns = ""; // let the CSS classes govern
+}
+toggleAst.addEventListener("change", relayout);
+toggleEditor.addEventListener("change", relayout);
 
 function flash(btn: HTMLElement, text: string): void {
   const old = btn.textContent;
@@ -282,7 +289,8 @@ let editorW = 0.4;
 let renderW = 0.36;
 
 function applyColumns(): void {
-  if (!toggleAst.checked) return;
+  // Custom drag widths only apply when every panel is visible.
+  if (!toggleAst.checked || !toggleEditor.checked) return;
   panelsEl.style.gridTemplateColumns = `${editorW}fr 6px ${renderW}fr 6px ${Math.max(0.15, 1 - editorW - renderW)}fr`;
 }
 
@@ -323,8 +331,8 @@ $("btn-insert").addEventListener("click", () => palette.toggle());
 // Exposed for debugging / scripting from the console.
 (window as unknown as { htslView: EditorView }).htslView = view;
 
-// Honour the AST checkbox's initial state (hidden by default).
-panelsEl.classList.toggle("no-ast", !toggleAst.checked);
+// Honour the checkboxes' initial state (AST hidden, editor shown by default).
+relayout();
 
 run(view);
 updateHelp(view, helpEl);
