@@ -193,5 +193,12 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Vérifié en navigateur : `{h1:…}` → édité en `{h1.vedette:Titre modifié}` (classe+texte MAJ) ; instance de composant ouvre `{@carte[titre=Salut]: Corps.}` ; Échap annule ; édition de texte intacte.
 - Core **184** tests (10 plages d'éléments), codemirror 25. Syntaxe du langage inchangée.
 
+### Éditeur de bloc = vrai CodeMirror dans le rendu (retour utilisateur)
+
+- Le textarea d'édition de bloc devient un **véritable éditeur CodeMirror HTSL** (`playground/src/block-editor.ts`) : coloration syntaxique, autocomplétion (`{@`, `/`, attributs) et linter — les mêmes extensions que l'éditeur principal via `@htsl/codemirror`. Objectif : tout faire depuis le rendu (l'éditeur principal devient optionnel).
+- Architecture : monté dans le **document parent** (où CM fonctionne) puis positionné en superposition sur l'élément via l'offset de l'iframe ; popups rendus dans `<body>` (`tooltips({parent})`) pour échapper à l'`overflow:hidden`. Le frame ne crée plus de textarea : au clic il notifie le parent `onBlockClick(start, end, rect)`.
+- Validation `⌘/Ctrl+Entrée` (bindings `Mod-Enter` **et** `Ctrl-Enter` pour Mac+autres) ou perte de focus réelle (`view.hasFocus`) ; `Échap` annule (après le `completionKeymap` pour que Échap ferme d'abord le popup). Un seul éditeur de bloc à la fois.
+- Vérifié en navigateur : clic sur `{h1:…}` ouvre un CM coloré ; édité en `{h1.vedette#intro: …}` puis Ctrl+Entrée → source réécrite + rendu MAJ ; Échap annule. (Le popup d'autocomplétion exige le focus réel, non disponible dans le harness de capture, mais l'extension est identique à l'éditeur principal éprouvé.)
+
 
 

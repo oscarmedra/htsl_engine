@@ -18,6 +18,7 @@ import { examples } from "./examples";
 import { FrameRenderer } from "./frame";
 import { setupPalette } from "./palette";
 import { updateHelp } from "./help";
+import { openBlockEditor } from "./block-editor";
 
 /* -------------------------------------------------------------------------- */
 /* DOM                                                                        */
@@ -56,7 +57,35 @@ function onElementEdit(start: number, end: number, rawSource: string): void {
   run(view, true);
 }
 
-const frame = new FrameRenderer(renderFrame, mathCss, onTextEdit, onElementEdit);
+/** Only one floating block editor at a time. */
+let closeBlockEditor: (() => void) | null = null;
+
+/**
+ * A block was clicked in the preview: open a full HTSL editor (highlighting +
+ * autocompletion) floating over it, so authoring happens straight from the
+ * render. `rect` is in the iframe's own viewport; add the iframe offset.
+ */
+function onBlockClick(start: number, end: number, rect: DOMRect): void {
+  closeBlockEditor?.(); // commit/cancel any previous one
+  const frameRect = renderFrame.getBoundingClientRect();
+  closeBlockEditor = openBlockEditor({
+    doc: view.state.sliceDoc(start, end),
+    rect: {
+      left: frameRect.left + rect.left,
+      top: frameRect.top + rect.top,
+      width: rect.width,
+    },
+    onCommit: (text) => {
+      closeBlockEditor = null;
+      onElementEdit(start, end, text);
+    },
+    onCancel: () => {
+      closeBlockEditor = null;
+    },
+  });
+}
+
+const frame = new FrameRenderer(renderFrame, mathCss, onTextEdit, onBlockClick);
 
 /** Dev-only metric: update time + how few DOM nodes were actually touched. */
 function showPerf(ms: number, touched: number, total: number): void {
@@ -102,7 +131,7 @@ function run(view: EditorView, force = false): void {
     // makes source-backed text runs editable directly in the preview.
     const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true });
     latestHtml = html;
-    const stats = frame.apply(html, src);
+    const stats = frame.apply(html);
     showPerf(performance.now() - t0, stats.touched, stats.total);
   } catch (e) {
     if (e instanceof HTSLError) {

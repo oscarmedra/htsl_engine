@@ -61,12 +61,19 @@ peut désormais cliquer l'élément lui-même.
   qu'éditer un composant édite son usage, pas son modèle.
 - **Rendu** : `render(ast, { editableText: true })` émet
   `data-htsl-range="début-fin"` sur les éléments.
-- **Playground** : survol d'un élément (hors texte) = halo bleu ; clic = la zone
-  devient une **zone d'édition** (textarea) pré-remplie avec la **source HTSL**
-  du bloc. `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est
-  remplacé tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; `Échap`
-  annule. Le clic sur un **texte** garde l'édition de texte (les deux modes
-  cohabitent : texte = sans syntaxe, élément = source du bloc).
+- **Playground** : survol d'un élément (hors texte) = halo bleu ; clic = un
+  **véritable éditeur CodeMirror HTSL** s'ouvre en superposition sur l'élément,
+  pré-rempli avec la **source HTSL** du bloc. Il a **la même expérience que
+  l'éditeur principal** : coloration syntaxique, autocomplétion (`{@`, `/`,
+  attributs…) et linter, via `@htsl/codemirror` (`playground/src/block-editor.ts`).
+  `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est remplacé
+  tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; `Échap` annule.
+  L'objectif est de pouvoir **tout faire depuis le rendu** (l'éditeur principal
+  devient optionnel). Détails : l'éditeur est monté dans le document parent (où
+  CodeMirror fonctionne déjà) puis positionné via l'offset de l'iframe ; ses
+  popups sont rendus dans `<body>` (`tooltips({ parent })`) pour échapper à
+  l'`overflow:hidden`. Le clic sur un **texte** garde l'édition de texte simple
+  (les deux modes cohabitent : texte = sans syntaxe, élément = source du bloc).
 - Tests (`tests/editable.test.ts`) : plage = `{…}`/`{@…/}` exact, absente par
   défaut, et instance de composant exposant l'appel (une seule plage).
 

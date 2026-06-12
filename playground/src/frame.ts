@@ -27,16 +27,8 @@ const BASE_CSS = `
   .htsl-edit:hover { background: #eef2ff; box-shadow: 0 0 0 1px #c7d2fe; cursor: text; }
   .htsl-edit:focus { outline: none; background: #fff8e1; box-shadow: 0 0 0 2px #f59e0b; }
   /* Block editing: the hovered element (its non-text region) is highlighted and
-     clickable; clicking turns it into an inline source editor. */
+     clickable; clicking opens a full HTSL editor over it (handled by the parent). */
   .htsl-hover { box-shadow: 0 0 0 2px #93c5fd; border-radius: 4px; cursor: pointer; }
-  .htsl-eledit-wrap { margin: 0.3rem 0; }
-  .htsl-eledit {
-    display: block; width: 100%; box-sizing: border-box; resize: vertical;
-    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-    padding: 0.5rem 0.6rem; border: 2px solid #f59e0b; border-radius: 6px;
-    background: #fffdf6; color: #1f2430; tab-size: 2;
-  }
-  .htsl-eledit-hint { font: 11px/1.4 system-ui, sans-serif; color: #92760a; margin-top: 0.2rem; }
 `;
 
 export interface MorphStats {
@@ -54,18 +46,16 @@ export class FrameRenderer {
   private pending: string | null = null;
   private readonly assets = new Map<string, HTMLElement>();
   private plotlyLoading = false;
-  /** Latest source string — needed to seed the inline block editor. */
-  private source = "";
   /** Element currently highlighted on hover (block-edit affordance). */
   private hovered: HTMLElement | null = null;
-  /** Element currently being edited inline, if any. */
-  private editing: HTMLElement | null = null;
 
   constructor(
     private readonly iframe: HTMLIFrameElement,
     mathCss: string,
     private readonly onTextEdit?: (start: number, end: number, text: string) => void,
-    private readonly onElementEdit?: (start: number, end: number, rawSource: string) => void,
+    /** Click on a block → request the parent to open a full editor over it.
+     *  `rect` is the element's bounding box in the iframe's own viewport. */
+    private readonly onBlockClick?: (start: number, end: number, rect: DOMRect) => void,
   ) {
     this.iframe.addEventListener("load", () => {
       this.doc = this.iframe.contentDocument;
@@ -83,7 +73,7 @@ export class FrameRenderer {
         this.onTextEdit(s, e, t.textContent ?? "");
       });
       // Block editing: highlight the hovered element, click to edit its source.
-      if (this.onElementEdit) this.installBlockEditing(this.doc!);
+      if (this.onBlockClick) this.installBlockEditing(this.doc!);
       if (this.pending !== null) {
         const html = this.pending;
         this.pending = null;
@@ -99,8 +89,7 @@ export class FrameRenderer {
   }
 
   /** Apply a freshly compiled HTML string, morphing only what changed. */
-  apply(html: string, source?: string): MorphStats {
-    if (source !== undefined) this.source = source;
+  apply(html: string): MorphStats {
     // Drop any stale hover highlight so morphdom doesn't diff the extra class.
     this.clearHover();
     if (!this.doc || !this.root) {
@@ -172,10 +161,9 @@ export class FrameRenderer {
     // Highlight the innermost editable element under the cursor, but never over
     // a text run (those have their own inline text editing).
     doc.addEventListener("mouseover", (ev) => {
-      if (this.editing) return;
       const t = ev.target as Element | null;
       const el =
-        t && !t.closest(".htsl-edit") && !t.closest(".htsl-eledit-wrap")
+        t && !t.closest(".htsl-edit")
           ? (t.closest("[data-htsl-range]") as HTMLElement | null)
           : null;
       if (el === this.hovered) return;
@@ -185,61 +173,14 @@ export class FrameRenderer {
     });
 
     doc.addEventListener("click", (ev) => {
-      if (this.editing) return;
       const t = ev.target as Element | null;
-      if (!t || t.closest(".htsl-edit") || t.closest(".htsl-eledit-wrap")) return;
+      if (!t || t.closest(".htsl-edit")) return; // text runs handle their own editing
       const el = t.closest("[data-htsl-range]") as HTMLElement | null;
-      if (el) this.openBlockEditor(el);
-    });
-  }
-
-  private openBlockEditor(el: HTMLElement): void {
-    if (this.editing || !this.onElementEdit || !this.doc) return;
-    const attr = el.getAttribute("data-htsl-range");
-    const [s, e] = (attr ?? "").split("-").map(Number);
-    if (s === undefined || e === undefined) return;
-    const raw = this.source.slice(s, e);
-    const doc = this.doc;
-
-    this.clearHover();
-    const wrap = doc.createElement("div");
-    wrap.className = "htsl-eledit-wrap";
-    const ta = doc.createElement("textarea");
-    ta.className = "htsl-eledit";
-    ta.value = raw;
-    ta.rows = Math.min(20, raw.split("\n").length);
-    ta.spellcheck = false;
-    const hint = doc.createElement("div");
-    hint.className = "htsl-eledit-hint";
-    hint.textContent = "⌘/Ctrl + Entrée pour valider · Échap pour annuler";
-    wrap.append(ta, hint);
-
-    el.style.display = "none";
-    el.parentNode?.insertBefore(wrap, el);
-    this.editing = el;
-    ta.focus();
-    ta.setSelectionRange(raw.length, raw.length);
-
-    let done = false;
-    const close = (commit: string | null): void => {
-      if (done) return;
-      done = true;
-      ta.removeEventListener("blur", onBlur);
-      wrap.remove();
-      el.style.display = "";
-      this.editing = null;
-      if (commit !== null && commit !== raw) this.onElementEdit!(s, e, commit);
-    };
-    const onBlur = (): void => close(ta.value);
-    ta.addEventListener("blur", onBlur);
-    ta.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape") {
-        ev.preventDefault();
-        close(null);
-      } else if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) {
-        ev.preventDefault();
-        close(ta.value);
-      }
+      if (!el || !this.onBlockClick) return;
+      const [s, e] = (el.getAttribute("data-htsl-range") ?? "").split("-").map(Number);
+      if (s === undefined || e === undefined) return;
+      this.clearHover();
+      this.onBlockClick(s, e, el.getBoundingClientRect());
     });
   }
 
