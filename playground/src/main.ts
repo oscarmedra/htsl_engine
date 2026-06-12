@@ -258,6 +258,9 @@ $("btn-download").addEventListener("click", () => {
   URL.revokeObjectURL(a.href);
 });
 
+// Export the rendered preview as PDF via the browser's print dialog.
+$("btn-pdf").addEventListener("click", () => frame.printToPdf());
+
 $("btn-share").addEventListener("click", async () => {
   const url = location.origin + location.pathname + encodeHash(view.state.doc.toString());
   window.history.replaceState(null, "", url);

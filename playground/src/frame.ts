@@ -29,6 +29,12 @@ const BASE_CSS = `
   /* Block editing: the hovered element (its non-text region) is highlighted and
      clickable; clicking opens a full HTSL editor over it (handled by the parent). */
   .htsl-hover { box-shadow: 0 0 0 2px #93c5fd; border-radius: 4px; cursor: pointer; }
+  /* PDF export (print): drop on-screen editing affordances, keep colours. */
+  @media print {
+    body { padding: 0; }
+    .htsl-edit, .htsl-hover { background: none !important; box-shadow: none !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
 `;
 
 export interface MorphStats {
@@ -82,10 +88,23 @@ export class FrameRenderer {
     });
     this.iframe.srcdoc = `<!doctype html><html lang="fr"><head>
 <meta charset="utf-8" />
+<title>document</title>
 <base target="_blank" />
 <link rel="stylesheet" href="${KATEX_CSS}" />
 <style>${BASE_CSS}${mathCss}</style>
 </head><body><div id="htsl-root"></div></body></html>`;
+  }
+
+  /** Open the print dialog for the rendered document (→ « Enregistrer au format
+   *  PDF »). Prints only the iframe, so the PDF is the pure render. */
+  printToPdf(): void {
+    const win = this.iframe.contentWindow;
+    if (!win || !this.doc) return;
+    // Default the PDF filename to the document's first heading.
+    const heading = this.doc.querySelector("h1, h2, h3")?.textContent?.trim();
+    this.doc.title = heading ? heading.slice(0, 60) : "document";
+    win.focus();
+    win.print();
   }
 
   /** Apply a freshly compiled HTML string, morphing only what changed. */

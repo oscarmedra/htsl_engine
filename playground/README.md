@@ -105,8 +105,12 @@ chargé automatiquement quand une scène est présente.
 
 - **Exemples préchargés** (menu déroulant), dont « Mise en page Tailwind » et
   « Bootstrap ».
-- Boutons **Copier HTML** / **Télécharger** (`.htsl`) / **Partager** (lien encodé
-  dans le hash d'URL, rechargé à l'ouverture).
+- Boutons **Copier HTML** / **Télécharger** (`.htsl`) / **PDF** / **Partager**
+  (lien encodé dans le hash d'URL, rechargé à l'ouverture).
+- **Export PDF** — le bouton **PDF** ouvre la boîte d'impression du navigateur sur
+  **l'iframe seule** (→ « Enregistrer au format PDF ») : le PDF est le rendu pur,
+  avec texte sélectionnable, formules KaTeX et styles intacts. Le nom de fichier
+  par défaut reprend le premier titre du document. (Aucune dépendance ajoutée.)
 
 ## Organisation du code
 
