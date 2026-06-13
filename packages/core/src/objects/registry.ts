@@ -72,6 +72,7 @@ const COLLECTION_ALIASES: Record<string, string> = {
   mg2: "math.geometry.2d",
   mg3: "math.geometry.3d",
   s3: "scene.3d",
+  plot: "math.plot",
 };
 
 const OBJECTS = new Map<string, ObjectMeta>();
@@ -479,6 +480,26 @@ registerObject({
   example: "{@mg3.sphere[center=\"(0,0,0)\", radius=2]/}",
 });
 
+// --- 2D function plot (y = f(x), rendered via Plotly) ---
+registerObject({
+  path: "math.plot.fn",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: ["plot"],
+  description: "Graphe d'une fonction y = f(x) (expression évaluée).",
+  attrs: [
+    { name: "fn", type: "string", required: false, default: "x", description: "Expression y=f(x), ex. sin(x)/x." },
+    tuple("xrange", false, "Intervalle x, ex. (-10,10)."),
+    { name: "samples", type: "number", required: false, default: "400", description: "Nombre de points." },
+    { name: "title", type: "string", required: false, description: "Titre du graphe." },
+    COLOR,
+    { name: "width", type: "number", required: false, default: "640", description: "Largeur en pixels." },
+    { name: "height", type: "number", required: false, default: "360", description: "Hauteur en pixels." },
+  ],
+  snippet: "{@plot[fn=${1:\"sin(x)/x\"}, xrange=\"(-15,15)\", title=${2:\"y = sin(x)/x\"}]/}",
+  example: "{@plot[fn=\"sin(x)/x\", xrange=\"(-15,15)\", title=\"y = sin(x)/x\"]/}",
+});
+
 // --- Declarative animated 3D scenes (WebGL / Three.js) ---
 const SPIN: AttrSchema = { name: "spin", type: "number", required: false, default: "0", description: "Rotation propre par image." };
 const ORBIT: AttrSchema = { name: "orbit", type: "number", required: false, default: "0", description: "Rayon d'orbite autour de l'origine." };
@@ -640,6 +661,40 @@ registerObject({
   ],
   snippet: "{@s3.line[points=${1:\"(0,0,0);(1,1,0);(2,0,1)\"}, color=${2:\"#22d3ee\"}]/}",
   example: "{@s3.line[points=\"(0,0,0);(1,1,0);(2,0,1);(3,1,0)\", color=\"#22d3ee\"]/}",
+});
+registerObject({
+  path: "scene.3d.surface",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Surface z = f(x, y) (expression mathématique évaluée).",
+  attrs: [
+    { name: "z", type: "string", required: false, default: "0", description: "Expression z=f(x,y), ex. sin(x)*cos(y)." },
+    tuple("xrange", false, "Intervalle x, ex. (-3,3)."),
+    tuple("yrange", false, "Intervalle y, ex. (-3,3)."),
+    { name: "res", type: "number", required: false, default: "36", description: "Résolution de la grille." },
+    COLOR,
+    OPACITY,
+  ],
+  snippet: "{@s3.surface[z=${1:\"sin(x)*cos(y)\"}, xrange=\"(-3,3)\", yrange=\"(-3,3)\", color=${2:\"#60a5fa\"}]/}",
+  example: "{@s3.surface[z=\"sin(x)*cos(y)\", xrange=\"(-3,3)\", yrange=\"(-3,3)\", color=\"#60a5fa\"]/}",
+});
+registerObject({
+  path: "scene.3d.curve",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Courbe paramétrique 3D (x(t), y(t), z(t)).",
+  attrs: [
+    { name: "x", type: "string", required: false, default: "cos(t)", description: "x(t)." },
+    { name: "y", type: "string", required: false, default: "sin(t)", description: "y(t)." },
+    { name: "z", type: "string", required: false, default: "t/3", description: "z(t)." },
+    tuple("trange", false, "Intervalle de t, ex. (0, 6.28)."),
+    { name: "samples", type: "number", required: false, default: "200", description: "Nombre de points." },
+    COLOR,
+  ],
+  snippet: "{@s3.curve[x=${1:\"cos(3*t)\"}, y=${2:\"sin(2*t)\"}, z=${3:\"sin(5*t)/2\"}, trange=\"(0, 6.28)\", color=${4:\"#22d3ee\"}]/}",
+  example: "{@s3.curve[x=\"cos(t)\", y=\"sin(t)\", z=\"t/3\", trange=\"(0, 18)\", color=\"#22d3ee\"]/}",
 });
 registerObject({
   path: "scene.3d.axes",

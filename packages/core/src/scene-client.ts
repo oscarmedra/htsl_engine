@@ -30,11 +30,15 @@ function sceneKey(el: Element): string {
   return el.getAttribute("data-htsl-hash") ?? quickHash(el.getAttribute("data-htsl-scene") ?? "");
 }
 
+/** True once Plotly has drawn into `el`. Plotly stamps `js-plotly-plot` on the
+ *  target element itself (not a descendant); a child marker covers test fakes. */
+function hasPlot(el: Element): boolean {
+  return el.classList?.contains("js-plotly-plot") || el.querySelector(".js-plotly-plot") !== null;
+}
+
 /** A scene needs (re)drawing when it has never been drawn or its hash changed. */
 function isPending(el: Element): boolean {
-  const drawn = el.getAttribute("data-htsl-init");
-  const hasPlot = el.querySelector(".js-plotly-plot") !== null;
-  return !(drawn === sceneKey(el) && hasPlot);
+  return !(el.getAttribute("data-htsl-init") === sceneKey(el) && hasPlot(el));
 }
 
 /** Scenes under `root` that still need to be drawn or updated (no Plotly needed). */
@@ -78,8 +82,7 @@ export function hydrateScenes(root?: ParentNode, plotly?: PlotlyLike): number {
       return;
     }
 
-    const hasPlot = el.querySelector(".js-plotly-plot") !== null;
-    if (hasPlot && Plotly.react) {
+    if (hasPlot(el) && Plotly.react) {
       Plotly.react(el, spec.data, spec.layout, CONFIG); // hash changed → in-place update
     } else {
       el.textContent = "";

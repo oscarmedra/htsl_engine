@@ -17,12 +17,13 @@
  * `orbit`+`speed` (circular orbit), `glow` (self-lit material).
  */
 import { escapeHtml } from "../escape.js";
+import { safeExpr } from "./expr.js";
 import type { ObjectNode } from "../types.js";
 
 export type ThreeShape = "sphere" | "box" | "torus" | "cylinder" | "cone" | "plane" | "point";
 
 export interface ThreeObject {
-  type: "mesh" | "vector" | "line" | "axes" | "grid";
+  type: "mesh" | "vector" | "line" | "axes" | "grid" | "surface";
   shape: ThreeShape;
   x: number;
   y: number;
@@ -42,10 +43,17 @@ export interface ThreeObject {
   /** vector arrow endpoints. */
   from: Vec3;
   to: Vec3;
-  /** polyline / trajectory points. */
+  /** polyline / trajectory points (also: sampled parametric curve). */
   points: Vec3[];
   /** grid divisions / axes size. */
   divisions: number;
+  /** surface z=f(x,y): row-major heights over a res×res grid + its bounds. */
+  heights: number[];
+  res: number;
+  xmin: number;
+  xmax: number;
+  ymin: number;
+  ymax: number;
 }
 
 export interface ThreeSpec {
@@ -90,6 +98,15 @@ function points(v: string | undefined): Vec3[] {
     .filter(Boolean)
     .map((s) => vec3(s));
 }
+/** Parse "(a, b)" → [a, b]. */
+function range(v: string | undefined, fallback: [number, number]): [number, number] {
+  if (!v) return fallback;
+  const p = v.replace(/[()]/g, "").split(",").map((s) => Number(s.trim()));
+  return [Number.isFinite(p[0]) ? p[0]! : fallback[0], Number.isFinite(p[1]) ? p[1]! : fallback[1]];
+}
+function clampInt(n: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, Math.round(n)));
+}
 
 function base(n: ObjectNode, shape: ThreeShape, type: ThreeObject["type"]): ThreeObject {
   return {
@@ -111,6 +128,12 @@ function base(n: ObjectNode, shape: ThreeShape, type: ThreeObject["type"]): Thre
     to: vec3(n.attrs["to"], [1, 1, 1]),
     points: points(n.attrs["points"]),
     divisions: num(n.attrs["divisions"], 10),
+    heights: [],
+    res: 0,
+    xmin: 0,
+    xmax: 0,
+    ymin: 0,
+    ymax: 0,
   };
 }
 
@@ -136,6 +159,37 @@ function actor(n: ObjectNode): ThreeObject | null {
       return base(n, "sphere", "vector");
     case "line":
       return base(n, "sphere", "line");
+    case "curve": {
+      // Parametric 3D curve (x(t), y(t), z(t)) sampled into points.
+      const fx = safeExpr(n.attrs["x"] ?? "cos(t)");
+      const fy = safeExpr(n.attrs["y"] ?? "sin(t)");
+      const fz = safeExpr(n.attrs["z"] ?? "t/3");
+      const [t0, t1] = range(n.attrs["trange"], [0, Math.PI * 2]);
+      const N = clampInt(num(n.attrs["samples"], 200), 2, 4000);
+      const pts: Vec3[] = [];
+      for (let i = 0; i < N; i++) {
+        const t = t0 + ((t1 - t0) * i) / (N - 1);
+        pts.push([fx({ t }), fy({ t }), fz({ t })]);
+      }
+      return { ...base(n, "sphere", "line"), points: pts };
+    }
+    case "surface": {
+      // z = f(x, y) sampled over a res×res grid → height field.
+      const f = safeExpr(n.attrs["z"] ?? "0");
+      const [x0, x1] = range(n.attrs["xrange"], [-3, 3]);
+      const [y0, y1] = range(n.attrs["yrange"], [-3, 3]);
+      const res = clampInt(num(n.attrs["res"], 36), 2, 120);
+      const heights: number[] = [];
+      for (let j = 0; j < res; j++) {
+        for (let i = 0; i < res; i++) {
+          const x = x0 + ((x1 - x0) * i) / (res - 1);
+          const y = y0 + ((y1 - y0) * j) / (res - 1);
+          const z = f({ x, y });
+          heights.push(Number.isFinite(z) ? z : 0);
+        }
+      }
+      return { ...base(n, "sphere", "surface"), heights, res, xmin: x0, xmax: x1, ymin: y0, ymax: y1 };
+    }
     case "axes":
       return { ...base(n, "sphere", "axes"), size: num(n.attrs["size"], 3) };
     case "grid":

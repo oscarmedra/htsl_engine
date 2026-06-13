@@ -29,6 +29,9 @@ export interface ThreeNS {
   ConeGeometry: Ctor;
   PlaneGeometry: Ctor;
   BufferGeometry: Ctor;
+  BufferAttribute: Ctor;
+  Float32BufferAttribute: Ctor;
+  DoubleSide: number;
   MeshStandardMaterial: Ctor;
   MeshBasicMaterial: Ctor;
   LineBasicMaterial: Ctor;
@@ -163,6 +166,37 @@ function buildObject(o: ThreeObject, T: ThreeNS): any {
       const pts = o.points.map((p) => new T.Vector3(p[0], p[1], p[2]));
       const geo = new T.BufferGeometry().setFromPoints(pts);
       return new T.Line(geo, new T.LineBasicMaterial({ color: o.color }));
+    }
+    case "surface": {
+      const { res, xmin, xmax, ymin, ymax, heights } = o;
+      const pos = new Float32Array(res * res * 3);
+      for (let j = 0; j < res; j++) {
+        for (let i = 0; i < res; i++) {
+          const k = j * res + i;
+          pos[k * 3] = xmin + ((xmax - xmin) * i) / (res - 1);
+          pos[k * 3 + 1] = heights[k] ?? 0; // height = up (y)
+          pos[k * 3 + 2] = ymin + ((ymax - ymin) * j) / (res - 1);
+        }
+      }
+      const idx: number[] = [];
+      for (let j = 0; j < res - 1; j++) {
+        for (let i = 0; i < res - 1; i++) {
+          const a = j * res + i;
+          idx.push(a, a + res, a + 1, a + 1, a + res, a + res + 1);
+        }
+      }
+      const geo = new T.BufferGeometry();
+      geo.setAttribute("position", new T.Float32BufferAttribute(pos, 3));
+      geo.setIndex(idx);
+      geo.computeVertexNormals();
+      const mat = new T.MeshStandardMaterial({
+        color: o.color,
+        transparent: o.opacity < 1,
+        opacity: o.opacity,
+        side: T.DoubleSide,
+        flatShading: false,
+      });
+      return new T.Mesh(geo, mat);
     }
     case "axes":
       return new T.AxesHelper(o.size);

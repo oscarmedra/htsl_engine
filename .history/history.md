@@ -255,3 +255,14 @@ Objectif : un maximum d'objets déclaratifs utiles aux mathématiciens/physicien
 - **Bug lexer corrigé** (pré-existant, exposé par les coords 3D) : un nombre négatif décimal non quoté `x=-2.5` cassait (le `-` routait vers `lexIdent`, qui s'arrête au `.`). `lexNumber` consomme désormais un `-` initial ; `-<chiffre>` → nombre. Bénéficie à tout le langage. Test parser ajouté.
 - **Tests** : `three.test.ts` étendu (vecteurs, lignes, axes, grille, options, exemples qui compilent). Core **205**, codemirror 33.
 - **Vérifié en navigateur** : scène riche (axes + grille + sphère-soleil + tore + cylindre + cône + boîte + vecteur + trajectoire + point en orbite) rendue en WebGL, animée, OrbitControls + auto-rotation, **0 erreur console**.
+
+## Évaluateur d'expressions + surfaces/courbes 3D + traceur 2D (maths/physique)
+
+Suite « ajoutez vos suggestions » : objets basés sur un évaluateur mathématique sûr.
+
+- **`objects/expr.ts`** : interpréteur d'expressions **sûr** (pas de eval/Function/global) — tokenizer + descente récursive → closure `(scope)=>number`. Opérateurs `+ - * / % ^` (^ droite-assoc, lie plus fort que le moins unaire), fonctions (sin/cos/exp/log/sqrt/abs/min/max/…), constantes (pi/e/tau/phi), variables. `compileExpr`/`safeExpr` exportés. 6 tests.
+- **`s3.surface`** : surface `z=f(x,y)` échantillonnée (grille res×res → champ de hauteurs en données) ; le runtime construit une BufferGeometry (normales calculées, double face). **`s3.curve`** : courbe paramétrique `(x(t),y(t),z(t))` échantillonnée → points → Line.
+- **`{@plot[fn="…"]}`** (`objects/plot.ts`) : graphe 2D `y=f(x)` échantillonné, rendu via le **chemin Plotly déclaratif** (nœud `htsl-scene`, zéro `<script>`). Alias `plot`.
+- **Fix `hasPlot`** (scene-client) : Plotly pose `js-plotly-plot` **sur** l'élément (pas dessous) → l'ancien `querySelector` rendait `hasPlot` toujours faux (redessin à chaque hydrate). Corrigé en `classList.contains(...) || querySelector(...)` → `react`/skip fonctionnent vraiment.
+- **Tests** : `expr.test.ts` (6), `three.test.ts` étendu (surface/courbe/plot). Core **214**, codemirror 33.
+- **Vérifié en navigateur** : surface `sin(x)cos(y)` + courbe paramétrique 3D + sinc `sin(x)/x` en 2D, rendus ensemble, 5 modifs → 0 erreur.

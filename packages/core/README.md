@@ -297,7 +297,24 @@ le runtime via Three.js — toujours **zéro `<script>`** :
 | `s3.sphere` `s3.box` `s3.torus` `s3.cylinder` `s3.cone` `s3.plane` `s3.point` | formes (maillages) |
 | `s3.vector` | flèche `from`→`to` (forces, champs, déplacements) |
 | `s3.line` | ligne/trajectoire (`points="(x,y,z);(x,y,z);…"`) |
+| `s3.surface` | **surface `z = f(x, y)`** (`z="sin(x)*cos(y)"`, `xrange`, `yrange`, `res`) |
+| `s3.curve` | **courbe paramétrique** `(x(t), y(t), z(t))` (`x`, `y`, `z`, `trange`, `samples`) |
 | `s3.axes` `s3.grid` | repère et grille de référence |
+
+### Fonctions & expressions
+
+`s3.surface`, `s3.curve` et le graphe 2D acceptent des **expressions
+mathématiques** (`sin(x)*cos(y)`, `cos(t)`, `sin(x)/x`…) évaluées par un petit
+**interpréteur sûr** (`compileExpr` / `safeExpr`, exporté) : aucun `eval`, aucun
+accès au global — le moteur échantillonne la fonction et n'émet que des
+**données**. Opérateurs `+ - * / % ^`, fonctions usuelles (`sin cos tan exp log
+sqrt abs min max …`), constantes (`pi e tau phi`).
+
+### Graphe de fonction 2D
+
+`{@plot[fn="sin(x)/x", xrange="(-15,15)", title="…"]}` trace une fonction
+`y = f(x)` : échantillonnée par l'interpréteur, rendue via le même chemin
+déclaratif Plotly que les scènes (nœud `htsl-scene`, **zéro `<script>`**).
 
 Transforms communs (maillages) : `x`/`y`/`z`, `color`, `opacity`, `glow`
 (auto-lumineux), `spin` (rotation propre), `orbit`+`speed` (orbite).

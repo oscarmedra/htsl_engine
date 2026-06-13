@@ -74,10 +74,41 @@ describe("declarative 3D scenes (Three.js) — engine", () => {
     );
   });
 
-  it("exposes ~12 s3 objects via introspection", () => {
+  it("exposes the s3 objects via introspection (examples all compile)", () => {
     const s3 = registry.list().filter((e) => e.path.startsWith("scene.3d."));
-    expect(s3.length).toBeGreaterThanOrEqual(11);
-    // every example must compile (palette previews never throw)
+    expect(s3.length).toBeGreaterThanOrEqual(13);
     for (const e of s3) expect(() => compile(e.example)).not.toThrow();
+  });
+
+  it("samples a surface z=f(x,y) into a height grid", () => {
+    const src = `{@s3.scene:{@s3.surface[z="x*x + y*y", xrange="(-2,2)", yrange="(-2,2)", res=5]/}}`;
+    const o = threeSpec(parse(src)[0] as ObjectNode).objects[0]!;
+    expect(o.type).toBe("surface");
+    expect(o.res).toBe(5);
+    expect(o.heights).toHaveLength(25);
+    expect(o.heights[0]).toBeCloseTo(8); // (-2)^2 + (-2)^2
+    expect(o.heights[12]).toBeCloseTo(0); // centre (0,0)
+  });
+
+  it("samples a parametric curve (x(t),y(t),z(t)) into points", () => {
+    const src = `{@s3.scene:{@s3.curve[x="cos(t)", y="sin(t)", z="0", trange="(0, 6.283185)", samples=60]/}}`;
+    const o = threeSpec(parse(src)[0] as ObjectNode).objects[0]!;
+    expect(o.type).toBe("line");
+    expect(o.points).toHaveLength(60);
+    expect(o.points[0]).toEqual([1, 0, 0]); // t=0 → (cos0, sin0, 0)
+  });
+});
+
+describe("2D function plot {@plot}", () => {
+  it("renders a declarative Plotly scene (sampled), no <script>", () => {
+    const html = compile(`{@plot[fn="sin(x)/x", xrange="(-15,15)"]/}`, { hashBlocks: true });
+    expect(html).toContain('class="htsl-scene htsl-scene--2d"');
+    expect(html).toContain("scatter");
+    expect(html).not.toContain("<script");
+  });
+
+  it("resolves the plot alias and lists the object", () => {
+    expect(registry.describe("plot")?.path).toBe("math.plot.fn");
+    expect(registry.list().map((e) => e.path)).toContain("math.plot.fn");
   });
 });

@@ -15,6 +15,7 @@ import {
   type MathContext,
 } from "./objects/math.js";
 import { isThreePath, renderThree } from "./objects/three.js";
+import { isPlotPath, renderPlot } from "./objects/plot.js";
 import type { ElementNode, Node, ObjectNode, RenderOptions, TextNode } from "./types.js";
 
 export { escapeHtml } from "./escape.js";
@@ -89,9 +90,9 @@ class Renderer {
 
   /** Render an `{@…}` object: declarative 3D scenes vs the math/geometry layer. */
   private object(node: ObjectNode): string {
-    if (isThreePath(node.path)) {
-      return renderThree(node, this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "");
-    }
+    const hashAttr = this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "";
+    if (isThreePath(node.path)) return renderThree(node, hashAttr);
+    if (isPlotPath(node.path)) return renderPlot(node, hashAttr);
     return renderMathObject(node, this.ctx, {
       ...(this.options.katex !== undefined ? { katex: this.options.katex } : {}),
       ...(this.options.source !== undefined ? { source: this.options.source } : {}),
