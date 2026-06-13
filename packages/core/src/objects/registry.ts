@@ -71,6 +71,7 @@ const COLLECTION_ALIASES: Record<string, string> = {
   mo: "math.object",
   mg2: "math.geometry.2d",
   mg3: "math.geometry.3d",
+  s3: "scene.3d",
 };
 
 const OBJECTS = new Map<string, ObjectMeta>();
@@ -476,6 +477,69 @@ registerObject({
   attrs: [tuple("center", false, "Centre, ex. (0,0,0)."), { name: "radius", type: "number", required: false, default: "1", description: "Rayon." }, COLOR, OPACITY],
   snippet: "{@mg3.sphere[center=${1:\"(0,0,0)\"}, radius=${2:2}]/}",
   example: "{@mg3.sphere[center=\"(0,0,0)\", radius=2]/}",
+});
+
+// --- Declarative animated 3D scenes (WebGL / Three.js) ---
+const SPIN: AttrSchema = { name: "spin", type: "number", required: false, default: "0", description: "Rotation propre par image." };
+const ORBIT: AttrSchema = { name: "orbit", type: "number", required: false, default: "0", description: "Rayon d'orbite autour de l'origine." };
+const SPEED: AttrSchema = { name: "speed", type: "number", required: false, default: "0", description: "Vitesse angulaire de l'orbite." };
+const GLOW: AttrSchema = { name: "glow", type: "boolean", required: false, default: "false", description: "Matériau auto-lumineux (ex. soleil)." };
+const POS3: AttrSchema[] = [
+  { name: "x", type: "number", required: false, default: "0", description: "Position x." },
+  { name: "y", type: "number", required: false, default: "0", description: "Position y." },
+  { name: "z", type: "number", required: false, default: "0", description: "Position z." },
+];
+registerObject({
+  path: "scene.3d.scene",
+  contentModel: "html",
+  category: "géométrie",
+  aliases: [],
+  description: "Scène 3D animée (WebGL, rendue via Three.js).",
+  attrs: [
+    { name: "width", type: "number", required: false, default: "600", description: "Largeur en pixels." },
+    { name: "height", type: "number", required: false, default: "400", description: "Hauteur en pixels." },
+    { name: "background", type: "string", required: false, default: "#020617", description: "Couleur de fond." },
+  ],
+  snippet:
+    "{@s3.scene[height=480]:\n  {@s3.sphere[radius=0.8, color=\"#facc15\", glow=true, spin=0.003]/}\n  {@s3.sphere[radius=0.3, color=\"#60a5fa\", orbit=3, speed=0.02]/}\n  ${1}\n}",
+  example:
+    "{@s3.scene[height=480]:\n  {@s3.sphere[radius=0.8, color=\"#facc15\", glow=true, spin=0.003]/}\n  {@s3.sphere[radius=0.3, color=\"#60a5fa\", orbit=3, speed=0.02]/}\n}",
+});
+registerObject({
+  path: "scene.3d.sphere",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Sphère 3D (WebGL) : position, couleur, rotation, orbite.",
+  attrs: [
+    { name: "radius", type: "number", required: false, default: "0.5", description: "Rayon." },
+    ...POS3,
+    COLOR,
+    SPIN,
+    ORBIT,
+    SPEED,
+    GLOW,
+  ],
+  snippet: "{@s3.sphere[radius=${1:0.5}, color=${2:\"#60a5fa\"}, orbit=${3:3}, speed=${4:0.02}]/}",
+  example: "{@s3.sphere[radius=0.4, color=\"#60a5fa\", orbit=3, speed=0.02]/}",
+});
+registerObject({
+  path: "scene.3d.box",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Cube/boîte 3D (WebGL) : position, couleur, rotation, orbite.",
+  attrs: [
+    { name: "size", type: "number", required: false, default: "1", description: "Côté." },
+    ...POS3,
+    COLOR,
+    SPIN,
+    ORBIT,
+    SPEED,
+    GLOW,
+  ],
+  snippet: "{@s3.box[size=${1:1}, color=${2:\"#f472b6\"}, spin=${3:0.01}]/}",
+  example: "{@s3.box[size=1, color=\"#f472b6\", spin=0.01]/}",
 });
 
 /* -------------------------------------------------------------------------- */

@@ -20,16 +20,21 @@
  * No globals are created beyond `window.HTSL`.
  */
 import { hydrateScenes, pendingScenes, purgeScenes, type PlotlyLike } from "./scene-client.js";
+import { hydrateThree, pendingThree, purgeThree, type ThreeNS } from "./three-client.js";
 
 /** External dependency of a dynamic type. KaTeX (formulas) will join later. */
 const PLOTLY_URL = "https://cdn.plot.ly/plotly-2.27.0.min.js";
+const THREE_URL = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
 
 /** Minimal view of the target window we touch (the page's, or an iframe's). */
 interface RuntimeWindow {
   document: Document;
   Plotly?: PlotlyLike;
+  THREE?: ThreeNS;
   HTSL?: HtslRuntime;
   MutationObserver?: typeof MutationObserver;
+  requestAnimationFrame?: (cb: (t: number) => void) => number;
+  cancelAnimationFrame?: (id: number) => void;
   __htslDeps?: Map<string, Promise<void>>;
 }
 
@@ -90,10 +95,24 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
   if (pendingScenes(root).length > 0) {
     try {
       await loadDependency(PLOTLY_URL, w);
+      drawn += hydrateScenes(root, w.Plotly);
     } catch {
-      return drawn; // CDN unreachable → leave the fallback message
+      /* CDN unreachable → leave the fallback message */
     }
-    drawn += hydrateScenes(root, w.Plotly);
+  }
+
+  // Animated 3D scenes (Three.js).
+  if (pendingThree(root).length > 0 && w.requestAnimationFrame && w.cancelAnimationFrame) {
+    try {
+      await loadDependency(THREE_URL, w);
+      drawn += hydrateThree(root, {
+        THREE: w.THREE,
+        requestAnimationFrame: w.requestAnimationFrame.bind(w),
+        cancelAnimationFrame: w.cancelAnimationFrame.bind(w),
+      });
+    } catch {
+      /* CDN unreachable → leave the fallback message */
+    }
   }
 
   return drawn;
@@ -103,6 +122,7 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
 export function purge(removed: Iterable<Element>, win?: RuntimeWindow): void {
   const w = targetWindow(win);
   purgeScenes(removed, w?.Plotly);
+  purgeThree(removed);
 }
 
 /**

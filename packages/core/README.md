@@ -274,6 +274,28 @@ L'API expose aussi `toPlotly(node, dim)` et `sceneSpec(node)` (JSON pur), ainsi
 que `hydrateScenes(root?, Plotly?)` (dessin bas niveau, si vous fournissez
 vous-même Plotly).
 
+### Scènes 3D animées (WebGL / Three.js)
+
+Pour du 3D animé libre (au-delà des surfaces mathématiques de Plotly), la
+collection **`s3`** (`scene.3d`) décrit des scènes **déclaratives** dessinées par
+le runtime via Three.js — toujours **zéro `<script>`** :
+
+```htsl
+{@s3.scene[height=480, background="#020617"]:
+  {@s3.sphere[radius=0.9, color="#facc15", glow=true, spin=0.004]/}   {!-- soleil --}
+  {@s3.sphere[radius=0.3, color="#60a5fa", orbit=3, speed=0.02]/}      {!-- planète --}
+}
+```
+
+| Objet | Rôle |
+|-------|------|
+| `s3.scene` | conteneur (attrs `width`, `height`, `background`) → `<div class="htsl-three" data-htsl-three='{…}'>` |
+| `s3.sphere` / `s3.box` | acteurs : `x`/`y`/`z`, `color`, `radius`/`size`, `spin` (rotation propre), `orbit`+`speed` (orbite autour de l'origine), `glow` (auto-lumineux) |
+
+Le runtime charge Three.js (dépendance déclarée), construit la scène, lance une
+boucle `requestAnimationFrame`, **reconstruit** au changement de hash (Three n'a
+pas de `react`) et **libère le contexte WebGL** (`forceContextLoss`) à la purge.
+
 ## Runtime navigateur
 
 Comme le renderer ne produit que des **données** (jamais de JS exécutable), un
@@ -286,7 +308,7 @@ import { hydrate, purge, loadDependency, installHtslRuntime } from "htsl";
 
 | Fonction | Rôle |
 |----------|------|
-| `loadDependency(url, win?)` | Charge un script externe **une fois par (fenêtre, URL)** : la `Promise` est mise en cache → jamais de double chargement ni de course. Chaque type dynamique déclare sa dépendance (Plotly pour les scènes ; KaTeX à venir). |
+| `loadDependency(url, win?)` | Charge un script externe **une fois par (fenêtre, URL)** : la `Promise` est mise en cache → jamais de double chargement ni de course. Chaque type dynamique déclare sa dépendance (Plotly pour les scènes math, Three.js pour les scènes 3D animées ; KaTeX à venir). |
 | `hydrate(root, win?)` | Scanne les nœuds `htsl-*`, charge la dépendance **seulement s'il y a du travail**, initialise ce qui ne l'est pas, marque chaque nœud (`data-htsl-init="<hash>"`). **Idempotent** : rappeler est toujours sûr. Hash changé → `Plotly.react` (jamais destroy + `newPlot`) ; hash inchangé → **strictement rien**. |
 | `purge(removed, win?)` | Libère les ressources (`Plotly.purge`) des scènes retirées/remplacées — à appeler avant qu'elles quittent le DOM (évite les fuites). |
 | `installHtslRuntime(win?)` | Installe le runtime comme **unique** global `window.HTSL`, hydrate au `DOMContentLoaded`, et garde tout synchronisé via un `MutationObserver` (purge les scènes retirées puis ré-hydrate). Idéal pour une page statique. |

@@ -14,6 +14,7 @@ import {
   renderMathObject,
   type MathContext,
 } from "./objects/math.js";
+import { isThreePath, renderThree } from "./objects/three.js";
 import type { ElementNode, Node, ObjectNode, RenderOptions, TextNode } from "./types.js";
 
 export { escapeHtml } from "./escape.js";
@@ -86,7 +87,11 @@ class Renderer {
       : "";
   }
 
-  private math(node: ObjectNode): string {
+  /** Render an `{@…}` object: declarative 3D scenes vs the math/geometry layer. */
+  private object(node: ObjectNode): string {
+    if (isThreePath(node.path)) {
+      return renderThree(node, this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "");
+    }
     return renderMathObject(node, this.ctx, {
       ...(this.options.katex !== undefined ? { katex: this.options.katex } : {}),
       ...(this.options.source !== undefined ? { source: this.options.source } : {}),
@@ -116,7 +121,7 @@ class Renderer {
       case "error":
         return htmlComment(node.message);
       case "object":
-        return this.math(node);
+        return this.object(node);
       case "element":
         return this.compactElement(node);
       case "define":
@@ -155,7 +160,7 @@ class Renderer {
       case "error":
         return pad + htmlComment(node.message);
       case "object":
-        return pad + this.math(node);
+        return pad + this.object(node);
       case "element":
         return this.prettyElement(node, indent);
       case "define":

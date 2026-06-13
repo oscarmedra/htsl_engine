@@ -20,6 +20,12 @@ import { hydrate as htslHydrate, purge as htslPurge, type HtslRuntime } from "ht
 
 const KATEX_CSS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css";
 
+/** Dynamic node types: (class, data attribute) preserved across morphs. */
+const DYNAMIC: ReadonlyArray<readonly [string, string]> = [
+  ["htsl-scene", "data-htsl-scene"],
+  ["htsl-three", "data-htsl-three"],
+];
+
 /** The iframe window, as the runtime's loadDependency/hydrate expect it. */
 type RuntimeWin = Parameters<HtslRuntime["hydrate"]>[1];
 
@@ -143,18 +149,21 @@ export class FrameRenderer {
         const fh = from.getAttribute("data-htsl-hash");
         const th = to.getAttribute("data-htsl-hash");
         if (fh !== null && fh === th) return false; // identical block → keep as-is
-        const fromScene = from.classList.contains("htsl-scene");
-        const toScene = to.classList.contains("htsl-scene");
-        if (fromScene && toScene) {
-          // Same scene slot → update only the data; the runtime redraws (react).
-          const spec = to.getAttribute("data-htsl-scene");
-          if (spec !== null) from.setAttribute("data-htsl-scene", spec);
-          if (th !== null) from.setAttribute("data-htsl-hash", th);
-          touched += 1;
-          return false;
+        // Same dynamic slot (scene→scene, three→three): update only the data and
+        // keep the element; the runtime redraws it (Plotly.react / Three rebuild).
+        for (const [cls, attr] of DYNAMIC) {
+          if (from.classList.contains(cls) && to.classList.contains(cls)) {
+            const spec = to.getAttribute(attr);
+            if (spec !== null) from.setAttribute(attr, spec);
+            if (th !== null) from.setAttribute("data-htsl-hash", th);
+            touched += 1;
+            return false;
+          }
         }
-        // A scene being repurposed into other content → free its plot first.
-        if (fromScene && !toScene) htslPurge([from], win);
+        // A dynamic node repurposed into other content → free its resources first.
+        if (from.classList.contains("htsl-scene") || from.classList.contains("htsl-three")) {
+          htslPurge([from], win);
+        }
         touched += 1;
         return true;
       },

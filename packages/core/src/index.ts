@@ -34,6 +34,9 @@ export { toPlotly, sceneSpec, latexOfGeometry, isGeometryPath, isScenePath, isDe
 export type { Trace, SceneSpec } from "./objects/geometry.js";
 export { hydrateScenes, pendingScenes, purgeScenes } from "./scene-client.js";
 export type { PlotlyLike } from "./scene-client.js";
+export { hydrateThree, pendingThree, purgeThree } from "./three-client.js";
+export { threeSpec, isThreePath, renderThree } from "./objects/three.js";
+export type { ThreeSpec, ThreeObject } from "./objects/three.js";
 export { loadDependency, hydrate, purge, installHtslRuntime } from "./runtime.js";
 export type { HtslRuntime } from "./runtime.js";
 export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";

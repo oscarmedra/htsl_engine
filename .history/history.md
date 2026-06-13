@@ -236,3 +236,12 @@ Trois bugs structurels (Plotly is not defined / Identifier already declared / ge
 - **Tests** : `tests/runtime.test.ts` (faux DOM minimal) — cache loadDependency, idempotence hydrate, react au changement de hash, purge au retrait, pas de chargement si rien à faire. `raw-text.test.ts` adapté (inline inerte). Core **197**, codemirror **33**.
 - **Vérifié en navigateur** : scène 3D + **10 modifications consécutives** → 0 erreur console, 1 seul plot (react, pas de fuite), 1 seul script Plotly. Retrait → purge appelé ; script inline inerte (non exécuté) ; re-ajout → redessine.
 - Décisions de périmètre (confirmées) : formules restent en rendu eager (déjà sans `<script>`, KaTeX dépendance future) ; scripts inline inertes (point 4). `.docs/12-runtime-declaratif.md` ajouté.
+
+## Scènes 3D animées déclaratives (collection s3 / Three.js)
+
+Suite au choix « scènes 3D natives » : pour de l'interactif 3D sans JS inline (interdit par le point 4), nouvelle collection déclarative.
+
+- **Cœur** : `objects/three.ts` (`threeSpec`, `renderThree`, `isThreePath`) ; registre `scene.3d.scene/sphere/box` (alias collection `s3`) avec attrs `x/y/z`, `color`, `radius`/`size`, `spin`, `orbit`+`speed`, `glow`. Le renderer émet `<div class="htsl-three" data-htsl-three='{objects:[…]}'>` — **zéro `<script>`**. `renderer.ts` : `math()` → `object()` qui dispatche three vs math.
+- **Runtime** : `three-client.ts` (`pendingThree`, `hydrateThree`, `purgeThree`) construit la scène Three.js + boucle `requestAnimationFrame`, reconstruit au changement de hash, libère le contexte WebGL (`forceContextLoss`) au teardown. `runtime.ts` déclare Three.js comme dépendance et l'orchestre (hydrate/purge). `frame.ts` : morphing généralisé (htsl-scene **et** htsl-three préservés/purgés via une table `DYNAMIC`).
+- **Tests** : `tests/three.test.ts` (5) — nœud de données sans `<script>`, spec JSON (positions/animation/glow), défauts, alias s3, présence registre. Core **202**, codemirror 33.
+- **Vérifié en navigateur** : système solaire (soleil glow + 2 planètes en orbite) rendu en WebGL, animé (rAF ~373 appels), **10 modifications consécutives → 0 erreur, 1 seul canvas** (teardown correct, pas de fuite de contexte), 1 seul script Three.js. Retrait → teardown (0 canvas).

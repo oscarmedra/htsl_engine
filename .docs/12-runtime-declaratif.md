@@ -39,8 +39,20 @@ CSS verbatim. Le contenu HTSL ne peut donc plus produire de JS exécutable.
   `DOMContentLoaded` + `MutationObserver` (mode page statique).
 
 Le runtime tourne dans le realm appelant mais opère sur une fenêtre cible (la
-page, ou l'iframe du playground) — pas d'injection cross-realm. Une seule
-dépendance déclarée pour l'instant : Plotly (scènes) ; KaTeX viendra.
+page, ou l'iframe du playground) — pas d'injection cross-realm. Dépendances
+déclarées : Plotly (scènes math) et Three.js (scènes 3D animées) ; KaTeX viendra.
+
+### Scènes 3D natives déclaratives (au lieu de JS inline)
+
+Plutôt que d'exécuter du Three.js inline (interdit, point 4), une collection
+`s3` (`scene.3d`) décrit des scènes 3D animées en **données** :
+`{@s3.scene: {@s3.sphere[glow=true, spin=…]/} {@s3.sphere[orbit=…, speed=…]/} }`
+→ `<div class="htsl-three" data-htsl-three='{objects:[…]}'>`. Le runtime
+(`three-client.ts`) charge Three.js, construit la scène + boucle d'animation,
+reconstruit au changement de hash, et libère le contexte WebGL
+(`forceContextLoss`) au teardown (sinon la limite ~16 contextes du navigateur est
+atteinte après quelques éditions). Le même cas d'usage « système solaire » que
+l'utilisateur voulait, sans aucun JS exécutable ni erreur console.
 
 `scene-client.ts` reste le dessin bas niveau (`hydrateScenes`, `pendingScenes`,
 `purgeScenes`) ; le runtime l'orchestre avec le chargement des dépendances.

@@ -15,14 +15,14 @@ function parseSel(sel: string): Sel {
   const out: Sel = {};
   const attr = /\[([\w-]+)(?:="([^"]*)")?\]/.exec(sel);
   if (attr) {
-    out.attr = attr[1];
+    out.attr = attr[1]!;
     if (attr[2] !== undefined) out.attrVal = attr[2];
   }
   const base = sel.replace(/\[[^\]]*\]/g, ""); // drop attribute parts (may contain dots)
   const tag = /^([a-z][\w-]*)/i.exec(base);
   if (tag) out.tag = tag[1]!.toUpperCase();
   const cls = /\.([\w-]+)/.exec(base);
-  if (cls) out.cls = cls[1];
+  if (cls) out.cls = cls[1]!;
   return out;
 }
 
