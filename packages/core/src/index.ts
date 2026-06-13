@@ -15,6 +15,7 @@ import { tokenize } from "./lexer.js";
 import { fromHtml, parseHtml, toHtsl } from "./from-html.js";
 import { expand } from "./components/expand.js";
 import { hydrateScenes } from "./scene-client.js";
+import { hydrate, purge, loadDependency, installHtslRuntime } from "./runtime.js";
 import { registry } from "./introspect.js";
 import { mathCss } from "./objects/css.js";
 import { HTSLError } from "./errors.js";
@@ -31,7 +32,10 @@ export { latexOfObject, latexOfNode, clearKatexCache } from "./objects/math.js";
 export { htslHash } from "./hash.js";
 export { toPlotly, sceneSpec, latexOfGeometry, isGeometryPath, isScenePath, isDecorPath, parseComplex } from "./objects/geometry.js";
 export type { Trace, SceneSpec } from "./objects/geometry.js";
-export { hydrateScenes } from "./scene-client.js";
+export { hydrateScenes, pendingScenes, purgeScenes } from "./scene-client.js";
+export type { PlotlyLike } from "./scene-client.js";
+export { loadDependency, hydrate, purge, installHtslRuntime } from "./runtime.js";
+export type { HtslRuntime } from "./runtime.js";
 export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";
 export { registry, documentComponents, documentVariables } from "./introspect.js";
 export type { ComponentInfo } from "./introspect.js";
@@ -85,6 +89,10 @@ export const htsl_engine = {
   toHtsl,
   expand,
   hydrateScenes,
+  hydrate,
+  purge,
+  loadDependency,
+  installHtslRuntime,
   registry,
   mathCss,
   HTSLError,

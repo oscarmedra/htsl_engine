@@ -5,18 +5,23 @@
  * morphs only the changed nodes into the existing body instead of reloading the
  * whole document:
  *
- *  - `<link>` / `<script>` (any CSS/JS framework) are hoisted to the iframe head
- *    and reconciled by key, so an unchanged framework is never reloaded;
+ *  - author `<link>` / `<script src>` (any CSS/JS framework) are hoisted to the
+ *    iframe head and reconciled by key, so an unchanged framework is never
+ *    reloaded;
  *  - blocks carrying an identical `data-htsl-hash` are kept untouched (no DOM
  *    work, no KaTeX re-render);
- *  - geometry scenes are never re-plotted unless their description changed
- *    (`hydrateScenes` uses `Plotly.react`).
+ *  - **dynamic nodes are not scripts**: after each morph the engine's single
+ *    runtime is asked to {@link purge} removed scenes and {@link hydrate} the
+ *    root (it loads Plotly once into the iframe and is idempotent). The renderer
+ *    never emits executable `<script>`.
  */
 import morphdom from "morphdom";
-import { hydrateScenes } from "htsl";
+import { hydrate as htslHydrate, purge as htslPurge, type HtslRuntime } from "htsl";
 
 const KATEX_CSS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css";
-const PLOTLY_JS = "https://cdn.plot.ly/plotly-2.27.0.min.js";
+
+/** The iframe window, as the runtime's loadDependency/hydrate expect it. */
+type RuntimeWin = Parameters<HtslRuntime["hydrate"]>[1];
 
 const BASE_CSS = `
   *, *::before, *::after { box-sizing: border-box; }
@@ -48,18 +53,11 @@ export interface MorphStats {
   total: number;
 }
 
-interface PlotlyWin extends Window {
-  Plotly?: Parameters<typeof hydrateScenes>[1];
-}
-
 export class FrameRenderer {
   private doc: Document | null = null;
   private root: HTMLElement | null = null;
   private pending: string | null = null;
   private readonly assets = new Map<string, HTMLElement>();
-  private plotlyLoading = false;
-  /** Inline script bodies already executed (run once per unique body). */
-  private readonly ranScripts = new Set<string>();
   /** Element currently highlighted on hover (block-edit affordance). */
   private hovered: HTMLElement | null = null;
 
@@ -137,6 +135,7 @@ export class FrameRenderer {
     next.append(...Array.from(tpl.content.childNodes));
 
     let touched = 0;
+    const removed: Element[] = []; // scenes leaving the DOM → purge their Plotly state
     morphdom(this.root, next, {
       childrenOnly: true,
       onBeforeElUpdated: (from: Element, to: Element) => {
@@ -144,7 +143,7 @@ export class FrameRenderer {
         const th = to.getAttribute("data-htsl-hash");
         if (fh !== null && fh === th) return false; // identical block → keep as-is
         if (from.classList.contains("htsl-scene")) {
-          // Update only the data attributes; leave the plot for hydrateScenes.
+          // Update only the data attributes; the runtime redraws via Plotly.react.
           const spec = to.getAttribute("data-htsl-scene");
           if (spec !== null) from.setAttribute("data-htsl-scene", spec);
           if (th !== null) from.setAttribute("data-htsl-hash", th);
@@ -158,8 +157,9 @@ export class FrameRenderer {
         touched += 1;
         return node;
       },
-      onNodeDiscarded: () => {
+      onNodeDiscarded: (node: globalThis.Node) => {
         touched += 1;
+        if (node.nodeType === 1) removed.push(node as Element);
       },
     });
 
@@ -171,29 +171,13 @@ export class FrameRenderer {
     }
 
     const total = this.root.getElementsByTagName("*").length;
-    this.hydrate();
-    this.runInlineScripts();
-    return { touched, total };
-  }
 
-  /**
-   * Execute inline `{script:…}` bodies. morphdom inserts them inert (scripts set
-   * via innerHTML never run), so we recreate each one — *after* the body is in
-   * place, so the DOM it manipulates exists. Each unique body runs once; editing
-   * a script re-runs it.
-   */
-  private runInlineScripts(): void {
-    if (!this.root || !this.doc) return;
-    const doc = this.doc;
-    this.root.querySelectorAll("script:not([src])").forEach((old) => {
-      const code = old.textContent ?? "";
-      if (this.ranScripts.has(code)) return;
-      this.ranScripts.add(code);
-      const fresh = doc.createElement("script");
-      for (const attr of Array.from(old.attributes)) fresh.setAttribute(attr.name, attr.value);
-      fresh.textContent = code;
-      old.replaceWith(fresh); // appending a fresh <script> executes it
-    });
+    // Hand off to the engine's single runtime: free removed scenes, then hydrate.
+    const win = this.iframe.contentWindow as unknown as RuntimeWin;
+    if (removed.length > 0) htslPurge(removed, win);
+    void htslHydrate(this.root, win);
+
+    return { touched, total };
   }
 
   /* ----------------------------------------------------------------------- */
@@ -275,25 +259,4 @@ export class FrameRenderer {
     }
   }
 
-  /** Draw / update geometry scenes (loads Plotly into the iframe on demand). */
-  private hydrate(): void {
-    const doc = this.doc!;
-    if (!doc.querySelector(".htsl-scene")) return;
-    const win = this.iframe.contentWindow as PlotlyWin | null;
-    if (!win) return;
-
-    if (win.Plotly) {
-      hydrateScenes(doc, win.Plotly);
-      return;
-    }
-    if (this.plotlyLoading) return;
-    this.plotlyLoading = true;
-    const s = doc.createElement("script");
-    s.src = PLOTLY_JS;
-    s.addEventListener("load", () => {
-      this.plotlyLoading = false;
-      if (win.Plotly) hydrateScenes(doc, win.Plotly);
-    });
-    doc.head.appendChild(s);
-  }
 }

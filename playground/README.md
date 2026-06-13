@@ -101,20 +101,20 @@ Le raccourci `.classe` n'accepte que des identifiants simples ; les variantes à
 KaTeX (formules) est toujours disponible dans l'iframe ; Plotly (scènes) y est
 chargé automatiquement quand une scène est présente.
 
-## Scripts inline (documents interactifs)
+## Dynamisme = données + runtime (zéro `<script>` émis)
 
-Un `{script:…}` est rendu verbatim **et exécuté** dans l'iframe : les scripts
-externes (`{script[src]/}`) et les `{link}` sont hissés une fois dans `<head>` ;
-les scripts inline sont lancés **après** le morphing du corps (le DOM qu'ils
-manipulent existe donc), une fois par contenu unique (éditer un script le relance).
-On peut ainsi construire des documents interactifs (diaporamas, quiz…) :
+Le rendu ne produit **jamais** de JS exécutable. Les scènes sont des **nœuds de
+données** (`data-htsl-scene`) ; après chaque morphing, le playground appelle le
+**runtime unique** du moteur (`hydrate`/`purge`, voir le README de `htsl`) sur
+l'iframe : il charge Plotly **une seule fois** (Promise cachée), dessine, met à
+jour via `Plotly.react` au changement, et **purge** les scènes retirées. C'est
+idempotent → aucune des erreurs classiques (« Plotly is not defined », double
+déclaration, `getElementById` null).
 
-```htsl
-{button#next:Suivant}
-{script:
-  document.getElementById('next').onclick = () => console.log('clic');
-}
-```
+- `{script[src=…]/}` (CDN **externe** écrit par l'auteur) reste chargé dans
+  `<head>` (une fois, réconcilié par clé).
+- `{script: …code…}` **inline** est rendu **inerte** (`type="text/plain"`) : le
+  contenu HTSL ne produit pas de JS exécutable.
 
 ## Autres
 
@@ -135,7 +135,7 @@ On peut ainsi construire des documents interactifs (diaporamas, quiz…) :
 | Fichier | Rôle |
 |---------|------|
 | `src/main.ts` | Composition : éditeur CodeMirror, pipeline de rendu, barre d'outils, panneaux. |
-| `src/frame.ts` | `FrameRenderer` : iframe, morphing chirurgical, hydratation des scènes, édition de texte + détection du double-clic bloc. |
+| `src/frame.ts` | `FrameRenderer` : iframe, morphing chirurgical, délègue au runtime du moteur (`purge` des scènes retirées + `hydrate`), édition de texte + détection du double-clic bloc. |
 | `src/block-editor.ts` | Éditeur de bloc flottant (CodeMirror complet) positionné sur l'élément. |
 | `src/palette.ts` | Palette d'insertion (générée depuis l'introspection). |
 | `src/help.ts` | Aide contextuelle (`describe()` de l'objet au curseur). |

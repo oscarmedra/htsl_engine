@@ -130,9 +130,10 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return escapeHtml(rawHtml(node));
     }
-    const open = openTag(node, extra + this.rangeAttr(node));
+    const data = extra + this.rangeAttr(node);
+    const open = openTag(node, data);
     if (VOID_TAGS.has(node.tag)) return open;
-    if (RAW_TEXT_TAGS.has(node.tag)) return `${open}${rawTextOf(node)}</${node.tag}>`;
+    if (RAW_TEXT_TAGS.has(node.tag)) return this.rawText(node, open, data);
     const inner = node.children
       .filter((c) => c.type !== "comment")
       .map((c) => this.compact(c))
@@ -169,9 +170,10 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return pad + escapeHtml(rawHtml(node));
     }
-    const open = openTag(node, extra + this.rangeAttr(node));
+    const data = extra + this.rangeAttr(node);
+    const open = openTag(node, data);
     if (VOID_TAGS.has(node.tag)) return pad + open;
-    if (RAW_TEXT_TAGS.has(node.tag)) return `${pad}${open}${rawTextOf(node)}</${node.tag}>`;
+    if (RAW_TEXT_TAGS.has(node.tag)) return pad + this.rawText(node, open, data);
 
     const children = node.children.filter((c) => c.type !== "comment");
     if (children.length === 0) {
@@ -188,9 +190,29 @@ class Renderer {
     return lines.join("\n");
   }
 
+  /**
+   * Render a raw-text element's body. `{style:…}` is emitted verbatim (CSS).
+   * For `{script:…}`: an external resource (`{script[src]/}`, empty body) is a
+   * normal `<script>` (the author chose to load it), but an **inline** body is
+   * emitted **inert** (`type="text/plain"`) — HTSL content never produces
+   * executable JS (see SECURITY in the README).
+   */
+  private rawText(node: ElementNode, open: string, data: string): string {
+    const body = rawTextOf(node);
+    if (node.tag === "script" && body.trim() !== "") {
+      return `<script type="text/plain"${data}>${neutralizeScript(body)}</script>`;
+    }
+    return `${open}${body}</${node.tag}>`;
+  }
+
   private isBlocked(tag: string): boolean {
     return this.allowedTags !== null && !this.allowedTags.has(tag);
   }
+}
+
+/** Prevent an inline (inert) script body from closing its `<script>` tag. */
+function neutralizeScript(body: string): string {
+  return body.replace(/<\/(script)/gi, "<\\/$1");
 }
 
 /* -------------------------------------------------------------------------- */

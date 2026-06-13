@@ -225,3 +225,14 @@ Le moteur cassait sur du JS dans `{script:…}` (les `{`/`}` étaient parsés co
 - **@htsl/codemirror** : frame `raw` (lang js/css) dans le StreamLanguage → coloration JS (mots-clés, nombres, chaînes, commentaires, gabarits multi-lignes via l'état), CSS minimal ; comptage d'accolades pour reprendre le HTSL après le `}`. Tags `keyword`/`number` ajoutés. 4 tests. codemirror **33**.
 - **Playground** : `FrameRenderer` n'hisse plus que `link, script[src]` dans `<head>` ; les scripts **inline sont exécutés après le morphing** (recréés car morphdom les insère inertes), une fois par contenu unique (`ranScripts`) → documents interactifs (diaporamas…).
 - Vérifié en navigateur avec l'exemple diaporama de l'utilisateur : aucune erreur de parse, JS coloré, script exécuté, clic « Suivant » qui change de slide.
+
+## Refactor de la couche d'exécution JS : 100 % déclaratif + runtime unique
+
+Trois bugs structurels (Plotly is not defined / Identifier already declared / getElementById null) venaient de `<script>` impératifs dans le HTML. Refactor vers une sortie déclarative + un runtime unique.
+
+- **Renderer déclaratif** (`packages/core/src/renderer.ts`) : `{script: code-inline}` devient **inerte** (`<script type="text/plain">`, `</script>` neutralisé) — le contenu HTSL ne produit plus de JS exécutable ; `{script[src]/}` externe et `{style:…}` restent permis. Les scènes étaient déjà déclaratives (`data-htsl-scene`).
+- **Runtime unique** (`packages/core/src/runtime.ts`, nouveau) : `loadDependency(url,win)` (Promise cachée par fenêtre+URL), `hydrate(root,win)` (idempotent : charge la dépendance seulement s'il y a du travail, `Plotly.react` au changement de hash, rien si inchangé, marque `data-htsl-init`), `purge(removed,win)` (`Plotly.purge`), `installHtslRuntime` (global `window.HTSL`, DOMContentLoaded + MutationObserver pour le mode standalone). `scene-client.ts` enrichi (`pendingScenes`, `purgeScenes`, marqueur `data-htsl-init`).
+- **Playground** (`frame.ts`) : rustines supprimées (`runInlineScripts`, `ranScripts`, `plotlyLoading`, injection `<script>` Plotly, ancien `hydrate()`). Après morphing : `purge(scènes retirées, iframeWin)` puis `hydrate(root, iframeWin)`.
+- **Tests** : `tests/runtime.test.ts` (faux DOM minimal) — cache loadDependency, idempotence hydrate, react au changement de hash, purge au retrait, pas de chargement si rien à faire. `raw-text.test.ts` adapté (inline inerte). Core **197**, codemirror **33**.
+- **Vérifié en navigateur** : scène 3D + **10 modifications consécutives** → 0 erreur console, 1 seul plot (react, pas de fuite), 1 seul script Plotly. Retrait → purge appelé ; script inline inerte (non exécuté) ; re-ajout → redessine.
+- Décisions de périmètre (confirmées) : formules restent en rendu eager (déjà sans `<script>`, KaTeX dépendance future) ; scripts inline inertes (point 4). `.docs/12-runtime-declaratif.md` ajouté.

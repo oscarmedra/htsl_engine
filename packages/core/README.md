@@ -72,22 +72,27 @@ identifier = letter { letter | digit | "-" | "_" } ;
 ## Texte brut : `{script:…}` / `{style:…}`
 
 Le corps d'un `{script:…}` ou `{style:…}` est lu **verbatim** (c'est du vrai
-JS/CSS, pas du HTSL) et rendu **sans échappement** — les `{` `}` `<` `&` du code
-sont préservés.
+JS/CSS, pas du HTSL) : les `{` `}` `<` `&` du code sont préservés. L'accolade
+fermante est celle qui **équilibre** l'ouvrante (les `{`/`}` imbriqués sont
+comptés ; ceux dans les chaînes, gabarits `` `…` `` et commentaires `//` `/* */`
+sont ignorés).
 
 ```htsl
-{script:
-  const el = document.querySelector('.x');
-  if (a < b) { el.classList.add('on'); }   // accolades, < et & intacts
-}
 {style:.x { color: red; } .y { display: none; }}
+{script[src="https://cdn.example/lib.js"]/}   {!-- ressource externe : permise --}
 ```
 
-L'accolade fermante du `{script:…}` est celle qui **équilibre** l'ouvrante :
-les `{`/`}` imbriqués sont comptés, et ceux à l'intérieur des chaînes, gabarits
-(`` `…` ``) et commentaires (`//`, `/* */`) sont ignorés pour ne pas fausser le
-compte. (Sécurité : émettre du JS/CSS inline est volontaire ; `allowedTags` peut
-toujours interdire `script`/`style`.)
+**Sécurité — le contenu HTSL ne produit jamais de JS exécutable.**
+
+- `{style:…}` est rendu tel quel (CSS, non exécutable).
+- `{script[src=…]/}` (ressource **externe**, sans corps) est rendu en
+  `<script src>` : c'est un chargement de CDN décidé par l'auteur.
+- un `{script: …code…}` **inline** est rendu **inerte** :
+  `<script type="text/plain">…</script>` (jamais exécuté ; `</script>` est
+  neutralisé). Le comportement dynamique passe par des nœuds de données +
+  [le runtime](#runtime-navigateur), pas par du JS émis dans le HTML.
+
+`allowedTags` peut en plus interdire totalement `script`/`style`.
 
 ## API
 
@@ -259,20 +264,35 @@ L'acteur `mg2.cpoint[z="3+2i", name=A]` place un point d'affixe complexe
 
 Attributs visuels communs : `color`, `opacity`, `label`/`name`.
 
-**Rendu** : le cœur ne dépend jamais de Plotly. Le renderer émet un `<div>` avec
-la description JSON des traces dans `data-htsl-scene` + un message de repli.
-Appelez `hydrateScenes(root?, Plotly?)` dans la page (après chargement de Plotly)
-pour les dessiner ; sans Plotly, le repli reste affiché.
+**Rendu déclaratif** : le cœur ne dépend jamais de Plotly et le renderer
+n'émet **aucun `<script>`**. Chaque scène est un nœud porteur de données
+`<div class="htsl-scene" data-htsl-scene='{…}' data-htsl-hash="…">` + un message
+de repli (pattern générique pour tout type dynamique : `class htsl-<type>` +
+`data-htsl-<type>`). C'est [le runtime](#runtime-navigateur) qui les dessine.
 
-```html
-<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-<script>
-  document.body.innerHTML = htsl_engine.compile(source);
-  htsl_engine.hydrateScenes(document, window.Plotly);
-</script>
+L'API expose aussi `toPlotly(node, dim)` et `sceneSpec(node)` (JSON pur), ainsi
+que `hydrateScenes(root?, Plotly?)` (dessin bas niveau, si vous fournissez
+vous-même Plotly).
+
+## Runtime navigateur
+
+Comme le renderer ne produit que des **données** (jamais de JS exécutable), un
+**runtime unique** donne vie au HTML. Il est livré avec le moteur (`window.HTSL`
+une fois installé) et c'est la **seule** couche JS que le moteur exécute.
+
+```ts
+import { hydrate, purge, loadDependency, installHtslRuntime } from "htsl";
 ```
 
-L'API expose aussi `toPlotly(node, dim)` et `sceneSpec(node)` (JSON pur).
+| Fonction | Rôle |
+|----------|------|
+| `loadDependency(url, win?)` | Charge un script externe **une fois par (fenêtre, URL)** : la `Promise` est mise en cache → jamais de double chargement ni de course. Chaque type dynamique déclare sa dépendance (Plotly pour les scènes ; KaTeX à venir). |
+| `hydrate(root, win?)` | Scanne les nœuds `htsl-*`, charge la dépendance **seulement s'il y a du travail**, initialise ce qui ne l'est pas, marque chaque nœud (`data-htsl-init="<hash>"`). **Idempotent** : rappeler est toujours sûr. Hash changé → `Plotly.react` (jamais destroy + `newPlot`) ; hash inchangé → **strictement rien**. |
+| `purge(removed, win?)` | Libère les ressources (`Plotly.purge`) des scènes retirées/remplacées — à appeler avant qu'elles quittent le DOM (évite les fuites). |
+| `installHtslRuntime(win?)` | Installe le runtime comme **unique** global `window.HTSL`, hydrate au `DOMContentLoaded`, et garde tout synchronisé via un `MutationObserver` (purge les scènes retirées puis ré-hydrate). Idéal pour une page statique. |
+
+Intégré (ex. le playground) : appelez `hydrate(conteneur, iframeWindow)` après
+chaque mise à jour du DOM — il charge Plotly dans cette fenêtre et est idempotent.
 
 ## Composants & variables
 

@@ -22,3 +22,4 @@ décrivant ce qui a été fait, pourquoi, et comment cela fonctionne.
 | `09-optimisation-playground.md` | Réactivité du playground : data-htsl-hash, morphdom, cache KaTeX, préservation Plotly |
 | `10-edition-texte-depuis-rendu.md` | Édition du texte depuis le rendu (plages source, editableText, réécriture) |
 | `11-couche-authoring.md` | Couche d'authoring : snippets, palette, commande slash, aide contextuelle (depuis l'introspection) |
+| `12-runtime-declaratif.md` | Couche d'exécution JS déclarative + runtime unique (loadDependency caché, hydrate idempotent, purge, scripts inline inertes) |
