@@ -273,3 +273,13 @@ Suite « ajoutez vos suggestions » : objets basés sur un évaluateur mathémat
 - **Multi-courbes 2D** : `{@plot}` devient un conteneur (contentModel html) ; objet `plot.curve` (fn/label/color). `renderPlot` agrège les courbes en un seul nœud Plotly multi-traces avec légende et palette par défaut. La forme `{@plot[fn=…]}` (une courbe) reste valable. Toujours rendu via le chemin déclaratif Plotly.
 - **Tests** : `three.test.ts` étendu (multi-courbes + légende, label autonome + attaché). Core **216**, codemirror 33.
 - **Vérifié en navigateur** : scène 3D avec labels (« origine », points A/B) + graphe « Trigonométrie » à 3 courbes (sin/cos/sinc) avec légende, 0 erreur.
+
+## Animations 3D déclaratives par id (s3.animate)
+
+Proposition utilisateur : des blocs d'animation référençant les objets par `id`. Implémenté + improvisations.
+
+- **IDs** : attribut `id` sur les maillages (cible des animations).
+- **`s3.animate`** : actions `move` (vers (x,y,z)), `rotate` (axis/angle), `scale` (value ou (sx,sy,sz)), `color`, `fade` (opacité), `transform` (adopte position+couleur d'un autre objet par id). Options `duration`, `delay`, `at` (départ absolu), `easing` (linear/easeIn/easeOut/easeInOut). Scène `loop` (défaut true).
+- **Timeline** (`three-client.ts`) : par cible, les animations s'enchaînent (curseur séquentiel, `at`/`delay` pour chevaucher). À la construction on précalcule des segments {start, end, from, to} (état complet pos/quat/scale/color/opacity) ; au runtime, interpolation par image (lerp position/échelle/couleur, slerp rotation, ease). Les objets ciblés sont exclus du spin/orbit (exclusion mutuelle).
+- **Tests** : `three.test.ts` (collecte par id, parsing move/rotate/transform, registre). Core **218**, codemirror 33.
+- **Vérifié en navigateur** : exemple utilisateur (A move→rotate→scale→transform vers B) joué en boucle, 0 erreur ; capture montre A agrandi, déplacé et passé à la couleur de B.

@@ -22,6 +22,7 @@ export interface ThreeNS {
   WebGLRenderer: Ctor;
   Color: Ctor;
   Vector3: Ctor;
+  Quaternion: Ctor;
   SphereGeometry: Ctor;
   BoxGeometry: Ctor;
   TorusGeometry: Ctor;
@@ -238,6 +239,35 @@ function buildObject(o: ThreeObject, T: ThreeNS, doc: Document): any {
   }
 }
 
+interface AnimState {
+  pos: any;
+  quat: any;
+  scale: any;
+  color: any;
+  opacity: number;
+}
+interface Segment {
+  start: number;
+  end: number;
+  from: AnimState;
+  to: AnimState;
+  easing: string;
+}
+
+function ease(p: number, kind: string): number {
+  const t = Math.max(0, Math.min(1, p));
+  switch (kind) {
+    case "linear":
+      return t;
+    case "easeIn":
+      return t * t;
+    case "easeOut":
+      return 1 - (1 - t) * (1 - t);
+    default: // easeInOut
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+}
+
 function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void {
   const w = Math.max(1, spec.width);
   const h = Math.max(1, spec.height);
@@ -264,20 +294,113 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
   scene.add(group);
 
   const doc = win.document;
+  const targets = new Set(spec.animations.map((a) => a.target));
+  const byId: Record<string, { obj: any; o: ThreeObject }> = {};
   const animated: Array<{ obj: any; spin: number; orbit: number; speed: number; angle: number }> = [];
   for (const o of spec.objects) {
     const obj = buildObject(o, T, doc);
     if (obj) {
       group.add(obj);
-      if (o.spin || o.orbit) animated.push({ obj, spin: o.spin, orbit: o.orbit, speed: o.speed, angle: 0 });
+      if (o.id) byId[o.id] = { obj, o };
+      // spin/orbit and a timeline are mutually exclusive on the same object.
+      if ((o.spin || o.orbit) && !targets.has(o.id)) {
+        animated.push({ obj, spin: o.spin, orbit: o.orbit, speed: o.speed, angle: 0 });
+      }
     }
-    // An actor may carry an attached label (e.g. a named point).
     if (o.label && o.type !== "label") {
       const lbl = makeLabel(o.label, o.color === "#ffffff" ? "#e5e7eb" : o.color, 0.4, T, doc);
       lbl.position.set(o.x, o.y + (o.size || 0.3) + 0.35, o.z);
       group.add(lbl);
     }
   }
+
+  /* Build the animation timeline: per target, sequential channels by default. */
+  const cloneSt = (s: AnimState): AnimState => ({
+    pos: s.pos.clone(),
+    quat: s.quat.clone(),
+    scale: s.scale.clone(),
+    color: s.color.clone(),
+    opacity: s.opacity,
+  });
+  const segsByTarget: Record<string, Segment[]> = {};
+  const stateById: Record<string, AnimState> = {};
+  const cursor: Record<string, number> = {};
+  let totalDur = 0;
+  for (const a of spec.animations) {
+    const entry = byId[a.target];
+    if (!entry) continue;
+    if (!stateById[a.target]) {
+      const o = entry.o;
+      stateById[a.target] = {
+        pos: new T.Vector3(o.x, o.y, o.z),
+        quat: new T.Quaternion(),
+        scale: new T.Vector3(1, 1, 1),
+        color: new T.Color(o.color),
+        opacity: o.opacity,
+      };
+      cursor[a.target] = 0;
+    }
+    const S = stateById[a.target]!;
+    const start = (a.at != null ? a.at : cursor[a.target]!) + a.delay;
+    const from = cloneSt(S);
+    // Apply the action to the running state → the segment's target state.
+    if (a.action === "move" && a.hasTo) S.pos.set(a.to[0], a.to[1], a.to[2]);
+    else if (a.action === "rotate") {
+      const ax = new T.Vector3(a.axis === "x" ? 1 : 0, a.axis === "y" ? 1 : 0, a.axis === "z" ? 1 : 0);
+      const q = new T.Quaternion().setFromAxisAngle(ax, (a.angle * Math.PI) / 180);
+      S.quat.multiply(q);
+    } else if (a.action === "scale") {
+      if (a.hasTo) S.scale.set(a.to[0], a.to[1], a.to[2]);
+      else S.scale.setScalar(a.value);
+    } else if (a.action === "color" && a.color) S.color.set(a.color);
+    else if (a.action === "fade") S.opacity = a.value;
+    else if (a.action === "transform") {
+      const b = byId[a.toId]?.o;
+      if (b) {
+        S.pos.set(b.x, b.y, b.z);
+        S.color.set(b.color);
+      }
+    }
+    const end = start + a.duration;
+    (segsByTarget[a.target] ??= []).push({ start, end, from, to: cloneSt(S), easing: a.easing });
+    cursor[a.target] = Math.max(cursor[a.target]!, end);
+    totalDur = Math.max(totalDur, end);
+  }
+  const hasTimeline = totalDur > 0;
+  const tmp: AnimState = {
+    pos: new T.Vector3(),
+    quat: new T.Quaternion(),
+    scale: new T.Vector3(),
+    color: new T.Color(),
+    opacity: 1,
+  };
+  const stateAt = (segs: Segment[], t: number): AnimState => {
+    if (t <= segs[0]!.start) return segs[0]!.from;
+    for (const s of segs) {
+      if (t < s.start) return s.from; // gap before this segment → hold previous
+      if (t < s.end) {
+        const p = ease((t - s.start) / (s.end - s.start), s.easing);
+        tmp.pos.lerpVectors(s.from.pos, s.to.pos, p);
+        tmp.quat.slerpQuaternions(s.from.quat, s.to.quat, p);
+        tmp.scale.lerpVectors(s.from.scale, s.to.scale, p);
+        tmp.color.copy(s.from.color).lerp(s.to.color, p);
+        tmp.opacity = s.from.opacity + (s.to.opacity - s.from.opacity) * p;
+        return tmp;
+      }
+    }
+    return segs[segs.length - 1]!.to;
+  };
+  const applyState = (obj: any, s: AnimState): void => {
+    obj.position.copy(s.pos);
+    obj.quaternion.copy(s.quat);
+    obj.scale.copy(s.scale);
+    const m = obj.material;
+    if (m) {
+      m.color?.copy?.(s.color);
+      if (s.opacity < 1) m.transparent = true;
+      m.opacity = s.opacity;
+    }
+  };
 
   let controls: any = null;
   if (spec.controls && T.OrbitControls) {
@@ -289,7 +412,8 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
   let raf = 0;
   let alive = true;
   let auto = 0;
-  const tick = (): void => {
+  let startTs = 0;
+  const tick = (now: number): void => {
     if (!alive) return;
     for (const a of animated) {
       if (a.spin) a.obj.rotation.y += a.spin;
@@ -298,6 +422,12 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
         a.obj.position.x = Math.cos(a.angle) * a.orbit;
         a.obj.position.z = Math.sin(a.angle) * a.orbit;
       }
+    }
+    if (hasTimeline) {
+      if (!startTs) startTs = now;
+      let t = (now - startTs) / 1000;
+      t = spec.loop ? t % totalDur : Math.min(t, totalDur);
+      for (const id in segsByTarget) applyState(byId[id]!.obj, stateAt(segsByTarget[id]!, t));
     }
     if (spec.autorotate) {
       auto += 0.003;

@@ -526,8 +526,9 @@ const POS3: AttrSchema[] = [
   { name: "z", type: "number", required: false, default: "0", description: "Position z." },
 ];
 const LABEL: AttrSchema = { name: "label", type: "string", required: false, description: "Étiquette affichée près de l'objet." };
+const ID: AttrSchema = { name: "id", type: "string", required: false, description: "Identifiant (cible des animations {@s3.animate})." };
 /** Common motion/material attributes shared by 3D meshes. */
-const MOTION: AttrSchema[] = [...POS3, COLOR, OPACITY, SPIN, ORBIT, SPEED, GLOW, LABEL];
+const MOTION: AttrSchema[] = [ID, ...POS3, COLOR, OPACITY, SPIN, ORBIT, SPEED, GLOW, LABEL];
 registerObject({
   path: "scene.3d.scene",
   contentModel: "html",
@@ -554,6 +555,7 @@ registerObject({
   aliases: [],
   description: "Sphère 3D (WebGL) : position, couleur, rotation, orbite.",
   attrs: [
+    ID,
     { name: "radius", type: "number", required: false, default: "0.5", description: "Rayon." },
     ...POS3,
     COLOR,
@@ -573,6 +575,7 @@ registerObject({
   aliases: [],
   description: "Cube/boîte 3D (WebGL) : position, couleur, rotation, orbite.",
   attrs: [
+    ID,
     { name: "size", type: "number", required: false, default: "1", description: "Côté." },
     ...POS3,
     COLOR,
@@ -580,6 +583,7 @@ registerObject({
     ORBIT,
     SPEED,
     GLOW,
+    LABEL,
   ],
   snippet: "{@s3.box[size=${1:1}, color=${2:\"#f472b6\"}, spin=${3:0.01}]/}",
   example: "{@s3.box[size=1, color=\"#f472b6\", spin=0.01]/}",
@@ -750,6 +754,28 @@ registerObject({
   ],
   snippet: "{@s3.grid[size=${1:10}, divisions=${2:10}]/}",
   example: "{@s3.grid[size=10, divisions=10]/}",
+});
+registerObject({
+  path: "scene.3d.animate",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Animation d'un objet (par id) : move / rotate / scale / color / fade / transform.",
+  attrs: [
+    { name: "target", type: "string", required: true, description: "id de l'objet à animer." },
+    { name: "action", type: "string", required: false, default: "move", description: "move | rotate | scale | color | fade | transform." },
+    tuple("to", false, "Destination : (x,y,z) pour move, ou un id pour transform."),
+    { name: "axis", type: "string", required: false, default: "y", description: "Axe de rotation (x/y/z)." },
+    { name: "angle", type: "number", required: false, default: "90", description: "Angle de rotation (degrés)." },
+    { name: "value", type: "number", required: false, description: "Échelle (scale) ou opacité (fade)." },
+    COLOR,
+    { name: "duration", type: "number", required: false, default: "1", description: "Durée (secondes)." },
+    { name: "delay", type: "number", required: false, default: "0", description: "Délai avant départ." },
+    { name: "at", type: "number", required: false, description: "Départ absolu (sinon enchaîné après la précédente)." },
+    { name: "easing", type: "string", required: false, default: "easeInOut", description: "linear | easeIn | easeOut | easeInOut." },
+  ],
+  snippet: "{@s3.animate[target=${1:\"A\"}, action=${2:\"move\"}, to=${3:\"(2,2,0)\"}, duration=${4:2}]/}",
+  example: "{@s3.animate[target=\"A\", action=\"move\", to=\"(2,2,0)\", duration=2]/}",
 });
 
 /* -------------------------------------------------------------------------- */

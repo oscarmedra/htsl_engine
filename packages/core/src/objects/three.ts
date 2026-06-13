@@ -22,8 +22,27 @@ import type { ObjectNode } from "../types.js";
 
 export type ThreeShape = "sphere" | "box" | "torus" | "cylinder" | "cone" | "plane" | "point";
 
+export type AnimAction = "move" | "rotate" | "scale" | "color" | "fade" | "transform";
+
+export interface Animation {
+  target: string;
+  action: AnimAction;
+  to: Vec3;
+  hasTo: boolean;
+  toId: string; // transform: id of the reference object
+  axis: "x" | "y" | "z";
+  angle: number; // degrees
+  value: number; // uniform scale / fade opacity
+  color: string;
+  duration: number;
+  delay: number;
+  at: number | null; // explicit start time (else sequential per target)
+  easing: string;
+}
+
 export interface ThreeObject {
   type: "mesh" | "vector" | "line" | "axes" | "grid" | "surface" | "label";
+  id: string;
   shape: ThreeShape;
   x: number;
   y: number;
@@ -69,7 +88,10 @@ export interface ThreeSpec {
   controls: boolean;
   /** slow automatic rotation of the whole scene. */
   autorotate: boolean;
+  /** replay the animation timeline in a loop (default true). */
+  loop: boolean;
   objects: ThreeObject[];
+  animations: Animation[];
 }
 
 type Vec3 = [number, number, number];
@@ -114,6 +136,7 @@ function clampInt(n: number, lo: number, hi: number): number {
 function base(n: ObjectNode, shape: ThreeShape, type: ThreeObject["type"]): ThreeObject {
   return {
     type,
+    id: n.attrs["id"] ?? "",
     shape,
     x: num(n.attrs["x"], 0),
     y: num(n.attrs["y"], 0),
@@ -206,11 +229,36 @@ function actor(n: ObjectNode): ThreeObject | null {
   }
 }
 
-/** Pure JSON description of a `{@s3.scene}` (its actors + canvas settings). */
+function animation(n: ObjectNode): Animation {
+  const toRaw = n.attrs["to"];
+  const hasVec = !!toRaw && toRaw.includes("(");
+  const action = (n.attrs["action"] ?? "move") as AnimAction;
+  return {
+    target: n.attrs["target"] ?? "",
+    action,
+    to: hasVec ? vec3(toRaw) : [0, 0, 0],
+    hasTo: hasVec,
+    toId: !hasVec ? (toRaw ?? "") : "",
+    axis: (n.attrs["axis"] ?? "y") as "x" | "y" | "z",
+    angle: num(n.attrs["angle"], 90),
+    value: num(n.attrs["value"], action === "fade" ? 0 : 2),
+    color: n.attrs["color"] ?? "",
+    duration: Math.max(0.001, num(n.attrs["duration"], 1)),
+    delay: num(n.attrs["delay"], 0),
+    at: n.attrs["at"] !== undefined ? num(n.attrs["at"], 0) : null,
+    easing: n.attrs["easing"] ?? "easeInOut",
+  };
+}
+
+/** Pure JSON description of a `{@s3.scene}` (its actors, animations + settings). */
 export function threeSpec(scene: ObjectNode): ThreeSpec {
   const objects: ThreeObject[] = [];
+  const animations: Animation[] = [];
   for (const child of scene.children) {
-    if (child.type === "object" && isThreePath(child.path) && child.path !== "scene.3d.scene") {
+    if (child.type !== "object" || !isThreePath(child.path) || child.path === "scene.3d.scene") continue;
+    if (child.path === "scene.3d.animate") {
+      animations.push(animation(child));
+    } else {
       const a = actor(child);
       if (a) objects.push(a);
     }
@@ -222,7 +270,9 @@ export function threeSpec(scene: ObjectNode): ThreeSpec {
     distance: num(scene.attrs["distance"], 6),
     controls: bool(scene.attrs["controls"]),
     autorotate: bool(scene.attrs["autorotate"]),
+    loop: scene.attrs["loop"] !== "false",
     objects,
+    animations,
   };
 }
 

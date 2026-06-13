@@ -123,6 +123,31 @@ describe("2D function plot {@plot}", () => {
   });
 });
 
+describe("3D animation timeline (s3.animate)", () => {
+  it("collects animations by target id, with defaults and parsed targets", () => {
+    const src = `{@s3.scene[loop=false]:
+      {@s3.box[id="A"]/}
+      {@s3.sphere[id="B", x=3]/}
+      {@s3.animate[target="A", action="move", to="(2,2,0)", duration=2]/}
+      {@s3.animate[target="A", action="rotate", axis="y", angle=180]/}
+      {@s3.animate[target="A", action="transform", to="B", duration=2]/}
+    }`;
+    const spec = threeSpec(parse(src)[0] as ObjectNode);
+    expect(spec.loop).toBe(false);
+    expect(spec.objects.map((o) => o.id)).toEqual(["A", "B"]);
+    expect(spec.animations).toHaveLength(3);
+    expect(spec.animations[0]).toMatchObject({ target: "A", action: "move", to: [2, 2, 0], hasTo: true, duration: 2 });
+    expect(spec.animations[1]).toMatchObject({ action: "rotate", axis: "y", angle: 180 });
+    expect(spec.animations[2]).toMatchObject({ action: "transform", toId: "B", hasTo: false });
+  });
+
+  it("registers s3.animate and the id attribute", () => {
+    expect(registry.describe("s3.animate")?.path).toBe("scene.3d.animate");
+    const sphere = registry.describe("s3.sphere");
+    expect(sphere?.attrs.some((a) => a.name === "id")).toBe(true);
+  });
+});
+
 describe("3D labels (s3.label / label attr)", () => {
   it("renders a standalone label and a label attached to an actor", () => {
     const spec = threeSpec(

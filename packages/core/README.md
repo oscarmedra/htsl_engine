@@ -327,8 +327,37 @@ conteneur de `{@plot.curve}` :
 }
 ```
 
-Transforms communs (maillages) : `x`/`y`/`z`, `color`, `opacity`, `glow`
+Transforms communs (maillages) : `id`, `x`/`y`/`z`, `color`, `opacity`, `glow`
 (auto-lumineux), `spin` (rotation propre), `orbit`+`speed` (orbite).
+
+### Animations par `id` (timeline)
+
+Donnez un `id` aux objets, puis pilotez-les avec des blocs **`s3.animate`** — une
+**timeline déclarative**. Sur une même cible les animations **s'enchaînent**
+automatiquement (séquentielles) ; `at`/`delay` permettent de chevaucher.
+
+```htsl
+{@s3.box[id="A", color="#f472b6"]/}
+{@s3.sphere[id="B", x=3, color="#60a5fa"]/}
+{@s3.animate[target="A", action="move",      to="(2,2,0)", duration=2]/}
+{@s3.animate[target="A", action="rotate",    axis="y", angle=180, duration=2]/}
+{@s3.animate[target="A", action="scale",     value=2, duration=1]/}
+{@s3.animate[target="A", action="transform", to="B", duration=2]/}
+```
+
+| `action` | Effet |
+|----------|-------|
+| `move` | déplace vers `to="(x,y,z)"` |
+| `rotate` | tourne de `angle°` autour de `axis` |
+| `scale` | met à l'échelle `value` (ou `to="(sx,sy,sz)"`) |
+| `color` | transition vers `color` |
+| `fade` | opacité → `value` |
+| `transform` | adopte la position + couleur de l'objet `to="<id>"` |
+
+Options : `duration`, `delay`, `at` (départ absolu), `easing`
+(`linear`/`easeIn`/`easeOut`/`easeInOut`). La scène **boucle** la timeline par
+défaut (`{@s3.scene[loop=false]}` pour jouer une fois). Le runtime interpole
+position (lerp), rotation (slerp), échelle, couleur et opacité par image.
 
 Le runtime charge Three.js (et OrbitControls si `controls`), construit la scène,
 lance une boucle `requestAnimationFrame`, **reconstruit** au changement de hash
