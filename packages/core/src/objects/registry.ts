@@ -483,12 +483,12 @@ registerObject({
 // --- 2D function plot (y = f(x), rendered via Plotly) ---
 registerObject({
   path: "math.plot.fn",
-  contentModel: "void",
+  contentModel: "html",
   category: "géométrie",
   aliases: ["plot"],
-  description: "Graphe d'une fonction y = f(x) (expression évaluée).",
+  description: "Graphe de fonction(s) y = f(x). Une seule (attr fn) ou plusieurs ({@plot.curve}).",
   attrs: [
-    { name: "fn", type: "string", required: false, default: "x", description: "Expression y=f(x), ex. sin(x)/x." },
+    { name: "fn", type: "string", required: false, description: "Expression y=f(x) (forme à une courbe)." },
     tuple("xrange", false, "Intervalle x, ex. (-10,10)."),
     { name: "samples", type: "number", required: false, default: "400", description: "Nombre de points." },
     { name: "title", type: "string", required: false, description: "Titre du graphe." },
@@ -496,8 +496,23 @@ registerObject({
     { name: "width", type: "number", required: false, default: "640", description: "Largeur en pixels." },
     { name: "height", type: "number", required: false, default: "360", description: "Hauteur en pixels." },
   ],
-  snippet: "{@plot[fn=${1:\"sin(x)/x\"}, xrange=\"(-15,15)\", title=${2:\"y = sin(x)/x\"}]/}",
+  snippet:
+    "{@plot[xrange=\"(-6.28,6.28)\", title=${1:\"Trigonométrie\"}]:\n  {@plot.curve[fn=\"sin(x)\", label=\"sin\"]/}\n  {@plot.curve[fn=\"cos(x)\", label=\"cos\"]/}\n}",
   example: "{@plot[fn=\"sin(x)/x\", xrange=\"(-15,15)\", title=\"y = sin(x)/x\"]/}",
+});
+registerObject({
+  path: "math.plot.curve",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Une courbe y = f(x) dans un {@plot} (pour superposer plusieurs fonctions).",
+  attrs: [
+    { name: "fn", type: "string", required: false, default: "x", description: "Expression y=f(x)." },
+    { name: "label", type: "string", required: false, description: "Nom dans la légende." },
+    COLOR,
+  ],
+  snippet: "{@plot.curve[fn=${1:\"sin(x)\"}, label=${2:\"sin\"}]/}",
+  example: "{@plot.curve[fn=\"sin(x)\", label=\"sin\"]/}",
 });
 
 // --- Declarative animated 3D scenes (WebGL / Three.js) ---
@@ -510,8 +525,9 @@ const POS3: AttrSchema[] = [
   { name: "y", type: "number", required: false, default: "0", description: "Position y." },
   { name: "z", type: "number", required: false, default: "0", description: "Position z." },
 ];
+const LABEL: AttrSchema = { name: "label", type: "string", required: false, description: "Étiquette affichée près de l'objet." };
 /** Common motion/material attributes shared by 3D meshes. */
-const MOTION: AttrSchema[] = [...POS3, COLOR, OPACITY, SPIN, ORBIT, SPEED, GLOW];
+const MOTION: AttrSchema[] = [...POS3, COLOR, OPACITY, SPIN, ORBIT, SPEED, GLOW, LABEL];
 registerObject({
   path: "scene.3d.scene",
   contentModel: "html",
@@ -545,6 +561,7 @@ registerObject({
     ORBIT,
     SPEED,
     GLOW,
+    LABEL,
   ],
   snippet: "{@s3.sphere[radius=${1:0.5}, color=${2:\"#60a5fa\"}, orbit=${3:3}, speed=${4:0.02}]/}",
   example: "{@s3.sphere[radius=0.4, color=\"#60a5fa\", orbit=3, speed=0.02]/}",
@@ -632,8 +649,23 @@ registerObject({
     { name: "radius", type: "number", required: false, default: "0.12", description: "Taille du marqueur." },
     ...MOTION,
   ],
-  snippet: "{@s3.point[x=${1:1}, y=${2:1}, z=${3:1}, color=${4:\"#f87171\"}]/}",
-  example: "{@s3.point[x=1, y=1, z=1, color=\"#f87171\"]/}",
+  snippet: "{@s3.point[x=${1:1}, y=${2:1}, z=${3:1}, color=${4:\"#f87171\"}, label=${5:\"A\"}]/}",
+  example: "{@s3.point[x=1, y=1, z=1, color=\"#f87171\", label=\"A\"]/}",
+});
+registerObject({
+  path: "scene.3d.label",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Étiquette texte 3D (billboard, toujours face caméra).",
+  attrs: [
+    { name: "text", type: "string", required: false, description: "Texte affiché." },
+    ...POS3,
+    COLOR,
+    { name: "size", type: "number", required: false, default: "0.4", description: "Taille." },
+  ],
+  snippet: "{@s3.label[text=${1:\"A\"}, x=${2:1}, y=${3:1}, z=${4:0}]/}",
+  example: "{@s3.label[text=\"O\", x=0, y=0, z=0]/}",
 });
 registerObject({
   path: "scene.3d.vector",

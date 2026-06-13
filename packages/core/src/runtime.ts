@@ -113,6 +113,7 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
       }
       drawn += hydrateThree(root, {
         THREE: w.THREE,
+        document: w.document,
         requestAnimationFrame: w.requestAnimationFrame.bind(w),
         cancelAnimationFrame: w.cancelAnimationFrame.bind(w),
       });

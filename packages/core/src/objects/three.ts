@@ -23,7 +23,7 @@ import type { ObjectNode } from "../types.js";
 export type ThreeShape = "sphere" | "box" | "torus" | "cylinder" | "cone" | "plane" | "point";
 
 export interface ThreeObject {
-  type: "mesh" | "vector" | "line" | "axes" | "grid" | "surface";
+  type: "mesh" | "vector" | "line" | "axes" | "grid" | "surface" | "label";
   shape: ThreeShape;
   x: number;
   y: number;
@@ -54,6 +54,9 @@ export interface ThreeObject {
   xmax: number;
   ymin: number;
   ymax: number;
+  /** label text: the `s3.label` text, or a label attached to another actor. */
+  text: string;
+  label: string;
 }
 
 export interface ThreeSpec {
@@ -134,6 +137,8 @@ function base(n: ObjectNode, shape: ThreeShape, type: ThreeObject["type"]): Thre
     xmax: 0,
     ymin: 0,
     ymax: 0,
+    text: n.attrs["text"] ?? "",
+    label: n.attrs["label"] ?? "",
   };
 }
 
@@ -190,6 +195,8 @@ function actor(n: ObjectNode): ThreeObject | null {
       }
       return { ...base(n, "sphere", "surface"), heights, res, xmin: x0, xmax: x1, ymin: y0, ymax: y1 };
     }
+    case "label":
+      return { ...base(n, "sphere", "label"), size: num(n.attrs["size"], 0.4) };
     case "axes":
       return { ...base(n, "sphere", "axes"), size: num(n.attrs["size"], 3) };
     case "grid":

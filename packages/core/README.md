@@ -299,6 +299,7 @@ le runtime via Three.js — toujours **zéro `<script>`** :
 | `s3.line` | ligne/trajectoire (`points="(x,y,z);(x,y,z);…"`) |
 | `s3.surface` | **surface `z = f(x, y)`** (`z="sin(x)*cos(y)"`, `xrange`, `yrange`, `res`) |
 | `s3.curve` | **courbe paramétrique** `(x(t), y(t), z(t))` (`x`, `y`, `z`, `trange`, `samples`) |
+| `s3.label` | **étiquette texte 3D** (billboard `Sprite`+canvas, toujours face caméra, sans addon). Un `label="A"` sur n'importe quel maillage pose aussi une étiquette. |
 | `s3.axes` `s3.grid` | repère et grille de référence |
 
 ### Fonctions & expressions
@@ -315,6 +316,16 @@ sqrt abs min max …`), constantes (`pi e tau phi`).
 `{@plot[fn="sin(x)/x", xrange="(-15,15)", title="…"]}` trace une fonction
 `y = f(x)` : échantillonnée par l'interpréteur, rendue via le même chemin
 déclaratif Plotly que les scènes (nœud `htsl-scene`, **zéro `<script>`**).
+
+Plusieurs courbes sur le même graphe (avec légende) : `{@plot}` devient un
+conteneur de `{@plot.curve}` :
+
+```htsl
+{@plot[xrange="(-6.28,6.28)", title="Trigonométrie"]:
+  {@plot.curve[fn="sin(x)", label="sin"]/}
+  {@plot.curve[fn="cos(x)", label="cos"]/}
+}
+```
 
 Transforms communs (maillages) : `x`/`y`/`z`, `color`, `opacity`, `glow`
 (auto-lumineux), `spin` (rotation propre), `orbit`+`speed` (orbite).

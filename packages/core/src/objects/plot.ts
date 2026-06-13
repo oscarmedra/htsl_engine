@@ -23,25 +23,56 @@ function range(v: string | undefined, fallback: [number, number]): [number, numb
   return [Number.isFinite(p[0]) ? p[0]! : fallback[0], Number.isFinite(p[1]) ? p[1]! : fallback[1]];
 }
 
-/** Render `{@plot[fn=…]}` as a declarative Plotly scene node (sampled curve). */
+const PALETTE = ["#2563eb", "#dc2626", "#16a34a", "#d97706", "#7c3aed", "#0891b2", "#db2777"];
+
+interface Curve {
+  fn: string;
+  color: string | undefined;
+  label: string | undefined;
+}
+
+/** Render `{@plot}` as a declarative Plotly scene node — one curve (attr `fn`)
+ *  or several (`{@plot.curve}` children, with a legend). */
 export function renderPlot(node: ObjectNode, hashAttr: string): string {
   if (node.path !== "math.plot.fn") return "";
-  const f = safeExpr(node.attrs["fn"] ?? "x");
+
+  // Gather curves: child `plot.curve` objects, else the single inline `fn`.
+  const curves: Curve[] = [];
+  for (const child of node.children) {
+    if (child.type === "object" && child.path === "math.plot.curve") {
+      curves.push({ fn: child.attrs["fn"] ?? "x", color: child.attrs["color"], label: child.attrs["label"] });
+    }
+  }
+  if (curves.length === 0) {
+    curves.push({ fn: node.attrs["fn"] ?? "x", color: node.attrs["color"], label: node.attrs["title"] });
+  }
+
   const [x0, x1] = range(node.attrs["xrange"], [-10, 10]);
   const samples = Math.max(2, Math.min(5000, Math.round(num(node.attrs["samples"], 400))));
   const xs: number[] = [];
-  const ys: Array<number | null> = [];
-  for (let i = 0; i < samples; i++) {
-    const x = x0 + ((x1 - x0) * i) / (samples - 1);
-    const y = f({ x });
-    xs.push(x);
-    ys.push(Number.isFinite(y) ? y : null); // gaps for asymptotes / undefined
-  }
+  for (let i = 0; i < samples; i++) xs.push(x0 + ((x1 - x0) * i) / (samples - 1));
 
-  const color = node.attrs["color"] ?? "#2563eb";
+  const data = curves.map((c, i) => {
+    const f = safeExpr(c.fn);
+    const ys = xs.map((x) => {
+      const y = f({ x });
+      return Number.isFinite(y) ? y : null; // gaps at asymptotes / undefined
+    });
+    return {
+      type: "scatter",
+      mode: "lines",
+      x: xs,
+      y: ys,
+      name: c.label ?? c.fn,
+      line: { color: c.color ?? PALETTE[i % PALETTE.length], width: 2 },
+      connectgaps: false,
+    };
+  });
+
   const width = num(node.attrs["width"], 640);
   const height = num(node.attrs["height"], 360);
   const title = node.attrs["title"];
+  const showlegend = curves.length > 1;
 
   const layout: Record<string, unknown> = {
     width,
@@ -51,13 +82,12 @@ export function renderPlot(node: ObjectNode, hashAttr: string): string {
     yaxis: { zeroline: true, zerolinecolor: "#94a3b8", gridcolor: "#eef2f7" },
     paper_bgcolor: "#ffffff",
     plot_bgcolor: "#ffffff",
+    showlegend,
+    ...(showlegend ? { legend: { x: 1, xanchor: "right", y: 1 } } : {}),
   };
   if (title) layout["title"] = { text: title, font: { size: 14 } };
 
-  const spec = {
-    data: [{ type: "scatter", mode: "lines", x: xs, y: ys, line: { color, width: 2 }, connectgaps: false }],
-    layout,
-  };
+  const spec = { data, layout };
   const json = escapeHtml(JSON.stringify(spec));
   return (
     `<div class="htsl-scene htsl-scene--2d" data-htsl-scene="${json}"${hashAttr} ` +

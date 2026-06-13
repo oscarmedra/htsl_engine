@@ -111,4 +111,26 @@ describe("2D function plot {@plot}", () => {
     expect(registry.describe("plot")?.path).toBe("math.plot.fn");
     expect(registry.list().map((e) => e.path)).toContain("math.plot.fn");
   });
+
+  it("superimposes several curves with a legend", () => {
+    const html = compile(
+      `{@plot[xrange="(-6.28,6.28)"]:{@plot.curve[fn="sin(x)", label="sin"]/}{@plot.curve[fn="cos(x)", label="cos"]/}}`,
+    );
+    const spec = JSON.parse(html.match(/data-htsl-scene="([^"]*)"/)![1]!.replace(/&quot;/g, '"'));
+    expect(spec.data).toHaveLength(2);
+    expect(spec.data.map((d: { name: string }) => d.name)).toEqual(["sin", "cos"]);
+    expect(spec.layout.showlegend).toBe(true);
+  });
+});
+
+describe("3D labels (s3.label / label attr)", () => {
+  it("renders a standalone label and a label attached to an actor", () => {
+    const spec = threeSpec(
+      parse(`{@s3.scene:{@s3.point[x=1, y=1, z=0, label="A"]/}{@s3.label[text="O", x=0, y=0, z=0]/}}`)[0] as ObjectNode,
+    );
+    const point = spec.objects.find((o) => o.type === "mesh");
+    const label = spec.objects.find((o) => o.type === "label");
+    expect(point?.label).toBe("A");
+    expect(label?.text).toBe("O");
+  });
 });

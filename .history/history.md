@@ -266,3 +266,10 @@ Suite « ajoutez vos suggestions » : objets basés sur un évaluateur mathémat
 - **Fix `hasPlot`** (scene-client) : Plotly pose `js-plotly-plot` **sur** l'élément (pas dessous) → l'ancien `querySelector` rendait `hasPlot` toujours faux (redessin à chaque hydrate). Corrigé en `classList.contains(...) || querySelector(...)` → `react`/skip fonctionnent vraiment.
 - **Tests** : `expr.test.ts` (6), `three.test.ts` étendu (surface/courbe/plot). Core **214**, codemirror 33.
 - **Vérifié en navigateur** : surface `sin(x)cos(y)` + courbe paramétrique 3D + sinc `sin(x)/x` en 2D, rendus ensemble, 5 modifs → 0 erreur.
+
+## Labels 3D + multi-courbes 2D (sans alourdir le moteur)
+
+- **Labels texte 3D** (sans CSS2DRenderer ni addon) : `s3.label[text=…]` et attribut `label` sur les maillages → billboard `Sprite` + texture canvas (texte net, toujours face caméra), dessiné côté runtime via le cœur de Three.js. Disposition des géométries/matériaux/textures au teardown (anti-fuite). Le three-client reçoit `document` pour créer le canvas.
+- **Multi-courbes 2D** : `{@plot}` devient un conteneur (contentModel html) ; objet `plot.curve` (fn/label/color). `renderPlot` agrège les courbes en un seul nœud Plotly multi-traces avec légende et palette par défaut. La forme `{@plot[fn=…]}` (une courbe) reste valable. Toujours rendu via le chemin déclaratif Plotly.
+- **Tests** : `three.test.ts` étendu (multi-courbes + légende, label autonome + attaché). Core **216**, codemirror 33.
+- **Vérifié en navigateur** : scène 3D avec labels (« origine », points A/B) + graphe « Trigonométrie » à 3 courbes (sin/cos/sinc) avec légende, 0 erreur.

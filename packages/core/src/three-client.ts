@@ -37,6 +37,9 @@ export interface ThreeNS {
   LineBasicMaterial: Ctor;
   Mesh: Ctor;
   Line: Ctor;
+  Sprite: Ctor;
+  SpriteMaterial: Ctor;
+  CanvasTexture: Ctor;
   ArrowHelper: Ctor;
   AxesHelper: Ctor;
   GridHelper: Ctor;
@@ -46,6 +49,7 @@ export interface ThreeNS {
 }
 export interface ThreeWindow {
   THREE: ThreeNS | undefined;
+  document: Document;
   requestAnimationFrame(cb: (t: number) => void): number;
   cancelAnimationFrame(id: number): void;
 }
@@ -141,8 +145,37 @@ function geometry(o: ThreeObject, T: ThreeNS): any {
   }
 }
 
-function buildObject(o: ThreeObject, T: ThreeNS): any {
+/** A billboard text label (canvas texture on a Sprite — no addon, always faces
+ *  the camera, crisp). */
+function makeLabel(text: string, color: string, worldSize: number, T: ThreeNS, doc: Document): any {
+  const fontPx = 64;
+  const pad = 14;
+  const measure = doc.createElement("canvas").getContext("2d")!;
+  measure.font = `bold ${fontPx}px system-ui, -apple-system, sans-serif`;
+  const tw = Math.max(1, Math.ceil(measure.measureText(text).width));
+  const canvas = doc.createElement("canvas");
+  canvas.width = tw + pad * 2;
+  canvas.height = fontPx + pad * 2;
+  const ctx = canvas.getContext("2d")!;
+  ctx.font = `bold ${fontPx}px system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left";
+  ctx.fillText(text, pad, canvas.height / 2);
+  const tex = new T.CanvasTexture(canvas);
+  const mat = new T.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false });
+  const sprite = new T.Sprite(mat);
+  sprite.scale.set((worldSize * canvas.width) / canvas.height, worldSize, 1);
+  return sprite;
+}
+
+function buildObject(o: ThreeObject, T: ThreeNS, doc: Document): any {
   switch (o.type) {
+    case "label": {
+      const sprite = makeLabel(o.text || "?", o.color === "#ffffff" ? "#e5e7eb" : o.color, o.size, T, doc);
+      sprite.position.set(o.x, o.y, o.z);
+      return sprite;
+    }
     case "mesh": {
       const transparent = o.opacity < 1;
       const mat = o.glow
@@ -230,12 +263,20 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
   const group = new T.Group();
   scene.add(group);
 
+  const doc = win.document;
   const animated: Array<{ obj: any; spin: number; orbit: number; speed: number; angle: number }> = [];
   for (const o of spec.objects) {
-    const obj = buildObject(o, T);
-    if (!obj) continue;
-    group.add(obj);
-    if (o.spin || o.orbit) animated.push({ obj, spin: o.spin, orbit: o.orbit, speed: o.speed, angle: 0 });
+    const obj = buildObject(o, T, doc);
+    if (obj) {
+      group.add(obj);
+      if (o.spin || o.orbit) animated.push({ obj, spin: o.spin, orbit: o.orbit, speed: o.speed, angle: 0 });
+    }
+    // An actor may carry an attached label (e.g. a named point).
+    if (o.label && o.type !== "label") {
+      const lbl = makeLabel(o.label, o.color === "#ffffff" ? "#e5e7eb" : o.color, 0.4, T, doc);
+      lbl.position.set(o.x, o.y + (o.size || 0.3) + 0.35, o.z);
+      group.add(lbl);
+    }
   }
 
   let controls: any = null;
@@ -278,6 +319,19 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
         } catch {
           /* ignore */
         }
+      }
+      // Free geometries, materials and textures (canvas labels) of the scene.
+      try {
+        group.traverse((o: any) => {
+          o.geometry?.dispose?.();
+          const m = o.material;
+          (Array.isArray(m) ? m : m ? [m] : []).forEach((mat: any) => {
+            mat.map?.dispose?.();
+            mat.dispose?.();
+          });
+        });
+      } catch {
+        /* ignore */
       }
       // Release the WebGL context immediately, else rapid rebuilds (every edit)
       // exhaust the browser's ~16-context limit and new renderers fail silently.
