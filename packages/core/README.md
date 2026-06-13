@@ -429,6 +429,15 @@ voit que des nœuds normaux).
   de composants.
 - Portée document, redéfinition autorisée (**dernière valeur au point d'usage**).
 - Une **variable inconnue** est une erreur localisée.
+- **Valeur brute (LaTeX, etc.)** : une valeur **entre guillemets** est prise
+  *verbatim* — ses `{` `}` `\` ne sont **pas** interprétés comme du HTSL. Idéal
+  pour des macros mathématiques réutilisables :
+
+  ```htsl
+  {!set H: "\tfrac{1}{2}\big(p^2 + \omega^2 q^2\big)"}
+  {@mte[label=ham]: H = {$H}}
+  {p:Le hamiltonien {@mtr[to=ham]/} décrit l'énergie totale.}
+  ```
 
 L'expansion est exposée via `expand(ast, { source? })` ; `compile`/`render`
 l'exécutent automatiquement avant le rendu.

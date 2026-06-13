@@ -292,3 +292,12 @@ L'action `transform` devient un **vrai morph de forme** (pas seulement position+
 - **Morph targets Three.js** : la cible A est construite avec la géométrie de A en base et la géométrie de B (même grille) en morph attribute (positions + normales). Matériau `morphTargets`/`morphNormals`. L'influence `morphTargetInfluences[0]` est pilotée par la timeline sur le segment `transform` (ease), 0→1, et remise à 0 à la boucle.
 - **Sémantique** : `transform` morphe **forme + couleur sur place** (le morph encode la taille de B ; B est un gabarit, sa position n'importe pas — utiliser `move` pour déplacer). A et B doivent être des formes morphables (sinon repli sur couleur seule).
 - **Vérifié en navigateur** : cube → tore réel (changement de forme vertex-à-vertex + couleur), gabarit hors champ, 0 erreur. Core 218, codemirror 33.
+
+## Valeur brute (LaTeX) dans {!set} via guillemets
+
+`{!set H: \tfrac{1}{2}…}` échouait : la valeur d'un set est lue comme du HTSL, donc les `{}` LaTeX deviennent des balises (`{1}` → balise invalide).
+
+- **Fix** : une valeur de directive **entre guillemets** est lexée **verbatim** (`lexRawString` : garde `{}`/`\`, seul `\"` → `"`), émise comme un seul nœud texte. `nextNonSpace()` détecte le guillemet après le `:`. L'interpolation non quotée (`{!set who: monde}`, `text-{$c}-600`) reste inchangée.
+- Usage : `{!set H: "\tfrac{1}{2}\big(p^2 + \omega^2 q^2\big)"}` puis `{@mte: H = {$H}}` → rendu KaTeX, équation numérotée + référence croisée.
+- Test (`components.test.ts`) : valeur quotée verbatim, pas d'erreur, braces non parsées. Core 219.
+- Vérifié en navigateur : hamiltonien H = ½(p²+ω²q²) typographié (KaTeX), 0 erreur.

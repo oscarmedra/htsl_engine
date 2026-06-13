@@ -107,6 +107,15 @@ describe("variables", () => {
     );
   });
 
+  it("keeps a quoted {!set} value verbatim (LaTeX with braces/backslashes)", () => {
+    const src = `{!set H: "\\tfrac{1}{2}\\big(p^2 + \\omega^2 q^2\\big)"}{@mtb: H = {$H}}`;
+    const html = compile(src);
+    expect(html).toContain("\\tfrac{1}{2}\\big(p^2 + \\omega^2 q^2\\big)");
+    expect(html).not.toContain("<error");
+    // The braces are NOT parsed as HTSL elements.
+    expect(html).not.toContain("<1>");
+  });
+
   it("honors redefinition (last value at the point of use)", () => {
     expect(compile(`{!set x: A}{p:{$x}}{!set x: B}{p:{$x}}`)).toBe(
       "<p>A</p><p>B</p>",

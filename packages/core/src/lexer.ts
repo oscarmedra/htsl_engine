@@ -253,6 +253,12 @@ class Lexer {
           this.stack.push({ kind: "raw", tag: frame.tag!, depth: 0 });
         } else {
           this.stack.push({ kind: "content" });
+          // `{!set H: "…raw…"}`: a quoted directive value is taken verbatim
+          // (e.g. LaTeX with braces/backslashes), not parsed as HTSL.
+          if (frame.directive && this.nextNonSpace() === '"') {
+            this.skipSpaces();
+            this.lexRawString();
+          }
         }
         return;
       }
@@ -321,6 +327,36 @@ class Lexer {
   }
 
   /** Lex a numeric attribute value such as `5` or `0.5` (emitted as IDENT). */
+  /** Peek the next non-whitespace character without consuming anything. */
+  private nextNonSpace(): string {
+    let i = this.pos;
+    while (i < this.src.length && /\s/.test(this.src[i] ?? "")) i++;
+    return this.src[i] ?? "";
+  }
+
+  /** Lex a quoted directive value **verbatim** (keeps LaTeX `{}`/`\`; `\"` → `"`),
+   *  emitting it as a single TEXT token. */
+  private lexRawString(): void {
+    const loc = this.loc();
+    const start = this.pos;
+    this.advance(); // opening quote
+    let value = "";
+    while (!this.eof()) {
+      const c = this.peek();
+      if (c === "\\" && this.peek(1) === '"') {
+        this.advance();
+        value += this.advance(); // escaped quote → literal "
+        continue;
+      }
+      if (c === '"') {
+        this.advance();
+        break;
+      }
+      value += this.advance();
+    }
+    this.tokens.push({ type: "TEXT", value, loc, start, end: this.pos });
+  }
+
   private lexNumber(): void {
     const loc = this.loc();
     let value = "";
