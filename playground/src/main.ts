@@ -30,7 +30,6 @@ const renderFrame = $<HTMLIFrameElement>("render");
 const astEl = $<HTMLPreElement>("ast");
 const bannerEl = $<HTMLDivElement>("banner");
 const panelsEl = $<HTMLElement>("panels");
-const examplesSel = $<HTMLSelectElement>("examples");
 const toggleAst = $<HTMLInputElement>("toggle-ast");
 const toggleEditor = $<HTMLInputElement>("toggle-editor");
 const perfEl = document.getElementById("perf");
@@ -204,11 +203,6 @@ const view = new EditorView({
 /* Toolbar                                                                     */
 /* -------------------------------------------------------------------------- */
 
-function setDoc(src: string): void {
-  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: src } });
-  run(view);
-}
-
 function initialDoc(): string {
   const fromHash = decodeHash();
   if (fromHash) return fromHash;
@@ -229,20 +223,6 @@ function decodeHash(): string | null {
   }
 }
 
-// Examples menu
-for (const ex of examples) {
-  const opt = document.createElement("option");
-  opt.value = ex.id;
-  opt.textContent = ex.label;
-  examplesSel.appendChild(opt);
-}
-examplesSel.addEventListener("change", () => {
-  const ex = examples.find((e) => e.id === examplesSel.value);
-  if (ex) {
-    setDoc(ex.src);
-    location.hash = "";
-  }
-});
 
 $("btn-copy").addEventListener("click", async () => {
   await navigator.clipboard.writeText(latestHtml);

@@ -15,5 +15,11 @@ export default defineConfig({
   build: {
     outDir: "dist",
     target: "es2020",
+    rollupOptions: {
+      input: {
+        main: fromHere("index.html"),
+        documentation: fromHere("documentation.html"),
+      },
+    },
   },
 });

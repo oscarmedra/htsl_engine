@@ -118,8 +118,10 @@ déclaration, `getElementById` null).
 
 ## Autres
 
-- **Exemples préchargés** (menu déroulant), dont « Mise en page Tailwind » et
-  « Bootstrap ».
+- Bouton **📖 Documentation** → `documentation.html` : une page complète
+  (philosophie, motivations des choix, outils intégrés, syntaxe, **catalogue
+  d'objets généré depuis l'introspection**, et un **prompt prêt à coller** pour
+  qu'une IA rédige du HTSL). Construite en multi-pages Vite.
 - Boutons **Copier HTML** / **Télécharger** (`.htsl`) / **PDF** / **Partager**
   (lien encodé dans le hash d'URL, rechargé à l'ouverture).
 - **Export PDF** — le bouton **PDF** ouvre la boîte d'impression du navigateur sur
@@ -139,7 +141,8 @@ déclaration, `getElementById` null).
 | `src/block-editor.ts` | Éditeur de bloc flottant (CodeMirror complet) positionné sur l'élément. |
 | `src/palette.ts` | Palette d'insertion (générée depuis l'introspection). |
 | `src/help.ts` | Aide contextuelle (`describe()` de l'objet au curseur). |
-| `src/examples.ts` | Documents d'exemple préchargés. |
+| `src/examples.ts` | Document d'exemple chargé au démarrage. |
+| `documentation.html` · `src/documentation.ts` · `src/docs.css` | Page de documentation (catalogue + prompt IA générés depuis l'introspection). |
 
 Le comportement de l'éditeur (langage, complétion, linter) n'est **pas**
 réimplémenté ici : il vient du paquet réutilisable `@htsl/codemirror`.
