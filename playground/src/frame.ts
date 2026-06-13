@@ -134,6 +134,7 @@ export class FrameRenderer {
     const next = doc.createElement("div");
     next.append(...Array.from(tpl.content.childNodes));
 
+    const win = this.iframe.contentWindow as unknown as RuntimeWin;
     let touched = 0;
     const removed: Element[] = []; // scenes leaving the DOM → purge their Plotly state
     morphdom(this.root, next, {
@@ -142,14 +143,18 @@ export class FrameRenderer {
         const fh = from.getAttribute("data-htsl-hash");
         const th = to.getAttribute("data-htsl-hash");
         if (fh !== null && fh === th) return false; // identical block → keep as-is
-        if (from.classList.contains("htsl-scene")) {
-          // Update only the data attributes; the runtime redraws via Plotly.react.
+        const fromScene = from.classList.contains("htsl-scene");
+        const toScene = to.classList.contains("htsl-scene");
+        if (fromScene && toScene) {
+          // Same scene slot → update only the data; the runtime redraws (react).
           const spec = to.getAttribute("data-htsl-scene");
           if (spec !== null) from.setAttribute("data-htsl-scene", spec);
           if (th !== null) from.setAttribute("data-htsl-hash", th);
           touched += 1;
           return false;
         }
+        // A scene being repurposed into other content → free its plot first.
+        if (fromScene && !toScene) htslPurge([from], win);
         touched += 1;
         return true;
       },
@@ -173,7 +178,6 @@ export class FrameRenderer {
     const total = this.root.getElementsByTagName("*").length;
 
     // Hand off to the engine's single runtime: free removed scenes, then hydrate.
-    const win = this.iframe.contentWindow as unknown as RuntimeWin;
     if (removed.length > 0) htslPurge(removed, win);
     void htslHydrate(this.root, win);
 
