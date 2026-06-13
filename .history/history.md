@@ -245,3 +245,13 @@ Suite au choix « scènes 3D natives » : pour de l'interactif 3D sans JS inline
 - **Runtime** : `three-client.ts` (`pendingThree`, `hydrateThree`, `purgeThree`) construit la scène Three.js + boucle `requestAnimationFrame`, reconstruit au changement de hash, libère le contexte WebGL (`forceContextLoss`) au teardown. `runtime.ts` déclare Three.js comme dépendance et l'orchestre (hydrate/purge). `frame.ts` : morphing généralisé (htsl-scene **et** htsl-three préservés/purgés via une table `DYNAMIC`).
 - **Tests** : `tests/three.test.ts` (5) — nœud de données sans `<script>`, spec JSON (positions/animation/glow), défauts, alias s3, présence registre. Core **202**, codemirror 33.
 - **Vérifié en navigateur** : système solaire (soleil glow + 2 planètes en orbite) rendu en WebGL, animé (rAF ~373 appels), **10 modifications consécutives → 0 erreur, 1 seul canvas** (teardown correct, pas de fuite de contexte), 1 seul script Three.js. Retrait → teardown (0 canvas).
+
+## Boîte à outils 3D maths/physique (collection s3 étendue)
+
+Objectif : un maximum d'objets déclaratifs utiles aux mathématiciens/physiciens, sur le modèle s3/runtime (zéro `<script>`).
+
+- **Nouvelles primitives** (`objects/three.ts` + registre) : formes `s3.torus`, `s3.cylinder`, `s3.cone`, `s3.plane`, `s3.point` (en plus de sphere/box) ; `s3.vector` (flèche from→to — forces/champs) ; `s3.line` (ligne/trajectoire depuis `points="(x,y,z);…"`) ; helpers `s3.axes` et `s3.grid`. Options de scène : `distance` (caméra), `controls` (OrbitControls souris), `autorotate`. ~12 objets s3.
+- **Runtime** (`three-client.ts`) : construit chaque type (géométries, ArrowHelper, Line/BufferGeometry, AxesHelper, GridHelper), applique spin/orbit, auto-rotation du groupe, OrbitControls (addon chargé à la demande via `loadDependency` quand `controls=true`), opacité/transparence. `forceContextLoss` au teardown.
+- **Bug lexer corrigé** (pré-existant, exposé par les coords 3D) : un nombre négatif décimal non quoté `x=-2.5` cassait (le `-` routait vers `lexIdent`, qui s'arrête au `.`). `lexNumber` consomme désormais un `-` initial ; `-<chiffre>` → nombre. Bénéficie à tout le langage. Test parser ajouté.
+- **Tests** : `three.test.ts` étendu (vecteurs, lignes, axes, grille, options, exemples qui compilent). Core **205**, codemirror 33.
+- **Vérifié en navigateur** : scène riche (axes + grille + sphère-soleil + tore + cylindre + cône + boîte + vecteur + trajectoire + point en orbite) rendue en WebGL, animée, OrbitControls + auto-rotation, **0 erreur console**.

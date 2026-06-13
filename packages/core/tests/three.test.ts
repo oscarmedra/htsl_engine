@@ -47,4 +47,37 @@ describe("declarative 3D scenes (Three.js) — engine", () => {
     expect(paths).toContain("scene.3d.sphere");
     expect(paths).toContain("scene.3d.box");
   });
+
+  it("supports vectors, lines, axes, grid and more shapes", () => {
+    const src = `{@s3.scene[controls=true, autorotate=true, distance=8]:
+      {@s3.axes[size=3]/}
+      {@s3.grid[size=10, divisions=20]/}
+      {@s3.torus[radius=1, tube=0.3]/}
+      {@s3.cylinder[radius=0.5, height=2]/}
+      {@s3.cone[radius=0.5, height=1]/}
+      {@s3.vector[from="(0,0,0)", to="(2,1,1)"]/}
+      {@s3.line[points="(0,0,0);(1,1,0);(2,0,1)"]/}
+    }`;
+    const spec = threeSpec(parse(src)[0] as ObjectNode);
+    expect(spec).toMatchObject({ controls: true, autorotate: true, distance: 8 });
+    const byType = (t: string) => spec.objects.filter((o) => o.type === t);
+    expect(byType("axes")).toHaveLength(1);
+    expect(byType("grid")[0]).toMatchObject({ size: 10, divisions: 20 });
+    expect(byType("vector")[0]).toMatchObject({ from: [0, 0, 0], to: [2, 1, 1] });
+    expect(byType("line")[0]?.points).toEqual([
+      [0, 0, 0],
+      [1, 1, 0],
+      [2, 0, 1],
+    ]);
+    expect(spec.objects.map((o) => o.shape)).toEqual(
+      expect.arrayContaining(["torus", "cylinder", "cone"]),
+    );
+  });
+
+  it("exposes ~12 s3 objects via introspection", () => {
+    const s3 = registry.list().filter((e) => e.path.startsWith("scene.3d."));
+    expect(s3.length).toBeGreaterThanOrEqual(11);
+    // every example must compile (palette previews never throw)
+    for (const e of s3) expect(() => compile(e.example)).not.toThrow();
+  });
 });

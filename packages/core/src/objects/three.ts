@@ -1,43 +1,69 @@
 /**
- * Declarative animated 3D scenes (WebGL / Three.js).
+ * Declarative animated 3D scenes (WebGL / Three.js) — useful primitives for
+ * mathematicians and physicists.
  *
  * Parallel to the Plotly geometry scenes, but for free-form animated 3D: the
  * renderer emits a **data node** `<div class="htsl-three" data-htsl-three='{…}'>`
  * — never a `<script>`. The runtime loads Three.js and draws/animates it.
  *
- * Objects (collection alias `s3` → `scene.3d`):
- *  - `{@s3.scene[width, height, background]: …actors…}`
- *  - `{@s3.sphere[radius, x, y, z, color, spin, orbit, speed, glow]/}`
- *  - `{@s3.box[size, x, y, z, color, spin, orbit, speed, glow]/}`
+ * Collection alias `s3` → `scene.3d`:
+ *  - `{@s3.scene[width, height, background, distance, controls, autorotate]: …]`
+ *  - meshes: `s3.sphere`, `s3.box`, `s3.torus`, `s3.cylinder`, `s3.cone`,
+ *    `s3.plane`, `s3.point`
+ *  - `s3.vector` (arrow), `s3.line` (polyline / trajectory)
+ *  - helpers: `s3.axes`, `s3.grid`
  *
- * `spin` = self-rotation per frame; `orbit`/`speed` = circular orbit around the
- * origin; `glow=true` = self-lit material (e.g. a sun).
+ * Common transforms: `x/y/z`, `color`, `opacity`, `spin` (self-rotation),
+ * `orbit`+`speed` (circular orbit), `glow` (self-lit material).
  */
 import { escapeHtml } from "../escape.js";
 import type { ObjectNode } from "../types.js";
 
+export type ThreeShape = "sphere" | "box" | "torus" | "cylinder" | "cone" | "plane" | "point";
+
 export interface ThreeObject {
-  shape: "sphere" | "box";
+  type: "mesh" | "vector" | "line" | "axes" | "grid";
+  shape: ThreeShape;
   x: number;
   y: number;
   z: number;
-  size: number;
   color: string;
+  opacity: number;
+  glow: boolean;
   spin: number;
   orbit: number;
   speed: number;
-  glow: boolean;
+  /** sphere/point radius · box "size" · plane side · torus/cylinder/cone radius */
+  size: number;
+  /** torus tube radius. */
+  tube: number;
+  /** cylinder/cone height. */
+  height: number;
+  /** vector arrow endpoints. */
+  from: Vec3;
+  to: Vec3;
+  /** polyline / trajectory points. */
+  points: Vec3[];
+  /** grid divisions / axes size. */
+  divisions: number;
 }
 
 export interface ThreeSpec {
   width: number;
   height: number;
   background: string;
+  /** camera distance from the origin (z). */
+  distance: number;
+  /** mouse orbit controls (loads the OrbitControls addon). */
+  controls: boolean;
+  /** slow automatic rotation of the whole scene. */
+  autorotate: boolean;
   objects: ThreeObject[];
 }
 
-const THREE_PREFIX = "scene.3d.";
+type Vec3 = [number, number, number];
 
+const THREE_PREFIX = "scene.3d.";
 export function isThreePath(path: string): boolean {
   return path.startsWith(THREE_PREFIX);
 }
@@ -46,35 +72,95 @@ function num(v: string | undefined, fallback: number): number {
   const n = v === undefined ? NaN : Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
+function bool(v: string | undefined): boolean {
+  return v === "true" || v === "";
+}
+/** Parse "(a, b, c)" → [a, b, c] (missing components default to 0). */
+function vec3(v: string | undefined, fallback: Vec3 = [0, 0, 0]): Vec3 {
+  if (!v) return fallback;
+  const parts = v.replace(/[()]/g, "").split(",").map((s) => Number(s.trim()));
+  return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
+}
+/** Parse "(a,b,c);(d,e,f);…" → list of points. */
+function points(v: string | undefined): Vec3[] {
+  if (!v) return [];
+  return v
+    .split(";")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => vec3(s));
+}
 
-function actor(n: ObjectNode): ThreeObject {
-  const shape: "sphere" | "box" = n.path.endsWith(".box") ? "box" : "sphere";
+function base(n: ObjectNode, shape: ThreeShape, type: ThreeObject["type"]): ThreeObject {
   return {
+    type,
     shape,
     x: num(n.attrs["x"], 0),
     y: num(n.attrs["y"], 0),
     z: num(n.attrs["z"], 0),
-    size: shape === "box" ? num(n.attrs["size"], 1) : num(n.attrs["radius"], 0.5),
     color: n.attrs["color"] ?? "#ffffff",
+    opacity: num(n.attrs["opacity"], 1),
+    glow: bool(n.attrs["glow"]),
     spin: num(n.attrs["spin"], 0),
     orbit: num(n.attrs["orbit"], 0),
     speed: num(n.attrs["speed"], 0),
-    glow: n.attrs["glow"] === "true",
+    size: num(n.attrs["size"], 1),
+    tube: num(n.attrs["tube"], 0.3),
+    height: num(n.attrs["height"], 1),
+    from: vec3(n.attrs["from"]),
+    to: vec3(n.attrs["to"], [1, 1, 1]),
+    points: points(n.attrs["points"]),
+    divisions: num(n.attrs["divisions"], 10),
   };
+}
+
+/** Translate one actor object node into its normalized 3D description. */
+function actor(n: ObjectNode): ThreeObject | null {
+  const suffix = n.path.slice(THREE_PREFIX.length);
+  switch (suffix) {
+    case "sphere":
+      return { ...base(n, "sphere", "mesh"), size: num(n.attrs["radius"], 0.5) };
+    case "point":
+      return { ...base(n, "point", "mesh"), size: num(n.attrs["radius"], 0.12) };
+    case "box":
+      return { ...base(n, "box", "mesh"), size: num(n.attrs["size"], 1) };
+    case "plane":
+      return { ...base(n, "plane", "mesh"), size: num(n.attrs["size"], 6) };
+    case "torus":
+      return { ...base(n, "torus", "mesh"), size: num(n.attrs["radius"], 1) };
+    case "cylinder":
+      return { ...base(n, "cylinder", "mesh"), size: num(n.attrs["radius"], 0.5) };
+    case "cone":
+      return { ...base(n, "cone", "mesh"), size: num(n.attrs["radius"], 0.5) };
+    case "vector":
+      return base(n, "sphere", "vector");
+    case "line":
+      return base(n, "sphere", "line");
+    case "axes":
+      return { ...base(n, "sphere", "axes"), size: num(n.attrs["size"], 3) };
+    case "grid":
+      return { ...base(n, "sphere", "grid"), size: num(n.attrs["size"], 10) };
+    default:
+      return null;
+  }
 }
 
 /** Pure JSON description of a `{@s3.scene}` (its actors + canvas settings). */
 export function threeSpec(scene: ObjectNode): ThreeSpec {
   const objects: ThreeObject[] = [];
   for (const child of scene.children) {
-    if (child.type === "object" && (child.path === "scene.3d.sphere" || child.path === "scene.3d.box")) {
-      objects.push(actor(child));
+    if (child.type === "object" && isThreePath(child.path) && child.path !== "scene.3d.scene") {
+      const a = actor(child);
+      if (a) objects.push(a);
     }
   }
   return {
     width: num(scene.attrs["width"], 600),
     height: num(scene.attrs["height"], 400),
     background: scene.attrs["background"] ?? "#020617",
+    distance: num(scene.attrs["distance"], 6),
+    controls: bool(scene.attrs["controls"]),
+    autorotate: bool(scene.attrs["autorotate"]),
     objects,
   };
 }

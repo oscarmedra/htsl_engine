@@ -288,8 +288,8 @@ class Lexer {
         this.lexString();
         return;
       default:
-        if (/[0-9]/.test(ch)) {
-          // Number-like attribute value (e.g. 0.5), kept as one IDENT token.
+        if (/[0-9]/.test(ch) || (ch === "-" && /[0-9]/.test(this.peek(1)))) {
+          // Number-like attribute value (e.g. 0.5, -2.5), kept as one IDENT token.
           this.lexNumber();
           return;
         }
@@ -324,6 +324,7 @@ class Lexer {
   private lexNumber(): void {
     const loc = this.loc();
     let value = "";
+    if (this.peek() === "-") value += this.advance(); // leading sign (e.g. -2.5)
     while (!this.eof() && /[0-9.]/.test(this.peek())) value += this.advance();
     this.push("IDENT", value, loc);
   }

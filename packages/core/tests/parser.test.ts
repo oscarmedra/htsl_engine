@@ -33,6 +33,11 @@ describe("parser — syntax (§2)", () => {
     expect(el.attrs).toEqual({ attr1: "val1", attr2: "val 2" });
   });
 
+  it("parses signed/decimal numeric attribute values (e.g. -2.5)", () => {
+    const el = firstElement("{tag[x=-2.5, y=2.5, z=-3]:t}");
+    expect(el.attrs).toEqual({ x: "-2.5", y: "2.5", z: "-3" });
+  });
+
   it("parses a self-closing element", () => {
     const el = firstElement('{img[src="a.png"]/}');
     expect(el.selfClosing).toBe(true);

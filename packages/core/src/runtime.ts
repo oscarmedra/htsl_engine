@@ -25,6 +25,7 @@ import { hydrateThree, pendingThree, purgeThree, type ThreeNS } from "./three-cl
 /** External dependency of a dynamic type. KaTeX (formulas) will join later. */
 const PLOTLY_URL = "https://cdn.plot.ly/plotly-2.27.0.min.js";
 const THREE_URL = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+const ORBIT_URL = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js";
 
 /** Minimal view of the target window we touch (the page's, or an iframe's). */
 interface RuntimeWindow {
@@ -102,9 +103,14 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
   }
 
   // Animated 3D scenes (Three.js).
-  if (pendingThree(root).length > 0 && w.requestAnimationFrame && w.cancelAnimationFrame) {
+  const three = pendingThree(root);
+  if (three.length > 0 && w.requestAnimationFrame && w.cancelAnimationFrame) {
     try {
       await loadDependency(THREE_URL, w);
+      // Load mouse-orbit controls only if a scene asks for them.
+      if (three.some((el) => (el.getAttribute("data-htsl-three") ?? "").includes('"controls":true'))) {
+        await loadDependency(ORBIT_URL, w).catch(() => undefined);
+      }
       drawn += hydrateThree(root, {
         THREE: w.THREE,
         requestAnimationFrame: w.requestAnimationFrame.bind(w),

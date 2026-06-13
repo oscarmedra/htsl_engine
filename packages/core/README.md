@@ -281,20 +281,31 @@ collection **`s3`** (`scene.3d`) décrit des scènes **déclaratives** dessinée
 le runtime via Three.js — toujours **zéro `<script>`** :
 
 ```htsl
-{@s3.scene[height=480, background="#020617"]:
-  {@s3.sphere[radius=0.9, color="#facc15", glow=true, spin=0.004]/}   {!-- soleil --}
-  {@s3.sphere[radius=0.3, color="#60a5fa", orbit=3, speed=0.02]/}      {!-- planète --}
+{@s3.scene[height=480, controls=true, autorotate=true]:
+  {@s3.axes[size=3]/}  {@s3.grid[size=12, divisions=12]/}
+  {@s3.sphere[radius=0.7, color="#facc15", glow=true]/}          {!-- soleil --}
+  {@s3.torus[radius=1.4, tube=0.18, color="#34d399", spin=0.01]/}
+  {@s3.vector[from="(0,0,0)", to="(2,2,1)", color="#f59e0b"]/}    {!-- force --}
+  {@s3.line[points="(-3,0,0);(-2,1,1);(-1,0,2)", color="#22d3ee"]/}  {!-- trajectoire --}
+  {@s3.point[color="#f87171", orbit=2.2, speed=0.03]/}            {!-- particule --}
 }
 ```
 
 | Objet | Rôle |
 |-------|------|
-| `s3.scene` | conteneur (attrs `width`, `height`, `background`) → `<div class="htsl-three" data-htsl-three='{…}'>` |
-| `s3.sphere` / `s3.box` | acteurs : `x`/`y`/`z`, `color`, `radius`/`size`, `spin` (rotation propre), `orbit`+`speed` (orbite autour de l'origine), `glow` (auto-lumineux) |
+| `s3.scene` | conteneur → `<div class="htsl-three" data-htsl-three='{…}'>`. Attrs : `width`, `height`, `background`, `distance` (caméra), `controls` (rotation souris / OrbitControls), `autorotate`. |
+| `s3.sphere` `s3.box` `s3.torus` `s3.cylinder` `s3.cone` `s3.plane` `s3.point` | formes (maillages) |
+| `s3.vector` | flèche `from`→`to` (forces, champs, déplacements) |
+| `s3.line` | ligne/trajectoire (`points="(x,y,z);(x,y,z);…"`) |
+| `s3.axes` `s3.grid` | repère et grille de référence |
 
-Le runtime charge Three.js (dépendance déclarée), construit la scène, lance une
-boucle `requestAnimationFrame`, **reconstruit** au changement de hash (Three n'a
-pas de `react`) et **libère le contexte WebGL** (`forceContextLoss`) à la purge.
+Transforms communs (maillages) : `x`/`y`/`z`, `color`, `opacity`, `glow`
+(auto-lumineux), `spin` (rotation propre), `orbit`+`speed` (orbite).
+
+Le runtime charge Three.js (et OrbitControls si `controls`), construit la scène,
+lance une boucle `requestAnimationFrame`, **reconstruit** au changement de hash
+(Three n'a pas de `react`) et **libère le contexte WebGL** (`forceContextLoss`) à
+la purge — d'où aucune fuite après des dizaines d'éditions.
 
 ## Runtime navigateur
 

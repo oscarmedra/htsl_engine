@@ -9,7 +9,7 @@
  *
  * Idempotent: a node already drawn at the same hash is left untouched. A node
  * whose hash changed is **rebuilt** (Three has no in-place "react"). A removed
- * node is torn down (animation stopped, renderer disposed, canvas dropped).
+ * node is torn down (animation stopped, renderer disposed + WebGL context freed).
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ThreeObject, ThreeSpec } from "./objects/three.js";
@@ -17,16 +17,29 @@ import type { ThreeObject, ThreeSpec } from "./objects/three.js";
 type Ctor = new (...args: any[]) => any;
 export interface ThreeNS {
   Scene: Ctor;
+  Group: Ctor;
   PerspectiveCamera: Ctor;
   WebGLRenderer: Ctor;
   Color: Ctor;
+  Vector3: Ctor;
   SphereGeometry: Ctor;
   BoxGeometry: Ctor;
+  TorusGeometry: Ctor;
+  CylinderGeometry: Ctor;
+  ConeGeometry: Ctor;
+  PlaneGeometry: Ctor;
+  BufferGeometry: Ctor;
   MeshStandardMaterial: Ctor;
   MeshBasicMaterial: Ctor;
+  LineBasicMaterial: Ctor;
   Mesh: Ctor;
+  Line: Ctor;
+  ArrowHelper: Ctor;
+  AxesHelper: Ctor;
+  GridHelper: Ctor;
   PointLight: Ctor;
   AmbientLight: Ctor;
+  OrbitControls?: Ctor;
 }
 export interface ThreeWindow {
   THREE: ThreeNS | undefined;
@@ -47,7 +60,6 @@ function quickHash(s: string): string {
   }
   return (h >>> 0).toString(36);
 }
-
 function key(el: Element): string {
   return el.getAttribute("data-htsl-hash") ?? quickHash(el.getAttribute("data-htsl-three") ?? "");
 }
@@ -99,7 +111,7 @@ export function hydrateThree(root: ParentNode, win: ThreeWindow): number {
   return drawn;
 }
 
-/** Tear down 3D scenes being removed/replaced (stops RAF, disposes the renderer). */
+/** Tear down 3D scenes being removed/replaced (stops RAF, frees WebGL context). */
 export function purgeThree(removed: Iterable<Element>): void {
   for (const el of removed) {
     if (el.classList?.contains("htsl-three")) teardown(el);
@@ -107,53 +119,116 @@ export function purgeThree(removed: Iterable<Element>): void {
   }
 }
 
-function build(el: Element, spec: ThreeSpec, THREE: ThreeNS, win: ThreeWindow): void {
+/* -------------------------------------------------------------------------- */
+
+function geometry(o: ThreeObject, T: ThreeNS): any {
+  switch (o.shape) {
+    case "box":
+      return new T.BoxGeometry(o.size, o.size, o.size);
+    case "torus":
+      return new T.TorusGeometry(o.size, o.tube, 24, 80);
+    case "cylinder":
+      return new T.CylinderGeometry(o.size, o.size, o.height, 40);
+    case "cone":
+      return new T.ConeGeometry(o.size, o.height, 40);
+    case "plane":
+      return new T.PlaneGeometry(o.size, o.size);
+    default: // sphere / point
+      return new T.SphereGeometry(o.size, 32, 24);
+  }
+}
+
+function buildObject(o: ThreeObject, T: ThreeNS): any {
+  switch (o.type) {
+    case "mesh": {
+      const transparent = o.opacity < 1;
+      const mat = o.glow
+        ? new T.MeshBasicMaterial({ color: o.color, transparent, opacity: o.opacity })
+        : new T.MeshStandardMaterial({ color: o.color, transparent, opacity: o.opacity });
+      const mesh = new T.Mesh(geometry(o, T), mat);
+      if (o.shape === "plane") mesh.rotation.x = -Math.PI / 2; // lie flat by default
+      mesh.position.set(o.x, o.y, o.z);
+      return mesh;
+    }
+    case "vector": {
+      const from = new T.Vector3(o.from[0], o.from[1], o.from[2]);
+      const to = new T.Vector3(o.to[0], o.to[1], o.to[2]);
+      const dir = to.clone().sub(from);
+      const len = dir.length() || 1;
+      dir.normalize();
+      const hex = new T.Color(o.color).getHex();
+      return new T.ArrowHelper(dir, from, len, hex, Math.min(0.4, len * 0.25), Math.min(0.25, len * 0.16));
+    }
+    case "line": {
+      const pts = o.points.map((p) => new T.Vector3(p[0], p[1], p[2]));
+      const geo = new T.BufferGeometry().setFromPoints(pts);
+      return new T.Line(geo, new T.LineBasicMaterial({ color: o.color }));
+    }
+    case "axes":
+      return new T.AxesHelper(o.size);
+    case "grid":
+      return new T.GridHelper(o.size, o.divisions);
+  }
+}
+
+function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void {
   const w = Math.max(1, spec.width);
   const h = Math.max(1, spec.height);
 
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(spec.background);
+  const scene = new T.Scene();
+  scene.background = new T.Color(spec.background);
 
-  const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
-  camera.position.z = 6;
+  const camera = new T.PerspectiveCamera(60, w / h, 0.1, 1000);
+  const d = spec.distance;
+  camera.position.set(d * 0.55, d * 0.45, d);
+  camera.lookAt(0, 0, 0);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  const renderer = new T.WebGLRenderer({ antialias: true });
   renderer.setSize(w, h);
   el.textContent = "";
   el.appendChild(renderer.domElement as Node);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-  const light = new THREE.PointLight(0xffffff, 2);
-  light.position.set(5, 5, 5);
+  scene.add(new T.AmbientLight(0xffffff, 0.45));
+  const light = new T.PointLight(0xffffff, 2);
+  light.position.set(6, 8, 6);
   scene.add(light);
 
-  const animated: Array<ThreeObject & { mesh: any; angle: number }> = [];
+  const group = new T.Group();
+  scene.add(group);
+
+  const animated: Array<{ obj: any; spin: number; orbit: number; speed: number; angle: number }> = [];
   for (const o of spec.objects) {
-    const geo =
-      o.shape === "box"
-        ? new THREE.BoxGeometry(o.size, o.size, o.size)
-        : new THREE.SphereGeometry(o.size, 32, 24);
-    const mat = o.glow
-      ? new THREE.MeshBasicMaterial({ color: o.color })
-      : new THREE.MeshStandardMaterial({ color: o.color });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(o.x, o.y, o.z);
-    scene.add(mesh);
-    if (o.spin || o.orbit) animated.push({ ...o, mesh, angle: 0 });
+    const obj = buildObject(o, T);
+    if (!obj) continue;
+    group.add(obj);
+    if (o.spin || o.orbit) animated.push({ obj, spin: o.spin, orbit: o.orbit, speed: o.speed, angle: 0 });
+  }
+
+  let controls: any = null;
+  if (spec.controls && T.OrbitControls) {
+    controls = new T.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
   }
 
   let raf = 0;
   let alive = true;
+  let auto = 0;
   const tick = (): void => {
     if (!alive) return;
     for (const a of animated) {
-      if (a.spin) a.mesh.rotation.y += a.spin;
+      if (a.spin) a.obj.rotation.y += a.spin;
       if (a.orbit) {
         a.angle += a.speed;
-        a.mesh.position.x = Math.cos(a.angle) * a.orbit;
-        a.mesh.position.z = Math.sin(a.angle) * a.orbit;
+        a.obj.position.x = Math.cos(a.angle) * a.orbit;
+        a.obj.position.z = Math.sin(a.angle) * a.orbit;
       }
     }
+    if (spec.autorotate) {
+      auto += 0.003;
+      group.rotation.y = auto;
+    }
+    if (controls) controls.update();
     renderer.render(scene, camera);
     raf = win.requestAnimationFrame(tick);
   };
@@ -163,6 +238,13 @@ function build(el: Element, spec: ThreeSpec, THREE: ThreeNS, win: ThreeWindow): 
     stop: () => {
       alive = false;
       win.cancelAnimationFrame(raf);
+      if (controls) {
+        try {
+          controls.dispose();
+        } catch {
+          /* ignore */
+        }
+      }
       // Release the WebGL context immediately, else rapid rebuilds (every edit)
       // exhaust the browser's ~16-context limit and new renderers fail silently.
       try {

@@ -489,6 +489,8 @@ const POS3: AttrSchema[] = [
   { name: "y", type: "number", required: false, default: "0", description: "Position y." },
   { name: "z", type: "number", required: false, default: "0", description: "Position z." },
 ];
+/** Common motion/material attributes shared by 3D meshes. */
+const MOTION: AttrSchema[] = [...POS3, COLOR, OPACITY, SPIN, ORBIT, SPEED, GLOW];
 registerObject({
   path: "scene.3d.scene",
   contentModel: "html",
@@ -499,6 +501,9 @@ registerObject({
     { name: "width", type: "number", required: false, default: "600", description: "Largeur en pixels." },
     { name: "height", type: "number", required: false, default: "400", description: "Hauteur en pixels." },
     { name: "background", type: "string", required: false, default: "#020617", description: "Couleur de fond." },
+    { name: "distance", type: "number", required: false, default: "6", description: "Distance de la caméra." },
+    { name: "controls", type: "boolean", required: false, default: "false", description: "Rotation à la souris (OrbitControls)." },
+    { name: "autorotate", type: "boolean", required: false, default: "false", description: "Rotation automatique lente." },
   ],
   snippet:
     "{@s3.scene[height=480]:\n  {@s3.sphere[radius=0.8, color=\"#facc15\", glow=true, spin=0.003]/}\n  {@s3.sphere[radius=0.3, color=\"#60a5fa\", orbit=3, speed=0.02]/}\n  ${1}\n}",
@@ -540,6 +545,124 @@ registerObject({
   ],
   snippet: "{@s3.box[size=${1:1}, color=${2:\"#f472b6\"}, spin=${3:0.01}]/}",
   example: "{@s3.box[size=1, color=\"#f472b6\", spin=0.01]/}",
+});
+registerObject({
+  path: "scene.3d.torus",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Tore (donut) 3D : rayon + rayon du tube.",
+  attrs: [
+    { name: "radius", type: "number", required: false, default: "1", description: "Rayon principal." },
+    { name: "tube", type: "number", required: false, default: "0.3", description: "Rayon du tube." },
+    ...MOTION,
+  ],
+  snippet: "{@s3.torus[radius=${1:1}, tube=${2:0.3}, color=${3:\"#34d399\"}, spin=0.01]/}",
+  example: "{@s3.torus[radius=1, tube=0.3, color=\"#34d399\", spin=0.01]/}",
+});
+registerObject({
+  path: "scene.3d.cylinder",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Cylindre 3D : rayon + hauteur.",
+  attrs: [
+    { name: "radius", type: "number", required: false, default: "0.5", description: "Rayon." },
+    { name: "height", type: "number", required: false, default: "1", description: "Hauteur." },
+    ...MOTION,
+  ],
+  snippet: "{@s3.cylinder[radius=${1:0.5}, height=${2:1.5}, color=${3:\"#a78bfa\"}]/}",
+  example: "{@s3.cylinder[radius=0.5, height=1.5, color=\"#a78bfa\"]/}",
+});
+registerObject({
+  path: "scene.3d.cone",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Cône 3D : rayon de base + hauteur.",
+  attrs: [
+    { name: "radius", type: "number", required: false, default: "0.5", description: "Rayon de base." },
+    { name: "height", type: "number", required: false, default: "1", description: "Hauteur." },
+    ...MOTION,
+  ],
+  snippet: "{@s3.cone[radius=${1:0.5}, height=${2:1.5}, color=${3:\"#fb923c\"}]/}",
+  example: "{@s3.cone[radius=0.6, height=1.5, color=\"#fb923c\"]/}",
+});
+registerObject({
+  path: "scene.3d.plane",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Plan 3D (carré, horizontal par défaut).",
+  attrs: [
+    { name: "size", type: "number", required: false, default: "6", description: "Côté du plan." },
+    ...MOTION,
+  ],
+  snippet: "{@s3.plane[size=${1:6}, color=${2:\"#1e293b\"}, opacity=0.6]/}",
+  example: "{@s3.plane[size=6, color=\"#1e293b\", opacity=0.6]/}",
+});
+registerObject({
+  path: "scene.3d.point",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Point 3D (petit marqueur) ; orbit = trajectoire animée.",
+  attrs: [
+    { name: "radius", type: "number", required: false, default: "0.12", description: "Taille du marqueur." },
+    ...MOTION,
+  ],
+  snippet: "{@s3.point[x=${1:1}, y=${2:1}, z=${3:1}, color=${4:\"#f87171\"}]/}",
+  example: "{@s3.point[x=1, y=1, z=1, color=\"#f87171\"]/}",
+});
+registerObject({
+  path: "scene.3d.vector",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Vecteur 3D (flèche) — forces, champs, déplacements.",
+  attrs: [
+    tuple("from", false, "Origine, ex. (0,0,0)."),
+    tuple("to", false, "Extrémité, ex. (1,2,1)."),
+    COLOR,
+  ],
+  snippet: "{@s3.vector[from=${1:\"(0,0,0)\"}, to=${2:\"(2,1,1)\"}, color=${3:\"#f59e0b\"}]/}",
+  example: "{@s3.vector[from=\"(0,0,0)\", to=\"(2,1,1)\", color=\"#f59e0b\"]/}",
+});
+registerObject({
+  path: "scene.3d.line",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Ligne / trajectoire 3D : liste de points séparés par ';'.",
+  attrs: [
+    tuple("points", false, "Points, ex. (0,0,0);(1,1,0);(2,0,1)."),
+    COLOR,
+  ],
+  snippet: "{@s3.line[points=${1:\"(0,0,0);(1,1,0);(2,0,1)\"}, color=${2:\"#22d3ee\"}]/}",
+  example: "{@s3.line[points=\"(0,0,0);(1,1,0);(2,0,1);(3,1,0)\", color=\"#22d3ee\"]/}",
+});
+registerObject({
+  path: "scene.3d.axes",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Repère 3D (axes X/Y/Z) pour la référence.",
+  attrs: [{ name: "size", type: "number", required: false, default: "3", description: "Longueur des axes." }],
+  snippet: "{@s3.axes[size=${1:3}]/}",
+  example: "{@s3.axes[size=3]/}",
+});
+registerObject({
+  path: "scene.3d.grid",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: [],
+  description: "Grille au sol 3D (plan de référence).",
+  attrs: [
+    { name: "size", type: "number", required: false, default: "10", description: "Étendue de la grille." },
+    { name: "divisions", type: "number", required: false, default: "10", description: "Nombre de divisions." },
+  ],
+  snippet: "{@s3.grid[size=${1:10}, divisions=${2:10}]/}",
+  example: "{@s3.grid[size=10, divisions=10]/}",
 });
 
 /* -------------------------------------------------------------------------- */
