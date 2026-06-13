@@ -352,12 +352,17 @@ automatiquement (séquentielles) ; `at`/`delay` permettent de chevaucher.
 | `scale` | met à l'échelle `value` (ou `to="(sx,sy,sz)"`) |
 | `color` | transition vers `color` |
 | `fade` | opacité → `value` |
-| `transform` | adopte la position + couleur de l'objet `to="<id>"` |
+| `transform` | **vrai morph de géométrie** : la forme change réellement (cube → sphère → tore…) + transition de couleur vers l'objet `to="<id>"`. B sert de gabarit (sa position n'importe pas ; utilisez `move` pour déplacer). |
 
 Options : `duration`, `delay`, `at` (départ absolu), `easing`
 (`linear`/`easeIn`/`easeOut`/`easeInOut`). La scène **boucle** la timeline par
 défaut (`{@s3.scene[loop=false]}` pour jouer une fois). Le runtime interpole
 position (lerp), rotation (slerp), échelle, couleur et opacité par image.
+
+Le **vrai morph** (`transform`) rééchantillonne les formes morphables
+(sphère/cube/tore/cylindre/cône/plan) sur une **grille canonique commune** puis
+interpole les sommets via les *morph targets* de Three.js (normales morphées
+pour un éclairage correct).
 
 Le runtime charge Three.js (et OrbitControls si `controls`), construit la scène,
 lance une boucle `requestAnimationFrame`, **reconstruit** au changement de hash

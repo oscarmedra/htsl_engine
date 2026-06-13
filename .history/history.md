@@ -283,3 +283,12 @@ Proposition utilisateur : des blocs d'animation référençant les objets par `i
 - **Timeline** (`three-client.ts`) : par cible, les animations s'enchaînent (curseur séquentiel, `at`/`delay` pour chevaucher). À la construction on précalcule des segments {start, end, from, to} (état complet pos/quat/scale/color/opacity) ; au runtime, interpolation par image (lerp position/échelle/couleur, slerp rotation, ease). Les objets ciblés sont exclus du spin/orbit (exclusion mutuelle).
 - **Tests** : `three.test.ts` (collecte par id, parsing move/rotate/transform, registre). Core **218**, codemirror 33.
 - **Vérifié en navigateur** : exemple utilisateur (A move→rotate→scale→transform vers B) joué en boucle, 0 erreur ; capture montre A agrandi, déplacé et passé à la couleur de B.
+
+## Vrai morph de géométrie pour transform (cube → sphère → tore…)
+
+L'action `transform` devient un **vrai morph de forme** (pas seulement position+couleur).
+
+- **Grille canonique commune** (`three-client.ts`, 48×32) : toute forme morphable (sphere/box/torus/cylinder/cone/plane/point) est rééchantillonnée par une fonction de surface (sphère UV ; cube = projection max-norm ; tore/cylindre/cône/plan paramétrés) → même nombre/ordre de sommets pour toutes.
+- **Morph targets Three.js** : la cible A est construite avec la géométrie de A en base et la géométrie de B (même grille) en morph attribute (positions + normales). Matériau `morphTargets`/`morphNormals`. L'influence `morphTargetInfluences[0]` est pilotée par la timeline sur le segment `transform` (ease), 0→1, et remise à 0 à la boucle.
+- **Sémantique** : `transform` morphe **forme + couleur sur place** (le morph encode la taille de B ; B est un gabarit, sa position n'importe pas — utiliser `move` pour déplacer). A et B doivent être des formes morphables (sinon repli sur couleur seule).
+- **Vérifié en navigateur** : cube → tore réel (changement de forme vertex-à-vertex + couleur), gabarit hors champ, 0 erreur. Core 218, codemirror 33.

@@ -268,6 +268,132 @@ function ease(p: number, kind: string): number {
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/* Real geometry morphing (transform A → B) via a shared canonical grid        */
+/* -------------------------------------------------------------------------- */
+
+const MORPHABLE = new Set(["sphere", "box", "torus", "cylinder", "cone", "plane", "point"]);
+const MW = 48; // grid columns (around)
+const MH = 32; // grid rows (along)
+
+function gridIndex(): number[] {
+  const idx: number[] = [];
+  for (let j = 0; j < MH; j++) {
+    for (let i = 0; i < MW; i++) {
+      const a = j * (MW + 1) + i;
+      const b = a + 1;
+      const c = a + (MW + 1);
+      const d = c + 1;
+      idx.push(a, c, b, b, c, d);
+    }
+  }
+  return idx;
+}
+
+/** Sample a shape onto the canonical (MW+1)×(MH+1) grid → flat positions. So any
+ *  two morphable shapes share vertex count/order and can be lerped vertex-wise. */
+function shapePositions(o: ThreeObject): Float32Array {
+  const pos = new Float32Array((MW + 1) * (MH + 1) * 3);
+  let k = 0;
+  for (let j = 0; j <= MH; j++) {
+    const v = j / MH;
+    for (let i = 0; i <= MW; i++) {
+      const u = i / MW;
+      const th = u * Math.PI * 2;
+      let x = 0;
+      let y = 0;
+      let z = 0;
+      switch (o.shape) {
+        case "box": {
+          const half = o.size / 2;
+          const ph = v * Math.PI;
+          const sp = Math.sin(ph);
+          const dx = sp * Math.cos(th);
+          const dy = Math.cos(ph);
+          const dz = sp * Math.sin(th);
+          const m = Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dz)) || 1;
+          x = (dx / m) * half;
+          y = (dy / m) * half;
+          z = (dz / m) * half;
+          break;
+        }
+        case "torus": {
+          const ph = v * Math.PI * 2;
+          x = (o.size + o.tube * Math.cos(ph)) * Math.cos(th);
+          z = (o.size + o.tube * Math.cos(ph)) * Math.sin(th);
+          y = o.tube * Math.sin(ph);
+          break;
+        }
+        case "cylinder":
+          x = o.size * Math.cos(th);
+          z = o.size * Math.sin(th);
+          y = (v - 0.5) * o.height;
+          break;
+        case "cone": {
+          const r = o.size * (1 - v);
+          x = r * Math.cos(th);
+          z = r * Math.sin(th);
+          y = (v - 0.5) * o.height;
+          break;
+        }
+        case "plane":
+          x = (u - 0.5) * o.size;
+          z = (v - 0.5) * o.size;
+          y = 0;
+          break;
+        default: {
+          // sphere / point
+          const ph = v * Math.PI;
+          const sp = Math.sin(ph);
+          x = o.size * sp * Math.cos(th);
+          y = o.size * Math.cos(ph);
+          z = o.size * sp * Math.sin(th);
+        }
+      }
+      pos[k++] = x;
+      pos[k++] = y;
+      pos[k++] = z;
+    }
+  }
+  return pos;
+}
+
+/** Build a mesh whose geometry can morph from shape `a` to shape `b`. */
+function buildMorphMesh(a: ThreeObject, b: ThreeObject, T: ThreeNS): any {
+  const idx = gridIndex();
+  const aPos = shapePositions(a);
+  const bPos = shapePositions(b);
+
+  const geo = new T.BufferGeometry();
+  geo.setAttribute("position", new T.Float32BufferAttribute(aPos, 3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+
+  const bGeo = new T.BufferGeometry();
+  bGeo.setAttribute("position", new T.Float32BufferAttribute(bPos.slice(), 3));
+  bGeo.setIndex(idx);
+  bGeo.computeVertexNormals();
+
+  geo.morphAttributes.position = [new T.Float32BufferAttribute(bPos, 3)];
+  geo.morphAttributes.normal = [bGeo.getAttribute("normal")];
+
+  const transparent = a.opacity < 1;
+  const mat = a.glow
+    ? new T.MeshBasicMaterial({ color: a.color, transparent, opacity: a.opacity, morphTargets: true })
+    : new T.MeshStandardMaterial({
+        color: a.color,
+        transparent,
+        opacity: a.opacity,
+        side: T.DoubleSide,
+        morphTargets: true,
+        morphNormals: true,
+      });
+  const mesh = new T.Mesh(geo, mat);
+  mesh.morphTargetInfluences = [0];
+  mesh.position.set(a.x, a.y, a.z);
+  return mesh;
+}
+
 function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void {
   const w = Math.max(1, spec.width);
   const h = Math.max(1, spec.height);
@@ -295,10 +421,26 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
 
   const doc = win.document;
   const targets = new Set(spec.animations.map((a) => a.target));
+  // First transform per target → the shape it morphs into.
+  const transformTo: Record<string, string> = {};
+  for (const a of spec.animations) {
+    if (a.action === "transform" && a.toId && !(a.target in transformTo)) transformTo[a.target] = a.toId;
+  }
+  const specById: Record<string, ThreeObject> = {};
+  for (const o of spec.objects) if (o.id) specById[o.id] = o;
+
   const byId: Record<string, { obj: any; o: ThreeObject }> = {};
+  const morphMeshById: Record<string, any> = {};
   const animated: Array<{ obj: any; spin: number; orbit: number; speed: number; angle: number }> = [];
   for (const o of spec.objects) {
-    const obj = buildObject(o, T, doc);
+    // A transform target whose source and reference are both morphable shapes
+    // gets a real geometry morph (box → sphere, etc.).
+    const toId = o.id ? transformTo[o.id] : undefined;
+    const b = toId ? specById[toId] : undefined;
+    const morphable =
+      o.type === "mesh" && MORPHABLE.has(o.shape) && b && b.type === "mesh" && MORPHABLE.has(b.shape);
+    const obj = morphable ? buildMorphMesh(o, b!, T) : buildObject(o, T, doc);
+    if (morphable && o.id) morphMeshById[o.id] = obj;
     if (obj) {
       group.add(obj);
       if (o.id) byId[o.id] = { obj, o };
@@ -325,6 +467,7 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
   const segsByTarget: Record<string, Segment[]> = {};
   const stateById: Record<string, AnimState> = {};
   const cursor: Record<string, number> = {};
+  const morphs: Array<{ mesh: any; start: number; end: number; easing: string }> = [];
   let totalDur = 0;
   for (const a of spec.animations) {
     const entry = byId[a.target];
@@ -355,14 +498,16 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
     } else if (a.action === "color" && a.color) S.color.set(a.color);
     else if (a.action === "fade") S.opacity = a.value;
     else if (a.action === "transform") {
+      // Morph the SHAPE + colour in place (the geometry morph handles size).
+      // B is a template — its own position is irrelevant; use `move` to relocate.
       const b = byId[a.toId]?.o;
-      if (b) {
-        S.pos.set(b.x, b.y, b.z);
-        S.color.set(b.color);
-      }
+      if (b) S.color.set(b.color);
     }
     const end = start + a.duration;
     (segsByTarget[a.target] ??= []).push({ start, end, from, to: cloneSt(S), easing: a.easing });
+    if (a.action === "transform" && morphMeshById[a.target]) {
+      morphs.push({ mesh: morphMeshById[a.target], start, end, easing: a.easing });
+    }
     cursor[a.target] = Math.max(cursor[a.target]!, end);
     totalDur = Math.max(totalDur, end);
   }
@@ -428,6 +573,11 @@ function build(el: Element, spec: ThreeSpec, T: ThreeNS, win: ThreeWindow): void
       let t = (now - startTs) / 1000;
       t = spec.loop ? t % totalDur : Math.min(t, totalDur);
       for (const id in segsByTarget) applyState(byId[id]!.obj, stateAt(segsByTarget[id]!, t));
+      // Real geometry morph: drive the morph-target influence over the segment.
+      for (const m of morphs) {
+        m.mesh.morphTargetInfluences[0] =
+          t <= m.start ? 0 : t >= m.end ? 1 : ease((t - m.start) / (m.end - m.start), m.easing);
+      }
     }
     if (spec.autorotate) {
       auto += 0.003;
