@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EditorState } from "@codemirror/state";
-import { getIndentation } from "@codemirror/language";
+import { getIndentation, foldable } from "@codemirror/language";
 import { htslTokens, htslLanguage } from "../src/language.js";
 
 const find = (src: string, text: string) => htslTokens(src).find((t) => t.text === text);
@@ -113,3 +113,42 @@ describe("raw-text highlighting (script / style)", () => {
     expect(toks[toks.length - 1]?.type).toBe("brace");
   });
 });
+
+describe("code folding", () => {
+  const foldOf = (src: string, lineNo: number) => {
+    const state = EditorState.create({ doc: src, extensions: [htslLanguage()] });
+    const line = state.doc.line(lineNo);
+    return foldable(state, line.from, line.to);
+  };
+
+  it("folds a multi-line {…} block from the opening line to its closing brace", () => {
+    const src = "{div:\n  {p:hi}\n}";
+    const r = foldOf(src, 1);
+    expect(r).not.toBeNull();
+    // folds from end of line 1 to the closing brace on line 3
+    expect(r!.from).toBe(state_end_of_line1(src));
+    expect(src[r!.to]).toBe("}");
+  });
+
+  it("does not fold a single-line block", () => {
+    expect(foldOf("{p:hello}", 1)).toBeNull();
+  });
+
+  it("ignores braces inside strings when matching", () => {
+    const src = '{div[data-x="a}b"]:\n  text\n}';
+    const r = foldOf(src, 1);
+    expect(r).not.toBeNull();
+    expect(src[r!.to]).toBe("}"); // the real closing brace, not the one in the string
+  });
+
+  it("handles nested blocks (folds the outer to the outer close)", () => {
+    const src = "{section:\n  {div:\n    x\n  }\n}";
+    const r = foldOf(src, 1);
+    expect(r).not.toBeNull();
+    expect(r!.to).toBe(src.length - 1); // last char is the outer "}"
+  });
+});
+
+function state_end_of_line1(src: string): number {
+  return src.indexOf("\n");
+}

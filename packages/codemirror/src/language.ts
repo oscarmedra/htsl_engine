@@ -7,6 +7,7 @@
  * inline/block math, comments and escapes.
  */
 import {
+  foldService,
   HighlightStyle,
   type IndentContext,
   LanguageSupport,
@@ -14,6 +15,7 @@ import {
   StringStream,
   syntaxHighlighting,
 } from "@codemirror/language";
+import type { EditorState } from "@codemirror/state";
 import { Tag } from "@lezer/highlight";
 import { contentModelOf } from "htsl";
 
@@ -448,8 +450,69 @@ const highlight = HighlightStyle.define([
   { tag: T.number, color: "#e8590c" },
 ]);
 
+/* -------------------------------------------------------------------------- */
+/* Code folding (collapse multi-line {…} / {@…} blocks)                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Fold range for a line: if the line opens a `{…}` block whose matching `}` is on
+ * a later line, fold from the end of the opening line to just before that `}`.
+ * Braces inside escapes (`\{`, `\}`) and `"…"` strings are ignored; balanced
+ * braces in math/scripts simply cancel out.
+ */
+function htslFold(state: EditorState, lineStart: number, lineEnd: number): { from: number; to: number } | null {
+  const s = state.doc.sliceString(lineStart, state.doc.length);
+  const lineLen = lineEnd - lineStart;
+  let depth = 0;
+  let quote = ""; // inside a "…" string
+
+  const step = (i: number): number => {
+    const c = s[i]!;
+    if (c === "\\") return i + 2; // escape: skip the next char
+    if (quote) {
+      if (c === quote) quote = "";
+      return i + 1;
+    }
+    if (c === '"') quote = c;
+    else if (c === "{") depth++;
+    else if (c === "}") depth--;
+    return i + 1;
+  };
+
+  // Scan the opening line.
+  let i = 0;
+  while (i < lineLen) i = step(i);
+  if (depth <= 0) return null; // this line does not open a multi-line block
+
+  // Continue scanning until the matching close brings depth back to 0.
+  while (i < s.length) {
+    const c = s[i]!;
+    if (c === "\\") {
+      i += 2;
+      continue;
+    }
+    if (quote) {
+      if (c === quote) quote = "";
+      i++;
+      continue;
+    }
+    if (c === '"') quote = c;
+    else if (c === "{") depth++;
+    else if (c === "}" && --depth === 0) {
+      const to = lineStart + i; // position of the closing brace
+      if (to <= lineEnd) return null; // closes on the same line
+      return { from: lineEnd, to };
+    }
+    i++;
+  }
+  return null;
+}
+
 export function htslLanguage(): LanguageSupport {
-  return new LanguageSupport(language, [syntaxHighlighting(highlight)]);
+  return new LanguageSupport(language, [
+    syntaxHighlighting(highlight),
+    foldService.of(htslFold),
+  ]);
 }
 
 /* -------------------------------------------------------------------------- */
