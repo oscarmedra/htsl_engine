@@ -93,7 +93,7 @@ class Lexer {
       } else if (next === "$") {
         this.lexVarRef(braceLoc);
       } else if (next === "!") {
-        this.lexDirective(braceLoc); // {!-- already handled above
+        this.lexDirective(braceLoc, braceStart); // {!-- already handled above
       } else {
         this.advance();
         this.push("LBRACE", "{", braceLoc, braceStart);
@@ -146,14 +146,14 @@ class Lexer {
     this.push("VARREF", name, braceLoc);
   }
 
-  private lexDirective(braceLoc: Loc): void {
+  private lexDirective(braceLoc: Loc, braceStart?: number): void {
     this.advance(); // {
     this.advance(); // !
     const keyword = this.readKeyword();
     if (keyword === "define") {
       this.skipSpaces();
       const name = this.readPath();
-      this.push("DEFINE_OPEN", name, braceLoc);
+      this.push("DEFINE_OPEN", name, braceLoc, braceStart);
       this.stack.push({ kind: "header", path: null, directive: true });
       return;
     }

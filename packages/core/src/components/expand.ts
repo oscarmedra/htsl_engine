@@ -214,13 +214,14 @@ function expandComponent(
   const result = expandNodes(component.body, childCtx);
 
   // The expanded nodes are fresh copies (element/object are spread). Their
-  // source ranges point at the *template*, which would be misleading to edit
-  // from a rendered instance — drop them, then expose the call site's range on
-  // the instance roots so clicking a component edits its `{@…}` usage.
+  // internal ranges point at the *template* — drop them, then mark the instance
+  // roots with the component name + its DEFINITION range, so the preview can edit
+  // the component's `{!define …}` directly from any instance.
   stripRanges(result);
-  if (usage.range) {
-    for (const node of result) {
-      if (node.type === "element" || node.type === "object") node.range = usage.range;
+  for (const node of result) {
+    if (node.type === "element" || node.type === "object") {
+      node.component = component.name;
+      if (component.range) node.range = component.range;
     }
   }
   return result;

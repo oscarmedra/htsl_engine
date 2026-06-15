@@ -88,6 +88,14 @@ class Renderer {
       : "";
   }
 
+  /** ` data-htsl-component="name"` on a component instance root (preview edits the
+   *  component's definition). */
+  private componentAttr(node: ElementNode): string {
+    return this.options.editableText && node.component
+      ? ` data-htsl-component="${escapeHtml(node.component)}"`
+      : "";
+  }
+
   /** Render an `{@…}` object: declarative 3D scenes vs the math/geometry layer. */
   private object(node: ObjectNode): string {
     const hashAttr = this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "";
@@ -136,7 +144,7 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return escapeHtml(rawHtml(node));
     }
-    const data = extra + this.rangeAttr(node);
+    const data = extra + this.rangeAttr(node) + this.componentAttr(node);
     const open = openTag(node, data);
     if (VOID_TAGS.has(node.tag)) return open;
     if (RAW_TEXT_TAGS.has(node.tag)) return this.rawText(node, open, data);
@@ -176,7 +184,7 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return pad + escapeHtml(rawHtml(node));
     }
-    const data = extra + this.rangeAttr(node);
+    const data = extra + this.rangeAttr(node) + this.componentAttr(node);
     const open = openTag(node, data);
     if (VOID_TAGS.has(node.tag)) return pad + open;
     if (RAW_TEXT_TAGS.has(node.tag)) return pad + this.rawText(node, open, data);

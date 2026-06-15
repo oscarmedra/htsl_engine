@@ -286,6 +286,7 @@ class Parser {
   private parseDefine(depth: number): DefineNode {
     const open = this.peek(); // DEFINE_OPEN
     const startLoc = open.loc;
+    const openStart = open.start;
     const name = open.value;
     this.advance();
 
@@ -300,8 +301,10 @@ class Parser {
     if (this.check("EOF")) {
       this.fail(`composant "{!define ${name}" jamais fermé.`, startLoc);
     }
+    const closeEnd = this.peek().end; // RBRACE
     this.advance(); // consume "}"
-    return { type: "define", name, params, body, loc: startLoc };
+    const range = this.range(openStart, closeEnd);
+    return { type: "define", name, params, body, loc: startLoc, ...(range ? { range } : {}) };
   }
 
   private parseParams(): Param[] {

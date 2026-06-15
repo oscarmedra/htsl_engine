@@ -202,33 +202,26 @@ export class FrameRenderer {
     this.hovered = null;
   }
 
-  /** The *outermost* editable element (top-level parent block) above `t`, so a
-   *  click deep inside many nested tags targets the parent, not a leaf like a
-   *  `{p}`. Returns null over a text run (which has its own inline editing). */
-  private parentBlock(t: Element | null): HTMLElement | null {
-    if (!t || t.closest(".htsl-edit")) return null;
-    let el = t.closest("[data-htsl-range]") as HTMLElement | null;
-    if (!el) return null;
-    for (let a = el.parentElement; a; a = a.parentElement) {
-      if (a.hasAttribute("data-htsl-range")) el = a;
-    }
-    return el;
+  /** The user-defined **component instance** above `t` (marked with
+   *  `data-htsl-component`). Only components are editable from the render — its
+   *  `data-htsl-range` points at the component's `{!define …}`. */
+  private componentInstance(t: Element | null): HTMLElement | null {
+    return (t?.closest("[data-htsl-component]") as HTMLElement | null) ?? null;
   }
 
   private installBlockEditing(doc: Document): void {
-    // Highlight the parent block under the cursor.
+    // Highlight the component instance under the cursor.
     doc.addEventListener("mouseover", (ev) => {
-      const el = this.parentBlock(ev.target as Element | null);
+      const el = this.componentInstance(ev.target as Element | null);
       if (el === this.hovered) return;
       this.clearHover();
       this.hovered = el;
       el?.classList.add("htsl-hover");
     });
 
-    // The block editor opens on double-click only, for the parent block only
-    // (a single click leaves the render alone; text runs handle their clicks).
+    // Double-click a component instance → edit its DEFINITION ({!define …}).
     doc.addEventListener("dblclick", (ev) => {
-      const el = this.parentBlock(ev.target as Element | null);
+      const el = this.componentInstance(ev.target as Element | null);
       if (!el || !this.onBlockClick) return;
       const [s, e] = (el.getAttribute("data-htsl-range") ?? "").split("-").map(Number);
       if (s === undefined || e === undefined) return;

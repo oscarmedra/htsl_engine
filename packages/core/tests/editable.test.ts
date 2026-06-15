@@ -52,14 +52,24 @@ describe("element source ranges", () => {
     expect(el.range).toBeUndefined();
   });
 
-  it("expose the call site (not the template) on a component instance", () => {
-    const src = "{!define card[t]:{div.card:{h2:{$t}}}}\n{@card[t=Bonjour]/}";
+  it("exposes the component DEFINITION (and its name) on a component instance", () => {
+    const define = "{!define card[t]:{div.card:{h2:{$t}}}}";
+    const src = `${define}\n{@card[t=Bonjour]/}`;
     const html = render(parse(src, { ranges: true }), { editableText: true });
+    // The instance root is tagged with the component name…
+    expect(html).toContain('data-htsl-component="card"');
+    // …and its range points at the {!define …} so the preview edits the template.
     const m = html.match(/data-htsl-range="(\d+)-(\d+)"/);
     expect(m).not.toBeNull();
-    expect(src.slice(Number(m![1]), Number(m![2]))).toBe("{@card[t=Bonjour]/}");
-    // Only one range attribute: the template internals are not separately editable.
+    expect(src.slice(Number(m![1]), Number(m![2]))).toBe(define);
+    // Template internals are not separately editable (single range).
     expect(html.match(/data-htsl-range=/g)).toHaveLength(1);
+  });
+
+  it("attaches a source range to the {!define} node", () => {
+    const ast = parse("{!define card[t]:{div:{$t}}}", { ranges: true });
+    const def = ast.find((n) => n.type === "define");
+    expect(def && def.type === "define" && def.range).toBeDefined();
   });
 });
 

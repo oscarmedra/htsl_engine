@@ -60,15 +60,18 @@ peut désormais cliquer l'élément lui-même.
   et la plage de l'**appel** `{@…}` est exposée sur la racine de l'instance, afin
   qu'éditer un composant édite son usage, pas son modèle.
 - **Rendu** : `render(ast, { editableText: true })` émet
-  `data-htsl-range="début-fin"` sur les éléments.
-- **Playground** : seul le **bloc parent (de premier niveau)** est éditable —
-  survoler/double-cliquer à l'intérieur cible le `[data-htsl-range]` le plus
-  extérieur (`parentBlock` dans `frame.ts`), pas une feuille comme `{p}` (utile
-  quand il y a beaucoup de balises imbriquées). Survol (hors texte) = halo bleu ;
-  **double-clic** = un **véritable éditeur CodeMirror HTSL** s'ouvre en
-  superposition sur le bloc, pré-rempli avec sa **source HTSL**. Il a **la même expérience que
-  l'éditeur principal** : coloration syntaxique, autocomplétion (`{@`, `/`,
-  attributs…) et linter, via `@htsl/codemirror` (`playground/src/block-editor.ts`).
+  `data-htsl-range="début-fin"` sur les éléments, et — sur la racine d'une
+  **instance de composant** — `data-htsl-component="nom"` avec un `range` pointant
+  vers la **définition** `{!define …}` (le parser attache une plage à `DefineNode`,
+  et l'expansion la propage sur l'instance avec le nom du composant).
+- **Playground** : l'édition de bloc est désormais réservée aux **composants
+  définis par l'utilisateur** (`{!define}`). Survoler/double-cliquer une instance
+  cible le `[data-htsl-component]` (`componentInstance` dans `frame.ts`) — plus de
+  bloc/balise parent. Survol = halo bleu ; **double-clic** = un **véritable éditeur
+  CodeMirror HTSL** s'ouvre en superposition, pré-rempli avec la **définition du
+  composant** : modifier le `{!define …}` met à jour **toutes** les instances. Même
+  expérience que l'éditeur principal (coloration, autocomplétion `{@`/`/`/attributs,
+  linter, pliage), via `@htsl/codemirror` (`playground/src/block-editor.ts`).
   `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est remplacé
   tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; `Échap` annule.
   L'objectif est de pouvoir **tout faire depuis le rendu** (l'éditeur principal

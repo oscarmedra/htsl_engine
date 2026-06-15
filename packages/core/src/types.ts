@@ -82,6 +82,9 @@ export interface ElementNode {
    * source directly from the rendered preview.
    */
   range?: [number, number];
+  /** Set by expansion on a component instance's root: the component name (so the
+   *  preview can offer to edit that component's definition). */
+  component?: string;
 }
 
 /**
@@ -101,6 +104,9 @@ export interface ObjectNode {
   /** Absolute source `[start, end]` offsets of the whole `{@...}` object, present
    *  only when parsed with `{ ranges: true }` (see {@link ElementNode.range}). */
   range?: [number, number];
+  /** Component name when this object is a component instance root (see
+   *  {@link ElementNode.component}). */
+  component?: string;
 }
 
 /** A component parameter, with an optional default value. */
@@ -116,6 +122,9 @@ export interface DefineNode {
   params: Param[];
   body: Node[];
   loc: Loc;
+  /** Absolute source `[start, end]` of the whole `{!define …}` (with `ranges:true`).
+   *  Lets the preview edit a component's definition from an instance. */
+  range?: [number, number];
 }
 
 /** A variable assignment: `{!set name: value}`. Removed by expansion. */
