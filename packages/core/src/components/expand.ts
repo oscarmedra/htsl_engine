@@ -215,13 +215,13 @@ function expandComponent(
 
   // The expanded nodes are fresh copies (element/object are spread). Their
   // internal ranges point at the *template* — drop them, then mark the instance
-  // roots with the component name + its DEFINITION range, so the preview can edit
-  // the component's `{!define …}` directly from any instance.
+  // roots with the component name + the **call site** range, so the preview edits
+  // this instance's usage `{@name[…]: children}` (its own params and children).
   stripRanges(result);
   for (const node of result) {
     if (node.type === "element" || node.type === "object") {
       node.component = component.name;
-      if (component.range) node.range = component.range;
+      if (usage.range) node.range = usage.range;
     }
   }
   return result;

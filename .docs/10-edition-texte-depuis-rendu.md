@@ -62,16 +62,17 @@ peut désormais cliquer l'élément lui-même.
 - **Rendu** : `render(ast, { editableText: true })` émet
   `data-htsl-range="début-fin"` sur les éléments, et — sur la racine d'une
   **instance de composant** — `data-htsl-component="nom"` avec un `range` pointant
-  vers la **définition** `{!define …}` (le parser attache une plage à `DefineNode`,
-  et l'expansion la propage sur l'instance avec le nom du composant).
-- **Playground** : l'édition de bloc est désormais réservée aux **composants
+  vers l'**appel** `{@nom[…]: children}` de cette instance (l'expansion marque la
+  racine avec le nom + la plage de l'usage ; `DefineNode` porte aussi une plage,
+  disponible pour de futurs usages).
+- **Playground** : l'édition de bloc est réservée aux **instances de composants
   définis par l'utilisateur** (`{!define}`). Survoler/double-cliquer une instance
   cible le `[data-htsl-component]` (`componentInstance` dans `frame.ts`) — plus de
-  bloc/balise parent. Survol = halo bleu ; **double-clic** = un **véritable éditeur
-  CodeMirror HTSL** s'ouvre en superposition, pré-rempli avec la **définition du
-  composant** : modifier le `{!define …}` met à jour **toutes** les instances. Même
-  expérience que l'éditeur principal (coloration, autocomplétion `{@`/`/`/attributs,
-  linter, pliage), via `@htsl/codemirror` (`playground/src/block-editor.ts`).
+  bloc/balise parent. **Double-clic** = un **véritable éditeur CodeMirror HTSL**
+  pré-rempli avec l'**appel propre à l'instance** (`{@carte[titre="…"]: ses
+  children}`) — chaque instance montre **son** contenu, pas la définition partagée.
+  Même expérience que l'éditeur principal (coloration, autocomplétion, linter,
+  pliage), via `@htsl/codemirror` (`playground/src/block-editor.ts`).
   `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est remplacé
   tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; `Échap` annule.
   L'objectif est de pouvoir **tout faire depuis le rendu** (l'éditeur principal
