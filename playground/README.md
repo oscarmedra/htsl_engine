@@ -122,8 +122,15 @@ déclaration, `getElementById` null).
   (philosophie, motivations des choix, outils intégrés, syntaxe, **catalogue
   d'objets généré depuis l'introspection**, et un **prompt prêt à coller** pour
   qu'une IA rédige du HTSL). Construite en multi-pages Vite.
-- Boutons **Copier HTML** / **Télécharger** (`.htsl`) / **PDF** / **Partager**
-  (lien encodé dans le hash d'URL, rechargé à l'ouverture).
+- Boutons **Copier HTML** / **Télécharger** (`.htsl`) / **PDF** / **Partager**.
+- **Sauvegarde & partage (sans serveur)** (`src/persistence.ts`) :
+  - **Auto-save** — le document courant est écrit dans `localStorage` à chaque
+    frappe (débattu), donc **un rafraîchissement ne perd jamais le travail**.
+  - **Lien partageable** — **Partager** encode tout le document dans l'URL,
+    **compressé en gzip** (`CompressionStream`, hash `#z=`) puis base64url, et le
+    copie dans le presse-papier. Ouvrir le lien restaure le document (décompression
+    au chargement), puis le hash est nettoyé. Un ancien format non compressé
+    (`#s=`) reste décodé pour les liens existants. Aucun backend, aucun compte.
 - **Export PDF** — le bouton **PDF** ouvre la boîte d'impression du navigateur sur
   **l'iframe seule** (→ « Enregistrer au format PDF ») : le PDF est le rendu pur,
   avec texte sélectionnable, formules KaTeX et styles intacts. Mise en page

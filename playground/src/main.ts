@@ -15,6 +15,14 @@ import katex from "katex";
 import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
 
 import { examples } from "./examples";
+import {
+  saveLocal,
+  loadLocal,
+  buildShareUrl,
+  decodeLegacyHash,
+  hasCompressedHash,
+  decodeCompressedHash,
+} from "./persistence";
 import { FrameRenderer } from "./frame";
 import { setupPalette } from "./palette";
 import { updateHelp } from "./help";
@@ -165,7 +173,13 @@ let debounce: number | undefined;
 const updateListener = EditorView.updateListener.of((u) => {
   if (!u.docChanged) return;
   window.clearTimeout(debounce);
-  debounce = window.setTimeout(() => run(view), 150);
+  debounce = window.setTimeout(() => {
+    run(view);
+    saveLocal(view.state.doc.toString()); // auto-save: refresh never loses work
+  }, 150);
+  // Editing supersedes a shared link → drop the hash so a refresh uses the
+  // local copy (the Share button regenerates a fresh link on demand).
+  if (location.hash) window.history.replaceState(null, "", location.pathname + location.search);
 });
 
 const extensions: Extension[] = [
@@ -206,23 +220,23 @@ const view = new EditorView({
 /* -------------------------------------------------------------------------- */
 
 function initialDoc(): string {
-  const fromHash = decodeHash();
-  if (fromHash) return fromHash;
-  return examples[0]!.src;
+  // Priority: a shared link, then the auto-saved local copy, then the example.
+  const legacy = decodeLegacyHash(location.hash);
+  if (legacy !== null) return legacy;
+  if (hasCompressedHash(location.hash)) return ""; // filled async (see hydrateFromHash)
+  return loadLocal() ?? examples[0]!.src;
 }
 
-function encodeHash(src: string): string {
-  return "#s=" + btoa(encodeURIComponent(src));
+/** Replace the whole document (used when restoring a compressed shared link). */
+function applyDoc(src: string): void {
+  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: src } });
+  run(view);
 }
-function decodeHash(): string | null {
-  const h = location.hash;
-  const m = /^#s=(.*)$/.exec(h);
-  if (!m) return null;
-  try {
-    return decodeURIComponent(atob(m[1]!));
-  } catch {
-    return null;
-  }
+
+/** A compressed `#z=` link is decoded asynchronously after the editor exists. */
+async function hydrateFromHash(): Promise<void> {
+  const src = await decodeCompressedHash(location.hash);
+  if (src !== null) applyDoc(src);
 }
 
 
@@ -244,8 +258,7 @@ $("btn-download").addEventListener("click", () => {
 $("btn-pdf").addEventListener("click", () => frame.printToPdf());
 
 $("btn-share").addEventListener("click", async () => {
-  const url = location.origin + location.pathname + encodeHash(view.state.doc.toString());
-  window.history.replaceState(null, "", url);
+  const url = await buildShareUrl(view.state.doc.toString());
   await navigator.clipboard.writeText(url);
   flash($("btn-share"), "Lien copié ✓");
 });
@@ -321,3 +334,6 @@ relayout();
 
 run(view);
 updateHelp(view, helpEl);
+
+// Restore a compressed shared link (#z=…) once the editor is ready.
+void hydrateFromHash();

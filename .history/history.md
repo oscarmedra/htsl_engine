@@ -301,3 +301,44 @@ L'action `transform` devient un **vrai morph de forme** (pas seulement position+
 - Usage : `{!set H: "\tfrac{1}{2}\big(p^2 + \omega^2 q^2\big)"}` puis `{@mte: H = {$H}}` → rendu KaTeX, équation numérotée + référence croisée.
 - Test (`components.test.ts`) : valeur quotée verbatim, pas d'erreur, braces non parsées. Core 219.
 - Vérifié en navigateur : hamiltonien H = ½(p²+ω²q²) typographié (KaTeX), 0 erreur.
+
+## Pliage de code dans l'éditeur
+
+Les blocs multi-lignes `{…}` / `{@…}` n'étaient pas repliables. HTSL est un
+`StreamLanguage` écrit à la main (pas d'arbre Lezer) → pliage via un
+`foldService` maison (`packages/codemirror/src/language.ts`) : `htslFold` compte
+les accolades à partir de la fin de ligne, ignore celles dans les chaînes `"…"`
+et après `\`, et renvoie la plage de la fin de ligne jusqu'au `}` fermant si
+celui-ci est sur une ligne ultérieure. Branché via `LanguageSupport([…,
+foldService.of(htslFold)])` ; le playground active `codeFolding()` +
+`foldGutter()` + `foldKeymap`. Tests (`language.test.ts`) : pliage multi-ligne,
+ligne simple non pliable, accolades dans chaînes, blocs imbriqués. Codemirror 37.
+Vérifié : le marqueur `⌄` plie un `{div.card:…}` (9→6 lignes, placeholder `…`),
+rendu inchangé.
+
+## Édition de bloc réservée aux composants définis, par instance
+
+L'édition depuis le rendu s'ouvrait pour toute balise parente. Restreinte aux
+**instances de composants `{!define}`**, et chaque instance montre **son propre
+appel** `{@nom[…]: ses children}` — pas la définition partagée. Le lexer porte
+des offsets sur `{` `{@` `}` (`DEFINE_OPEN` inclus) ; `DefineNode` reçoit une
+`range`. À l'expansion (`expand.ts`), les plages internes du template sont
+retirées, et la racine de l'instance est marquée `component = nom` avec la
+`range` de **l'appel** (`usage.range`, pas `component.range`). Le renderer émet
+`data-htsl-component="nom"` ; le playground (`frame.ts`) cible
+`[data-htsl-component]` au survol/double-clic. Vérifié : double-clic sur un `h1`
+n'ouvre rien ; sur une instance, l'éditeur s'ouvre pré-rempli avec l'appel propre
+à l'instance. Core 220, codemirror 37.
+
+## Persistance & lien partageable (sans serveur)
+
+Les documents disparaissaient au rafraîchissement et n'étaient pas partageables.
+Solution 100 % client (`playground/src/persistence.ts`, voir
+`.docs/13-persistance-et-partage.md`) : **auto-save** dans `localStorage`
+(`htsl:doc`, écrit à chaque frappe → F5 ne perd rien) + **lien compressé** —
+**Partager** encode tout le document en gzip (`CompressionStream`) → base64url →
+hash `#z=`, copié dans le presse-papier ; l'ouverture décompresse
+(`DecompressionStream`) et restaure, puis nettoie le hash. Rétrocompat `#s=`
+(non compressé) et repli si la compression manque. Aucune dépendance, aucun
+serveur. Vérifié : F5 restaure le document ; ouvrir un lien `#z=` (après vidage
+du localStorage et changement de doc) restaure exactement le document partagé.
