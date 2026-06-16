@@ -1,13 +1,13 @@
-# @htsl/codemirror
+# htsl-codemirror
 
 Extensions [CodeMirror 6](https://codemirror.net) réutilisables pour le langage
 **HTSL** : coloration syntaxique, autocomplétion contextuelle et linter.
 
 ```bash
-npm install @htsl/codemirror @htsl/core codemirror
+npm install htsl-codemirror htsl-engine codemirror
 ```
 
-`@codemirror/*`, `@lezer/highlight` et `@htsl/core` sont des **peerDependencies**.
+`@codemirror/*`, `@lezer/highlight` et `htsl-engine` sont des **peerDependencies**.
 
 ## Ajouter un éditeur HTSL en moins de 10 lignes
 
@@ -16,8 +16,8 @@ import { EditorView, basicSetup } from "codemirror";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { autocompletion } from "@codemirror/autocomplete";
-import { parse, registry } from "@htsl/core";
-import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
+import { parse, registry } from "htsl-engine";
+import { htslLanguage, htslCompletion, htslLinter } from "htsl-codemirror";
 
 new EditorView({
   parent: document.querySelector("#editor")!,
@@ -49,7 +49,7 @@ Helpers : `htslTokens(src)` (tokenisation, pour tests/outils), `htslDiagnostics(
 ## Notes
 
 - `htslCompletion` accepte n'importe quel objet d'introspection compatible
-  (`list` / `describe` / `components` / `variables`) — passez `registry` de `@htsl/core`,
+  (`list` / `describe` / `components` / `variables`) — passez `registry` de `htsl-engine`,
   ou un registre étendu.
 - **Commande slash** : la source renvoie les entrées quand l'autocomplétion est
   ouverte sur un `/` en début de ligne. CodeMirror n'auto-active pas sur un

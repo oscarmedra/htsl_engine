@@ -1,5 +1,5 @@
 {
-  "name": "@htsl/core",
+  "name": "htsl-engine",
   "version": "0.1.0",
   "description": "HTSL (HyperText Structured Language) — declarative markup engine for math/physics documents: parser, renderer and runtime that compiles to HTML through an AST.",
   "type": "module",

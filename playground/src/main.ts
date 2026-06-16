@@ -7,12 +7,12 @@ import { bracketMatching, codeFolding, foldGutter, foldKeymap } from "@codemirro
 import { autocompletion, completionKeymap, closeBrackets, startCompletion } from "@codemirror/autocomplete";
 import { lintGutter } from "@codemirror/lint";
 
-import { parse, render, registry, mathCss, HTSLError } from "@htsl/core";
-import type { Node } from "@htsl/core";
+import { parse, render, registry, mathCss, HTSLError } from "htsl-engine";
+import type { Node } from "htsl-engine";
 import katex from "katex";
 
-// Editor behaviour comes entirely from the reusable @htsl/codemirror package.
-import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
+// Editor behaviour comes entirely from the reusable htsl-codemirror package.
+import { htslLanguage, htslCompletion, htslLinter } from "htsl-codemirror";
 
 import { examples } from "./examples";
 import {

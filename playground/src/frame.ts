@@ -16,7 +16,7 @@
  *    never emits executable `<script>`.
  */
 import morphdom from "morphdom";
-import { hydrate as htslHydrate, purge as htslPurge, type HtslRuntime } from "@htsl/core";
+import { hydrate as htslHydrate, purge as htslPurge, type HtslRuntime } from "htsl-engine";
 
 const KATEX_CSS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css";
 

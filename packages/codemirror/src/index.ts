@@ -1,7 +1,7 @@
 /**
- * @htsl/codemirror — reusable CodeMirror 6 extensions for HTSL.
+ * htsl-codemirror — reusable CodeMirror 6 extensions for HTSL.
  *
- *   import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
+ *   import { htslLanguage, htslCompletion, htslLinter } from "htsl-codemirror";
  */
 export { htslLanguage, htslTokens } from "./language.js";
 export type { HtslToken } from "./language.js";

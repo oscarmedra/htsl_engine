@@ -2,7 +2,7 @@
   "name": "htsl-monorepo",
   "version": "0.1.0",
   "private": true,
-  "description": "Monorepo HTSL : moteur (packages/core), extensions CodeMirror (@htsl/codemirror) et playground.",
+  "description": "Monorepo HTSL : moteur (packages/core), extensions CodeMirror (htsl-codemirror) et playground.",
   "type": "module",
   "workspaces": [
     "packages/core",

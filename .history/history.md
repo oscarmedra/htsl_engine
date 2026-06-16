@@ -136,12 +136,12 @@ Les entrées les plus récentes sont ajoutées en bas.
 - Tailwind n'est plus codé en dur ; exemples mis à jour pour charger leur framework eux-mêmes ; nouvel exemple **Bootstrap**.
 - Vérifié en navigateur : Bootstrap (alerte/cartes/boutons) et Tailwind chargés depuis le document, scène 3D Plotly dans l'iframe, UI du playground intacte.
 
-### Restructuration en monorepo + paquet @htsl/codemirror
+### Restructuration en monorepo + paquet htsl-codemirror
 
-- **Monorepo npm workspaces** : moteur déménagé (`git mv`) vers `packages/core/` (paquet `htsl`, 157 tests à l'identique) ; nouveau `packages/codemirror/` (`@htsl/codemirror`) ; `playground/` privé. `package.json` racine (workspaces + scripts globaux `npm test`/`build`/`typecheck`/`dev`). README racine = monorepo, README moteur dans core.
-- **@htsl/codemirror** : extensions CodeMirror 6 réutilisables extraites du playground — `htslLanguage()` (StreamLanguage maison, thème inline auto-suffisant), `htslCompletion(registry)` (autocomplétion branchée sur l'introspection), `htslLinter(parse)` (+ helper `htslDiagnostics`). Peer deps `@codemirror/*`/`@lezer/highlight`/`htsl`. README d'intégration < 10 lignes. 21 tests (tokenisation, complétion via CompletionContext, diagnostics).
+- **Monorepo npm workspaces** : moteur déménagé (`git mv`) vers `packages/core/` (paquet `htsl`, 157 tests à l'identique) ; nouveau `packages/codemirror/` (`htsl-codemirror`) ; `playground/` privé. `package.json` racine (workspaces + scripts globaux `npm test`/`build`/`typecheck`/`dev`). README racine = monorepo, README moteur dans core.
+- **htsl-codemirror** : extensions CodeMirror 6 réutilisables extraites du playground — `htslLanguage()` (StreamLanguage maison, thème inline auto-suffisant), `htslCompletion(registry)` (autocomplétion branchée sur l'introspection), `htslLinter(parse)` (+ helper `htslDiagnostics`). Peer deps `@codemirror/*`/`@lezer/highlight`/`htsl`. README d'intégration < 10 lignes. 21 tests (tokenisation, complétion via CompletionContext, diagnostics).
 - **Bug réel corrigé (avec test)** : le tokenizer de coloration avalait les `.classes` (le regex du tag incluait `.`) — corrigé (tag sans point hors crochets, valeurs avec point dans `[...]`).
-- **Playground** rebranché sur `@htsl/codemirror` (alias Vite/TS vers les sources) : ne réimplémente plus rien de l'éditeur ; supprime `htsl-lang.ts`/`complete.ts` locaux. Build des 3 paquets OK (core tsup, codemirror tsup externalisé, playground vite 666 Ko).
+- **Playground** rebranché sur `htsl-codemirror` (alias Vite/TS vers les sources) : ne réimplémente plus rien de l'éditeur ; supprime `htsl-lang.ts`/`complete.ts` locaux. Build des 3 paquets OK (core tsup, codemirror tsup externalisé, playground vite 666 Ko).
 - `teste.html` : chemin du bundle mis à jour (`packages/core/dist-min/`).
 - Vérifié en navigateur : coloration, autocomplétion (`{@mg2.`) et soulignement d'erreurs (ligne/col) fournis par le paquet ; rendu Tailwind/KaTeX dans l'iframe.
 - Total : **178 tests** verts (core 157 + codemirror 21). `.docs/08-monorepo-et-codemirror.md` ajouté.
@@ -169,7 +169,7 @@ Les entrées les plus récentes sont ajoutées en bas.
 ### Couche d'authoring (palette, snippets, slash, aide)
 
 - Cœur : métadonnées du registre étendues avec `snippet` (template à trous) + `category` (structure/formules/géométrie/document) + `kind` (object/element). Balises HTML courantes (h1, p, ul, table, a, img…) enregistrées comme `kind:"element"` — introspectables mais sans effet sur le lexer/parser (filtrés par kind). `registry.list()` renvoie les champs riches. Tests : snippets/catégories présents, éléments HTML kind=element, `isKnownObject` faux pour eux, **chaque exemple compile** (aperçus sûrs). Core : **179 tests**.
-- `@htsl/codemirror` : `htslCompletion` insère les snippets (`snippet()` de CodeMirror, trous au Tab) après `{@` ; **commande slash** `/` en début de ligne (objets + HTML + composants), filtre après le `/`, insertion remplaçant le `/`. 25 tests.
+- `htsl-codemirror` : `htslCompletion` insère les snippets (`snippet()` de CodeMirror, trous au Tab) après `{@` ; **commande slash** `/` en début de ligne (objets + HTML + composants), filtre après le `/`, insertion remplaçant le `/`. 25 tests.
 - Playground : **palette** drawer (➕), groupée par catégorie, recherche, aperçus rendus compilés (cachés), clic = insertion du snippet ; **aide contextuelle** sous l'éditeur (describe() de l'objet au curseur : description + tableau d'attributs). Déclenchement slash via `startCompletion`.
 - Bug corrigé : le `from` du slash incluait le `/` → CM filtrait sur « /x » contre des labels sans `/` (tout exclu) ; corrigé (filtre après le `/`, apply depuis le `/`).
 - Test cible vérifié en navigateur : titre + équation numérotée (1) + scène 3D construits **à la souris** (clics palette) → rendu correct.
@@ -180,7 +180,7 @@ Les entrées les plus récentes sont ajoutées en bas.
 - **Conteneurs regroupés en tête** : composants définis par l'utilisateur (lus à chaque ouverture via `registry.components(parse(doc))`) + scènes 2D/3D, séparés des objets simples. Ordre : Conteneurs, Structure, Formules, Équations, Géométrie (acteurs, scènes exclues).
 - **Aperçus en texte** au lieu de formules rendues : `compile(example)` sans KaTeX → texte du rendu (maths en LaTeX source), plus léger/clair ; scènes = « 🧊 Graphique interactif ». KaTeX retiré de la palette.
 - **Description lisible en avant**, chemin technique discret (l'éditeur est pour les power users).
-- **Contenu tampon à l'insertion** : scènes pré-remplies d'un acteur (cercle/point 2D, sphère 3D) ; composants remplis de `Contenu du conteneur.` et leurs paramètres sans défaut prennent leur nom comme valeur → HTSL valide qui **rend immédiatement** (plus d'attribut vide malformé `name=`). Snippets de scène mis à jour dans le cœur ; `componentSnippet` (palette + @htsl/codemirror) corrigé.
+- **Contenu tampon à l'insertion** : scènes pré-remplies d'un acteur (cercle/point 2D, sphère 3D) ; composants remplis de `Contenu du conteneur.` et leurs paramètres sans défaut prennent leur nom comme valeur → HTSL valide qui **rend immédiatement** (plus d'attribut vide malformé `name=`). Snippets de scène mis à jour dans le cœur ; `componentSnippet` (palette + htsl-codemirror) corrigé.
 - Vérifié en navigateur : groupe Conteneurs (card + scènes), aperçus texte, card inséré rend `.card` + titre + contenu, scène 3D rend 1 tracé Plotly.
 
 ### Classification de la palette + édition d'un élément depuis le rendu (retour utilisateur)
@@ -195,7 +195,7 @@ Les entrées les plus récentes sont ajoutées en bas.
 
 ### Éditeur de bloc = vrai CodeMirror dans le rendu (retour utilisateur)
 
-- Le textarea d'édition de bloc devient un **véritable éditeur CodeMirror HTSL** (`playground/src/block-editor.ts`) : coloration syntaxique, autocomplétion (`{@`, `/`, attributs) et linter — les mêmes extensions que l'éditeur principal via `@htsl/codemirror`. Objectif : tout faire depuis le rendu (l'éditeur principal devient optionnel).
+- Le textarea d'édition de bloc devient un **véritable éditeur CodeMirror HTSL** (`playground/src/block-editor.ts`) : coloration syntaxique, autocomplétion (`{@`, `/`, attributs) et linter — les mêmes extensions que l'éditeur principal via `htsl-codemirror`. Objectif : tout faire depuis le rendu (l'éditeur principal devient optionnel).
 - Architecture : monté dans le **document parent** (où CM fonctionne) puis positionné en superposition sur l'élément via l'offset de l'iframe ; popups rendus dans `<body>` (`tooltips({parent})`) pour échapper à l'`overflow:hidden`. Le frame ne crée plus de textarea : au clic il notifie le parent `onBlockClick(start, end, rect)`.
 - Validation `⌘/Ctrl+Entrée` (bindings `Mod-Enter` **et** `Ctrl-Enter` pour Mac+autres) ou perte de focus réelle (`view.hasFocus`) ; `Échap` annule (après le `completionKeymap` pour que Échap ferme d'abord le popup). Un seul éditeur de bloc à la fois.
 - Vérifié en navigateur : clic sur `{h1:…}` ouvre un CM coloré ; édité en `{h1.vedette#intro: …}` puis Ctrl+Entrée → source réécrite + rendu MAJ ; Échap annule. (Le popup d'autocomplétion exige le focus réel, non disponible dans le harness de capture, mais l'extension est identique à l'éditeur principal éprouvé.)
@@ -210,7 +210,7 @@ Les entrées les plus récentes sont ajoutées en bas.
 ### Indentation (retour utilisateur : « pourquoi l'indentation ne marche pas ? »)
 
 - Cause : le `StreamLanguage` HTSL n'avait pas de méthode `indent`, et aucune touche **Tab** n'était liée → ni auto-indentation à l'Entrée, ni Tab.
-- `@htsl/codemirror` : ajout d'`indent` au parser (profondeur = nb de frames d'accolades ouvertes × `unit` ; une ligne commençant par `}` se désindente d'un niveau) + `languageData.indentOnInput = /^\s*\}$/` (réindente en tapant `}`). 4 tests via `getIndentation` (1 bloc → 2, imbriqué → 4, `}` → 0, racine → 0). codemirror **29** tests.
+- `htsl-codemirror` : ajout d'`indent` au parser (profondeur = nb de frames d'accolades ouvertes × `unit` ; une ligne commençant par `}` se désindente d'un niveau) + `languageData.indentOnInput = /^\s*\}$/` (réindente en tapant `}`). 4 tests via `getIndentation` (1 bloc → 2, imbriqué → 4, `}` → 0, racine → 0). codemirror **29** tests.
 - Playground : `indentWithTab` ajouté au keymap de l'éditeur principal **et** de l'éditeur de bloc (Tab indente, Shift-Tab désindente).
 - Vérifié en navigateur : `{ul:` + Entrée → `{ul:\n  ` ; Tab sur une ligne → `  …`.
 
@@ -222,7 +222,7 @@ Les entrées les plus récentes sont ajoutées en bas.
 Le moteur cassait sur du JS dans `{script:…}` (les `{`/`}` étaient parsés comme du HTSL) et CodeMirror ne colorait pas le JS.
 
 - **Moteur** : nouvelle frame lexer `raw` pour les balises `script`/`style` (RAW_TEXT_TAGS). Le corps est lu **verbatim** jusqu'au `}` qui équilibre l'ouvrante (comptage d'accolades en ignorant chaînes, gabarits `` `…` `` et commentaires `//` `/* */`). Le renderer émet ce corps **sans échappement** (`rawTextOf`). 7 tests (`tests/raw-text.test.ts`). Core **191**.
-- **@htsl/codemirror** : frame `raw` (lang js/css) dans le StreamLanguage → coloration JS (mots-clés, nombres, chaînes, commentaires, gabarits multi-lignes via l'état), CSS minimal ; comptage d'accolades pour reprendre le HTSL après le `}`. Tags `keyword`/`number` ajoutés. 4 tests. codemirror **33**.
+- **htsl-codemirror** : frame `raw` (lang js/css) dans le StreamLanguage → coloration JS (mots-clés, nombres, chaînes, commentaires, gabarits multi-lignes via l'état), CSS minimal ; comptage d'accolades pour reprendre le HTSL après le `}`. Tags `keyword`/`number` ajoutés. 4 tests. codemirror **33**.
 - **Playground** : `FrameRenderer` n'hisse plus que `link, script[src]` dans `<head>` ; les scripts **inline sont exécutés après le morphing** (recréés car morphdom les insère inertes), une fois par contenu unique (`ranScripts`) → documents interactifs (diaporamas…).
 - Vérifié en navigateur avec l'exemple diaporama de l'utilisateur : aucune erreur de parse, JS coloré, script exécuté, clic « Suivant » qui change de slide.
 
@@ -349,7 +349,7 @@ Première étape pour rendre HTSL intégrable par d'autres (l'outil ne vivait qu
 local). L'architecture s'y prête déjà : `compile()` produit du HTML pur et
 `installHtslRuntime()` expose `window.HTSL`, hydrate au DOMContentLoaded et charge
 KaTeX/Plotly/Three à la demande. Reste à distribuer. Roadmap convenue : (1)
-déployer le playground, (2) publier npm `htsl` + `@htsl/codemirror` + bundle CDN,
+déployer le playground, (2) publier npm `htsl` + `htsl-codemirror` + bundle CDN,
 (3) CLI `npx htsl build`, (4) plugins de framework. Voir
 `.docs/14-distribution-et-deploiement.md`.
 
@@ -363,14 +363,15 @@ de création du dépôt + activation Pages documentée dans `playground/README.m
 Build vérifié (~225 kB gzip, libs lourdes hors bundle). Pré-requis restant côté
 utilisateur : créer le remote GitHub et activer Pages (pas de remote pour l'instant).
 
-## Distribution étape 2 : packages npm `@htsl/core` + `@htsl/codemirror` + CDN
+## Distribution étape 2 : packages npm `htsl-engine` + `htsl-codemirror` + CDN
 
-Préparation de la publication npm (le nom `htsl` sans scope est pris par un
-package abandonné de 2018 → cœur renommé **`@htsl/core`**, scope `@htsl` conservé
-pour codemirror). Détails : `.docs/14-distribution-et-deploiement.md`.
+Préparation de la publication npm. Le nom `htsl` (sans scope) est pris par un
+package abandonné de 2018, et l'org npm `@htsl` n'est pas créable (collision avec
+ce package) → packages **non scopés** : cœur renommé **`htsl-engine`** et éditeur
+**`htsl-codemirror`**. Détails : `.docs/14-distribution-et-deploiement.md`.
 
 - Renommage complet : imports source/tests, alias Vite, `paths` tsconfig,
-  peer/devDeps (`@htsl/core: "^0.1.0"`, satisfait par le workspace local et valide
+  peer/devDeps (`htsl-engine: "^0.1.0"`, satisfait par le workspace local et valide
   une fois publié), dep playground.
 - Métadonnées de publication sur les deux packages : `repository`/`homepage`/
   `bugs`/`author`, `publishConfig.access:"public"`, `prepublishOnly`, `files` +=

@@ -17,7 +17,7 @@ import {
 } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
 import { Tag } from "@lezer/highlight";
-import { contentModelOf } from "@htsl/core";
+import { contentModelOf } from "htsl-engine";
 
 const IDENT = /[A-Za-z0-9_-]/;
 const PATH = /^[A-Za-z0-9_.-]+/;

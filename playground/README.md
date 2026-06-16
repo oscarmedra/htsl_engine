@@ -2,7 +2,7 @@
 
 Application web (Vite) pour écrire du HTSL, le voir rendu en direct, et l'éditer
 **aussi bien depuis le code que depuis le rendu**. Elle consomme le moteur
-(`htsl`) et les extensions d'éditeur (`@htsl/codemirror`) du monorepo.
+(`htsl-engine`) et les extensions d'éditeur (`htsl-codemirror`) du monorepo.
 
 ## Démarrage
 
@@ -14,7 +14,7 @@ npm run dev        # serveur de dev → http://localhost:5173
 ```
 
 Ou depuis ce dossier : `npm run dev`, `npm run build` (→ `dist/`),
-`npm run preview`. Le moteur et `@htsl/codemirror` sont liés par les workspaces
+`npm run preview`. Le moteur et `htsl-codemirror` sont liés par les workspaces
 (rechargement à chaud quand on modifie le cœur).
 
 ## Déploiement public (GitHub Pages, sans serveur)
@@ -61,7 +61,7 @@ Trois panneaux : **Éditeur HTSL** · **Rendu** (iframe isolée) · **AST** (JSO
   s'affichent en bandeau **et** sont soulignées (ligne/colonne). La page ne casse
   jamais — le dernier rendu valide est conservé.
 - **Coloration**, **autocomplétion**, **indentation** et **linter** viennent de
-  `@htsl/codemirror` (voir son README). Tab/Maj-Tab indentent.
+  `htsl-codemirror` (voir son README). Tab/Maj-Tab indentent.
 
 ## Couche d'authoring (réduire la marche d'apprentissage)
 
@@ -133,7 +133,7 @@ chargé automatiquement quand une scène est présente.
 
 Le rendu ne produit **jamais** de JS exécutable. Les scènes sont des **nœuds de
 données** (`data-htsl-scene`) ; après chaque morphing, le playground appelle le
-**runtime unique** du moteur (`hydrate`/`purge`, voir le README de `htsl`) sur
+**runtime unique** du moteur (`hydrate`/`purge`, voir le README de `htsl-engine`) sur
 l'iframe : il charge Plotly **une seule fois** (Promise cachée), dessine, met à
 jour via `Plotly.react` au changement, et **purge** les scènes retirées. C'est
 idempotent → aucune des erreurs classiques (« Plotly is not defined », double
@@ -180,4 +180,4 @@ déclaration, `getElementById` null).
 | `documentation.html` · `src/documentation.ts` · `src/docs.css` | Page de documentation (catalogue + prompt IA générés depuis l'introspection). |
 
 Le comportement de l'éditeur (langage, complétion, linter) n'est **pas**
-réimplémenté ici : il vient du paquet réutilisable `@htsl/codemirror`.
+réimplémenté ici : il vient du paquet réutilisable `htsl-codemirror`.

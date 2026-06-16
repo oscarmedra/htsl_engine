@@ -1,11 +1,10 @@
 name: Publish packages to npm
 
-# Publie @htsl/core puis @htsl/codemirror sur npm.
+# Publie htsl-engine puis htsl-codemirror sur npm (packages non scopés, publics).
 #
 # Pré-requis (une seule fois) :
-#   1. Créer l'organisation npm `htsl` sur npmjs.com (gratuit) pour le scope @htsl.
-#   2. Créer un token « Automation » sur npmjs.com → Access Tokens.
-#   3. L'ajouter en secret de dépôt : Settings → Secrets and variables → Actions
+#   1. Créer un token « Automation » sur npmjs.com → Access Tokens.
+#   2. L'ajouter en secret de dépôt : Settings → Secrets and variables → Actions
 #      → New repository secret → nom NPM_TOKEN.
 #
 # Déclenché à la publication d'une Release GitHub (ou manuellement). Les versions
@@ -33,12 +32,12 @@ jobs:
 
       - run: npm ci
 
-      # @htsl/core builds dist + dist-min via prepublishOnly ; --access public
-      # est requis pour un package scopé public (aussi fixé dans publishConfig).
-      - run: npm publish -w @htsl/core --access public
+      # htsl-engine construit dist + dist-min via prepublishOnly ; --access public
+      # est explicite (sans effet pour un package non scopé, déjà public).
+      - run: npm publish -w htsl-engine --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - run: npm publish -w @htsl/codemirror --access public
+      - run: npm publish -w htsl-codemirror --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -59,4 +59,4 @@ entièrement côté client (`playground/src/persistence.ts`).
 ## Garanties
 
 Aucune dépendance ajoutée, aucun serveur. Le cœur (`packages/core`) et
-`@htsl/codemirror` sont inchangés — c'est purement de la plomberie playground.
+`htsl-codemirror` sont inchangés — c'est purement de la plomberie playground.

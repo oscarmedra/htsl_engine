@@ -3,7 +3,7 @@
  * attribute table, straight from `registry.describe()`.
  */
 import type { EditorView } from "@codemirror/view";
-import { registry, type ObjectMeta } from "@htsl/core";
+import { registry, type ObjectMeta } from "htsl-engine";
 
 /** Nearest `{@path` opened before the cursor; reads the full path forward. */
 function objectAtCursor(doc: string, pos: number): ObjectMeta | null {
