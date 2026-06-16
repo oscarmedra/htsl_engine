@@ -116,3 +116,14 @@ secret `NPM_TOKEN` (workflow `release.yml`).
 CLI `npx htsl build` (HTML autonome) et plugins de framework. Le versioning reste
 manuel (bump des `version` dans les package.json) ; changesets pourra être ajouté
 plus tard si le rythme de releases le justifie.
+
+## Manuel d'intégration dans la page Documentation du playground
+
+La page `documentation.html` gagne une section **« Intégration (CDN / npm) »**
+(nouveau groupe de nav « Exploiter le moteur ») expliquant les 3 façons
+d'exploiter le moteur hors du playground : (1) balise `<script>` CDN
+auto-hydratante (unpkg/jsDelivr), (2) `npm install @noah-medra/htsl-core`
+(`compile()` + `installHtslRuntime()`), (3) compilation côté serveur/build →
+HTML statique, plus un bonus « éditeur HTSL via `@noah-medra/htsl-codemirror` ».
+Liens npm/GitHub inclus. Vérifié en navigateur (4 sous-sections, blocs de code
+avec « Copier », 0 erreur). Déployé sur Pages au push (auto).

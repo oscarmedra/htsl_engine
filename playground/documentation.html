@@ -29,6 +29,8 @@
         <a href="#frameworks">Frameworks CSS</a>
         <a href="#render-edit">Éditer depuis le rendu</a>
         <a href="#security">Sécurité</a>
+        <div class="group">Exploiter le moteur</div>
+        <a href="#integration">Intégration (CDN / npm)</a>
         <div class="group">Référence</div>
         <a href="#catalog">Catalogue d'objets</a>
         <a href="#prompt">Prompt pour une IA</a>
@@ -210,6 +212,97 @@
               <code>{script: …code…}</code> inline est rendu inerte (<code>type="text/plain"</code>).
               Seul <code>{script[src=…]/}</code> (CDN choisi par l'auteur) charge du code.</li>
           </ul>
+        </section>
+
+        <section id="integration">
+          <h2>Intégration — utiliser HTSL hors du playground</h2>
+          <p class="lead" style="font-size:1rem">
+            Le moteur est distribué en deux paquets npm publics —
+            <code>@noah-medra/htsl-core</code> (le moteur + le runtime) et
+            <code>@noah-medra/htsl-codemirror</code> (l'éditeur, optionnel) — plus un
+            <strong>bundle CDN</strong>. L'architecture est toujours la même :
+            <code>compile()</code> produit du <strong>HTML inerte</strong> (des nœuds
+            <code>data-htsl-*</code>, jamais de <code>&lt;script&gt;</code> exécutable), puis un
+            <strong>runtime unique</strong> hydrate la page (KaTeX/Plotly/Three.js chargés à la
+            demande). Trois façons de l'exploiter, du plus simple au plus intégré.
+          </p>
+
+          <h3>1 · Sans rien installer — balise <code>&lt;script&gt;</code> (CDN)</h3>
+          <p>Idéal pour une page statique, un blog, un cours. Un seul script : il expose le
+            global <code>htsl_engine</code> <strong>et</strong> installe le runtime
+            (<code>window.HTSL</code>), qui hydrate automatiquement ce que tu injectes.</p>
+          <pre><code>&lt;script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.auto.global.js"&gt;&lt;/script&gt;
+&lt;div id="out"&gt;&lt;/div&gt;
+&lt;script&gt;
+  document.getElementById("out").innerHTML =
+    htsl_engine.compile("{h1:Bonjour} {@mte: E = mc^2} {@plot[fn=\"sin(x)/x\", xrange=\"(-15,15)\"]/}");
+  // le runtime (MutationObserver) hydrate la formule et le graphe tout seul
+&lt;/script&gt;</code></pre>
+          <p class="note">Variantes disponibles dans <code>dist-min/</code> :
+            <code>htsl.global.js</code> (même global, <em>sans</em> auto-runtime — tu appelles
+            <code>htsl_engine.installHtslRuntime()</code> toi-même) et <code>htsl.min.js</code>
+            (ESM minifié pour un <code>import</code> par URL). Remplace <code>unpkg.com</code>
+            par <code>cdn.jsdelivr.net/npm</code> si tu préfères jsDelivr.</p>
+
+          <h3>2 · Dans une application — npm</h3>
+          <pre><code>npm install @noah-medra/htsl-core</code></pre>
+          <pre><code>import { compile, installHtslRuntime } from "@noah-medra/htsl-core";
+
+// 1) compiler du HTSL en HTML (nœuds de données, inertes)
+document.querySelector("#doc").innerHTML = compile(
+  "{h2:Trajectoire} {@plot[fn=\"cos(x)*exp(-x*x/20)\", xrange=\"(-10,10)\"]/}"
+);
+
+// 2) installer le runtime une fois : il hydrate les data-htsl-* présents
+//    (et à venir), en chargeant KaTeX/Plotly/Three uniquement si nécessaire
+installHtslRuntime();</code></pre>
+          <p>API utile : <code>parse()</code> (HTSL → AST), <code>render(ast, opts)</code>
+            (AST → HTML, options <code>prettyPrint</code>/<code>allowedTags</code>),
+            <code>compile()</code> (les deux), <code>mathCss</code> (styles des équations),
+            <code>registry</code> (introspection des objets), <code>HTSLError</code>. Le paquet
+            est en <strong>ESM</strong>, typé (TypeScript), sans dépendance dans le cœur.</p>
+
+          <h3>3 · Côté serveur / build — HTML statique</h3>
+          <p>Pour générer des fichiers (polycopiés, site statique, CI), compile au build et sers
+            le HTML. Ajoute le runtime côté client uniquement si le document contient du
+            dynamique (formules, graphes, scènes).</p>
+          <pre><code>import { compile, mathCss } from "@noah-medra/htsl-core";
+import { writeFileSync } from "node:fs";
+
+const body = compile(sourceHtsl, { prettyPrint: true });
+writeFileSync("sortie.html", `&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;
+  &lt;style&gt;${mathCss}&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;${body}
+  &lt;script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.auto.global.js"&gt;&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;`);</code></pre>
+
+          <h3>Bonus · un éditeur HTSL dans ton app</h3>
+          <p>Le même éditeur que ce playground (coloration, autocomplétion, indentation, linter,
+            pliage) est réutilisable via <code>@noah-medra/htsl-codemirror</code> sur
+            <a href="https://codemirror.net" target="_blank" rel="noopener">CodeMirror 6</a>.</p>
+          <pre><code>npm install @noah-medra/htsl-codemirror @noah-medra/htsl-core codemirror</code></pre>
+          <pre><code>import { EditorView, basicSetup } from "codemirror";
+import { autocompletion } from "@codemirror/autocomplete";
+import { parse, registry } from "@noah-medra/htsl-core";
+import { htslLanguage, htslCompletion, htslLinter } from "@noah-medra/htsl-codemirror";
+
+new EditorView({
+  parent: document.querySelector("#editor"),
+  doc: "{div.box:Bonjour {@mti: x^2}}",
+  extensions: [
+    basicSetup,
+    htslLanguage(),
+    autocompletion({ override: [htslCompletion(registry)] }),
+    htslLinter(parse),
+  ],
+});</code></pre>
+
+          <p class="note"><strong>Paquets &amp; liens.</strong>
+            <a href="https://www.npmjs.com/package/@noah-medra/htsl-core" target="_blank" rel="noopener">@noah-medra/htsl-core</a> ·
+            <a href="https://www.npmjs.com/package/@noah-medra/htsl-codemirror" target="_blank" rel="noopener">@noah-medra/htsl-codemirror</a> ·
+            code source sur <a href="https://github.com/oscarmedra/htsl_engine" target="_blank" rel="noopener">GitHub</a>.
+            <strong>Sécurité&nbsp;:</strong> où qu'il s'exécute, le moteur n'émet jamais de JS
+            depuis le contenu (voir <a href="#security">Sécurité</a>).</p>
         </section>
 
         <section id="catalog">
