@@ -99,10 +99,20 @@ smoke-tests Node : `htsl.min.js` `compile()` OK et `htsl.auto.global.js` install
 bien `window.HTSL` sans crash ; `npm pack --dry-run` montre des tarballs corrects
 (`@noah-medra/htsl-core` 211 kB avec dist+dist-min+LICENSE ; `@noah-medra/htsl-codemirror` 17 kB).
 
-## Reste à faire (publication effective + étapes 3-4)
+## Publié (2026-06-16)
 
-Côté utilisateur pour publier : `npm login`, puis `npm publish -w @noah-medra/htsl-core`
-et `npm publish -w @noah-medra/htsl-codemirror` (ou via le workflow + secret `NPM_TOKEN`).
-Ensuite : CLI `npx htsl build` et plugins de framework. Le versioning reste
-manuel (bump des `version` dans les package.json) ;
-changesets pourra être ajouté plus tard si le rythme de releases le justifie.
+`@noah-medra/htsl-core@0.1.0` et `@noah-medra/htsl-codemirror@0.1.0` sont **en
+ligne sur npm** (installables, CDN unpkg `200` sur
+`@noah-medra/htsl-core/dist-min/htsl.auto.global.js`). La publication a buté sur
+la 2FA du compte (les tokens « Publish »/granular n'ont pas contourné la 2FA, et
+`--otp` est ignoré en auth par token *Publish*) ; finalement débloquée en
+fournissant un **code de récupération 2FA** comme valeur `--otp` (un par publish).
+Le compte `noah-medra` a la 2FA « auth + writes » ; pour publier sans code à
+l'avenir, créer un token **Automation** (Classic) ou **Granular** et le mettre en
+secret `NPM_TOKEN` (workflow `release.yml`).
+
+## Reste à faire (étapes 3-4)
+
+CLI `npx htsl build` (HTML autonome) et plugins de framework. Le versioning reste
+manuel (bump des `version` dans les package.json) ; changesets pourra être ajouté
+plus tard si le rythme de releases le justifie.

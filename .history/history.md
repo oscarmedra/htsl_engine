@@ -390,3 +390,13 @@ package) → publication sous le **scope personnel de l'auteur** `@noah-medra`
   re-testé en navigateur (0 erreur), smoke-tests Node (compile + window.HTSL),
   `npm pack --dry-run` tarballs corrects. Reste côté user : créer l'org npm
   `htsl`, `npm login`, publier.
+
+## Publication npm effective (2026-06-16)
+
+`@noah-medra/htsl-core@0.1.0` et `@noah-medra/htsl-codemirror@0.1.0` publiés sur
+npm (visibles via `npm view`, install OK, CDN unpkg `htsl.auto.global.js` → 200).
+Blocage 2FA contourné en utilisant un **code de récupération** comme `--otp`
+(les tokens Publish/granular ne bypassaient pas la 2FA du compte). Pour les
+prochaines releases sans code : token Automation/Granular en secret `NPM_TOKEN`
++ workflow `release.yml`. Sécurité : tokens et codes de récup exposés pendant la
+session → à révoquer/régénérer côté utilisateur.
