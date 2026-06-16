@@ -18,6 +18,8 @@ import { examples } from "./examples";
 import {
   saveLocal,
   loadLocal,
+  saveFlag,
+  loadFlag,
   buildShareUrl,
   decodeLegacyHash,
   hasCompressedHash,
@@ -271,8 +273,21 @@ function relayout(): void {
   panelsEl.classList.toggle("no-editor", !toggleEditor.checked);
   panelsEl.style.gridTemplateColumns = ""; // let the CSS classes govern
 }
-toggleAst.addEventListener("change", relayout);
-toggleEditor.addEventListener("change", relayout);
+// Persist each panel's visibility so a refresh keeps the layout you chose.
+toggleAst.addEventListener("change", () => {
+  saveFlag("ast", toggleAst.checked);
+  relayout();
+});
+toggleEditor.addEventListener("change", () => {
+  saveFlag("editor", toggleEditor.checked);
+  relayout();
+});
+
+/** Restore the persisted panel visibility (defaults: editor + AST hidden). */
+function restorePanelPrefs(): void {
+  toggleEditor.checked = loadFlag("editor") ?? false;
+  toggleAst.checked = loadFlag("ast") ?? false;
+}
 
 function flash(btn: HTMLElement, text: string): void {
   const old = btn.textContent;
@@ -330,7 +345,8 @@ $("btn-insert").addEventListener("click", () => palette.toggle());
 // Exposed for debugging / scripting from the console.
 (window as unknown as { htslView: EditorView }).htslView = view;
 
-// Honour the checkboxes' initial state (AST hidden, editor shown by default).
+// Restore the panel visibility chosen on a previous visit (default: both hidden).
+restorePanelPrefs();
 relayout();
 
 run(view);

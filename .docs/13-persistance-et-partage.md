@@ -79,3 +79,12 @@ dessinées). Ajouts (playground only) :
 - Vérifié en navigateur : éditeur caché au chargement ; sur un doc avec scène
   3D + graphe, le loader couvre le panneau puis se fond une fois la scène dessinée
   (`sceneDrawn: true`) ; 0 erreur console ; typecheck OK.
+
+## Persistance de la visibilité des panneaux
+
+L'état des cases **« Éditeur »** et **« AST »** est mémorisé dans `localStorage`
+(`htsl:ui:editor` / `htsl:ui:ast`, via `saveFlag`/`loadFlag` de `persistence.ts`).
+Au boot, `restorePanelPrefs()` lit ces flags **avant** `relayout()` ; chaque
+`change` les ré-enregistre. Défaut au tout premier accès (flag absent) : **les
+deux masqués**. Vérifié : cocher « Éditeur » puis actualiser → l'éditeur reste
+affiché (flag « 1 ») ; le décocher → reste masqué après refresh (flag « 0 »).

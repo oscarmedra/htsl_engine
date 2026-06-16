@@ -27,6 +27,29 @@ export function loadLocal(): string | null {
 }
 
 /* -------------------------------------------------------------------------- */
+/* UI preferences (panel visibility)                                          */
+/* -------------------------------------------------------------------------- */
+
+/** Persist a boolean UI flag (e.g. a panel toggle) so it survives a refresh. */
+export function saveFlag(key: string, value: boolean): void {
+  try {
+    localStorage.setItem(`htsl:ui:${key}`, value ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Read a persisted UI flag, or `null` if it was never set (→ use the default). */
+export function loadFlag(key: string): boolean | null {
+  try {
+    const v = localStorage.getItem(`htsl:ui:${key}`);
+    return v === null ? null : v === "1";
+  } catch {
+    return null;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /* URL hash (compressed) encoding                                             */
 /* -------------------------------------------------------------------------- */
 

@@ -417,3 +417,11 @@ attend le chargement+dessin Plotly/Three) ; `main.ts` ajoute `.is-ready` (fondu)
 à ce moment, + filet `setTimeout(8 s)`. Case « Éditeur » non cochée par défaut →
 rendu plein écran au boot. Vérifié en navigateur (loader visible puis fondu,
 scène dessinée, 0 erreur) ; typecheck playground OK. Détails : `.docs/13`.
+
+## Persistance de la visibilité des panneaux (playground)
+
+Les cases « Éditeur » et « AST » mémorisent leur état dans `localStorage`
+(`htsl:ui:editor`/`htsl:ui:ast`, helpers `saveFlag`/`loadFlag`). `restorePanelPrefs()`
+restaure au boot avant `relayout()` ; chaque `change` sauvegarde. Défaut premier
+accès : les deux masqués. Vérifié en navigateur (cocher → refresh → reste affiché ;
+décocher → reste masqué ; 0 erreur ; typecheck OK). Détails : `.docs/13`.
