@@ -443,3 +443,18 @@ son `appearance` est remplacé par une piste arrondie + knob coulissant. OFF =
 gris, ON = couleur accent (knob translaté), focus-visible accessible, respect de
 `prefers-reduced-motion`. Vérifié en navigateur : ON bleu / OFF gris, le clic
 bascule bien le panneau correspondant ; 0 erreur console.
+
+## Prompt IA remplacé (style « générateur de documents ») + complété
+
+Le prompt de la page Documentation est remplacé par une version fournie par
+l'utilisateur, plus pédagogique et directive (« Tu es un générateur de documents
+HTSL… »). Vérification du registre : les objets `mo*`/`mc.*` du prompt existent
+bien (ils ne sont juste pas listés séparément par `registry.list()`). Ajout, dans
+le même style, des sections **manquantes** : graphes de fonctions `{@plot}` /
+`{@plot.curve}` et **scènes 3D animées `{@s3.*}`** (Three.js, avec actions
+move/rotate/scale/color/fade/transform), plus `mg2.droite` / `mg3.line` /
+`mg3.segment`. Tous les exemples du prompt compilent (testé). Le prompt vit
+désormais dans `playground/src/ai-prompt.txt` importé en `?raw` (évite tout
+échappement des backslashes LaTeX / backticks ; `vite-env.d.ts` ajouté pour les
+types). `buildPrompt()`/`objectReference()` retirés de `documentation.ts`.
+Vérifié en navigateur : textarea remplie, backslashes intacts, 0 erreur.
