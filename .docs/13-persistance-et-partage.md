@@ -60,3 +60,22 @@ entièrement côté client (`playground/src/persistence.ts`).
 
 Aucune dépendance ajoutée, aucun serveur. Le cœur (`packages/core`) et
 `@noah-medra/htsl-codemirror` sont inchangés — c'est purement de la plomberie playground.
+
+## Loader de rendu + éditeur masqué par défaut
+
+Au rafraîchissement, on percevait un bref « désordre » avant que les composants
+soient hydratés (CSS KaTeX en cours de chargement, scènes Plotly/Three pas encore
+dessinées). Ajouts (playground only) :
+
+- **Overlay loader** sur le panneau de rendu (`#render-loader`, spinner +
+  « Préparation du rendu… »), **visible par défaut dans le HTML** pour masquer le
+  flash dès le premier paint. `FrameRenderer` expose une promesse `firstRender`
+  résolue **après la première hydratation réelle** : dans `apply()`, on attend
+  `hydrate()` (qui ne se résout qu'une fois Plotly/Three chargés **et dessinés**).
+  `main.ts` ajoute alors la classe `.is-ready` (fondu 0.35 s). Filet de sécurité :
+  un `setTimeout(8 s)` garantit que le loader ne reste jamais bloqué (CDN injoignable).
+- **Éditeur masqué par défaut** : la case « Éditeur » n'est plus `checked` →
+  `relayout()` applique `no-editor` au boot, le rendu prend toute la largeur.
+- Vérifié en navigateur : éditeur caché au chargement ; sur un doc avec scène
+  3D + graphe, le loader couvre le panneau puis se fond une fois la scène dessinée
+  (`sceneDrawn: true`) ; 0 erreur console ; typecheck OK.

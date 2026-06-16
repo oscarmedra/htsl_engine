@@ -67,6 +67,15 @@ export class FrameRenderer {
   /** Element currently highlighted on hover (block-edit affordance). */
   private hovered: HTMLElement | null = null;
 
+  /** Resolves once the FIRST real render has been hydrated (scenes drawn). The
+   *  playground uses it to drop the loading overlay only when the preview is
+   *  actually ready — masking the brief flash of un-hydrated content on load. */
+  private firstDone = false;
+  private resolveFirst: () => void = () => {};
+  readonly firstRender: Promise<void> = new Promise<void>((r) => {
+    this.resolveFirst = r;
+  });
+
   constructor(
     private readonly iframe: HTMLIFrameElement,
     mathCss: string,
@@ -187,8 +196,15 @@ export class FrameRenderer {
     const total = this.root.getElementsByTagName("*").length;
 
     // Hand off to the engine's single runtime: free removed scenes, then hydrate.
+    // hydrate() resolves only after Plotly/Three are loaded and drawn → it is our
+    // "preview is ready" signal for the first render.
     if (removed.length > 0) htslPurge(removed, win);
-    void htslHydrate(this.root, win);
+    void htslHydrate(this.root, win).catch(() => undefined).finally(() => {
+      if (!this.firstDone) {
+        this.firstDone = true;
+        this.resolveFirst();
+      }
+    });
 
     return { touched, total };
   }

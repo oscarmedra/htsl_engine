@@ -12,7 +12,7 @@
           <span class="logo">HTSL</span>
           <span class="tagline">playground</span>
           <label class="toggle" title="Afficher/masquer l'éditeur de code">
-            <input type="checkbox" id="toggle-editor" checked /> Éditeur
+            <input type="checkbox" id="toggle-editor" /> Éditeur
           </label>
         </div>
         <div class="toolbar">
@@ -38,6 +38,10 @@
         <section class="panel" id="panel-render">
           <div class="panel-head">Rendu <span class="hint">(iframe isolée · vos {link}/{script} y sont chargés)</span><span id="perf" class="perf"></span></div>
           <iframe id="render" class="panel-body render-frame" title="rendu HTSL"></iframe>
+          <div id="render-loader" class="render-loader" role="status" aria-live="polite">
+            <div class="render-loader-spinner" aria-hidden="true"></div>
+            <span class="render-loader-text">Préparation du rendu…</span>
+          </div>
         </section>
         <div class="gutter" data-gutter="2"></div>
         <section class="panel" id="panel-ast">

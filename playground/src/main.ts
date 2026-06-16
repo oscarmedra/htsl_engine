@@ -42,6 +42,7 @@ const toggleAst = $<HTMLInputElement>("toggle-ast");
 const toggleEditor = $<HTMLInputElement>("toggle-editor");
 const perfEl = document.getElementById("perf");
 const helpEl = $<HTMLDivElement>("help");
+const renderLoader = document.getElementById("render-loader");
 
 /* -------------------------------------------------------------------------- */
 /* Shared state                                                               */
@@ -337,3 +338,10 @@ updateHelp(view, helpEl);
 
 // Restore a compressed shared link (#z=…) once the editor is ready.
 void hydrateFromHash();
+
+// Drop the render loader only once the first render is fully hydrated (scenes
+// drawn) — so a refresh shows a clean loader, never half-rendered content. A
+// safety timeout guarantees it never sticks (e.g. a CDN is unreachable).
+const hideLoader = (): void => renderLoader?.classList.add("is-ready");
+void frame.firstRender.then(hideLoader);
+window.setTimeout(hideLoader, 8000);

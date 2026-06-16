@@ -407,3 +407,13 @@ Ajout en haut du README d'un bloc **« 🌐 Essayer / utiliser »** : playground
 ligne (https://oscarmedra.github.io/htsl_engine/), documentation, install npm
 `@noah-medra/htsl-core`, snippet CDN. Correction des dernières mentions obsolètes
 du cœur (`htsl` → `@noah-medra/htsl-core`) dans le tableau des paquets et l'arbre.
+
+## Loader de rendu + éditeur masqué par défaut (playground)
+
+Masquage du « désordre » au rafraîchissement avant hydratation. Overlay
+`#render-loader` (spinner) visible par défaut dans le HTML ; `FrameRenderer`
+expose `firstRender` (résolue après la 1ʳᵉ hydratation réelle — `hydrate()`
+attend le chargement+dessin Plotly/Three) ; `main.ts` ajoute `.is-ready` (fondu)
+à ce moment, + filet `setTimeout(8 s)`. Case « Éditeur » non cochée par défaut →
+rendu plein écran au boot. Vérifié en navigateur (loader visible puis fondu,
+scène dessinée, 0 erreur) ; typecheck playground OK. Détails : `.docs/13`.
