@@ -434,3 +434,12 @@ poignées masquées ; topbar/toolbar en `flex-wrap`. Le `display:flex` neutralis
 les `grid-template-columns` (desktop + inline du drag). Vérifié à 375×812 et
 820×1100 (rendu au-dessus, éditeur masqué → rendu plein écran) ; desktop non
 régressé ; 0 erreur. Détails : `.docs/13`.
+
+## Toggles « Éditeur » / « AST » en switches stylés (playground)
+
+Les cases à cocher deviennent de vrais **interrupteurs** (CSS pur) : la
+`<input type=checkbox>` garde id + événements (aucune logique JS touchée), seul
+son `appearance` est remplacé par une piste arrondie + knob coulissant. OFF =
+gris, ON = couleur accent (knob translaté), focus-visible accessible, respect de
+`prefers-reduced-motion`. Vérifié en navigateur : ON bleu / OFF gris, le clic
+bascule bien le panneau correspondant ; 0 erreur console.
