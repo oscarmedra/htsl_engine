@@ -1,0 +1,52 @@
+name: Deploy playground to GitHub Pages
+
+# Construit le playground (Vite, base relative "./") et le publie sur GitHub
+# Pages. Aucun serveur applicatif : c'est un site statique. Les libs lourdes
+# (KaTeX/Plotly/Three) sont chargées à l'exécution par le runtime HTSL.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # bouton « Run workflow » dans l'onglet Actions
+
+# Permissions minimales pour publier sur Pages via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une seule publication à la fois ; on n'annule pas un déploiement en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Installe tout le monorepo (le build du playground importe le moteur
+      # et l'éditeur depuis les sources via des alias Vite).
+      - run: npm ci
+
+      - run: npm run build -w htsl-playground
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: playground/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

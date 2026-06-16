@@ -342,3 +342,23 @@ hash `#z=`, copié dans le presse-papier ; l'ouverture décompresse
 (non compressé) et repli si la compression manque. Aucune dépendance, aucun
 serveur. Vérifié : F5 restaure le document ; ouvrir un lien `#z=` (après vidage
 du localStorage et changement de doc) restaure exactement le document partagé.
+
+## Distribution : déploiement du playground (GitHub Pages, sans serveur)
+
+Première étape pour rendre HTSL intégrable par d'autres (l'outil ne vivait qu'en
+local). L'architecture s'y prête déjà : `compile()` produit du HTML pur et
+`installHtslRuntime()` expose `window.HTSL`, hydrate au DOMContentLoaded et charge
+KaTeX/Plotly/Three à la demande. Reste à distribuer. Roadmap convenue : (1)
+déployer le playground, (2) publier npm `htsl` + `@htsl/codemirror` + bundle CDN,
+(3) CLI `npx htsl build`, (4) plugins de framework. Voir
+`.docs/14-distribution-et-deploiement.md`.
+
+Étape 1 livrée : workflow `.github/workflows/deploy-playground.yml` (npm ci →
+build playground → upload-pages-artifact → deploy-pages, sur push main +
+dispatch, permissions OIDC). Trivial car `vite.config.ts` utilise `base: "./"`
+(chemins relatifs → marche à n'importe quelle URL, sous-chemin projet inclus,
+sans toucher au code) et le build importe le moteur depuis les sources. Les liens
+`#z=` (location.pathname) restent valides quel que soit l'hébergement. Procédure
+de création du dépôt + activation Pages documentée dans `playground/README.md`.
+Build vérifié (~225 kB gzip, libs lourdes hors bundle). Pré-requis restant côté
+utilisateur : créer le remote GitHub et activer Pages (pas de remote pour l'instant).

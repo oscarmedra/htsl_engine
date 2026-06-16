@@ -17,6 +17,34 @@ Ou depuis ce dossier : `npm run dev`, `npm run build` (→ `dist/`),
 `npm run preview`. Le moteur et `@htsl/codemirror` sont liés par les workspaces
 (rechargement à chaud quand on modifie le cœur).
 
+## Déploiement public (GitHub Pages, sans serveur)
+
+Le playground est un **site statique** : `vite build` produit du HTML/JS/CSS, et
+les libs lourdes (KaTeX/Plotly/Three) sont chargées à l'exécution par le runtime
+HTSL. La config Vite utilise `base: "./"` (chemins **relatifs**) → le build
+fonctionne à n'importe quelle URL, y compris un sous-chemin de projet
+`https://<user>.github.io/<repo>/`. Aucune modification de code n'est requise.
+
+Le workflow [`.github/workflows/deploy-playground.yml`](../.github/workflows/deploy-playground.yml)
+construit le playground et le publie sur Pages à chaque push sur `main`.
+
+Pré-requis (une seule fois, le dépôt n'ayant pas encore de remote) :
+
+```bash
+# 1. Créer le dépôt distant et pousser (via gh, ou à la main sur github.com)
+gh repo create htsl_motor --public --source=. --remote=origin --push
+# 2. Activer Pages avec la source « GitHub Actions »
+gh api -X POST repos/<user>/htsl_motor/pages -f build_type=workflow
+```
+
+Sans `gh` : créer le dépôt sur github.com, `git remote add origin <url>`,
+`git push -u origin main`, puis **Settings → Pages → Source : GitHub Actions**.
+Le workflow se déclenche au push (ou via **Actions → Run workflow**) et l'URL
+publique apparaît dans l'environnement `github-pages`.
+
+> Les liens de partage `#z=` utilisent `location.origin + location.pathname`,
+> donc ils restent valides quel que soit l'hébergement (sous-chemin compris).
+
 ## Disposition
 
 Trois panneaux : **Éditeur HTSL** · **Rendu** (iframe isolée) · **AST** (JSON).
