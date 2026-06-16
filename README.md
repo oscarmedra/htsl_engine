@@ -18,21 +18,28 @@ visuellement.
 Ce dépôt est un **monorepo npm workspaces** en trois paquets : le moteur, des
 extensions d'éditeur réutilisables, et un playground web.
 
+## 🌐 Essayer / utiliser
+
+- **Playground en ligne** : **https://oscarmedra.github.io/htsl_engine/** — écris du HTSL, vois le rendu, partage par lien.
+- **Documentation** (dont le manuel d'intégration) : <https://oscarmedra.github.io/htsl_engine/documentation.html>
+- **Installer le moteur** : `npm install @noah-medra/htsl-core` ([npm](https://www.npmjs.com/package/@noah-medra/htsl-core))
+- **Sans build (CDN)** : `<script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.auto.global.js"></script>`
+
 ---
 
 ## Les paquets
 
 | Paquet | Dossier | Rôle | Doc |
 |--------|---------|------|-----|
-| **`htsl`** | [`packages/core`](packages/core) | Le **moteur** : lexer, parser, renderer, expansion composants/variables, registre d'objets `@`, API d'introspection, conversion HTML→HTSL. **Zéro dépendance** dans le cœur (KaTeX/Plotly sont des peerDependencies optionnelles). | [README](packages/core/README.md) |
+| **`@noah-medra/htsl-core`** | [`packages/core`](packages/core) | Le **moteur** : lexer, parser, renderer, expansion composants/variables, registre d'objets `@`, API d'introspection, conversion HTML→HTSL, **runtime** d'hydratation. **Zéro dépendance** dans le cœur (KaTeX/Plotly sont des peerDependencies optionnelles). | [README](packages/core/README.md) |
 | **`@noah-medra/htsl-codemirror`** | [`packages/codemirror`](packages/codemirror) | Extensions **CodeMirror 6** réutilisables : coloration, autocomplétion contextuelle (snippets + commande slash), indentation, linter. Tout est généré depuis l'introspection du moteur. | [README](packages/codemirror/README.md) |
 | **`playground`** _(privé)_ | [`playground`](playground) | App **Vite** : édition live, rendu isolé en iframe, **couche d'authoring** (palette d'insertion, aide contextuelle), **édition directe depuis le rendu** (texte et blocs). Consomme les deux paquets ci-dessus. | [README](playground/README.md) |
 
 ```
 htsl_motor/
 ├─ packages/
-│  ├─ core/         → "htsl"             (le moteur, publiable)
-│  └─ codemirror/   → "@noah-medra/htsl-codemirror" (extensions éditeur, publiable)
+│  ├─ core/         → "@noah-medra/htsl-core"        (le moteur, publié sur npm)
+│  └─ codemirror/   → "@noah-medra/htsl-codemirror"  (extensions éditeur, publié)
 ├─ playground/      → app web (privée)
 ├─ .docs/           → documentation d'étapes (00…11) + index
 └─ .history/        → journal des décisions

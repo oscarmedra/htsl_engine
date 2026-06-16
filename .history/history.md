@@ -400,3 +400,10 @@ Blocage 2FA contourné en utilisant un **code de récupération** comme `--otp`
 prochaines releases sans code : token Automation/Granular en secret `NPM_TOKEN`
 + workflow `release.yml`. Sécurité : tokens et codes de récup exposés pendant la
 session → à révoquer/régénérer côté utilisateur.
+
+## README racine : liens « en ligne » + nom de paquet à jour
+
+Ajout en haut du README d'un bloc **« 🌐 Essayer / utiliser »** : playground en
+ligne (https://oscarmedra.github.io/htsl_engine/), documentation, install npm
+`@noah-medra/htsl-core`, snippet CDN. Correction des dernières mentions obsolètes
+du cœur (`htsl` → `@noah-medra/htsl-core`) dans le tableau des paquets et l'arbre.
