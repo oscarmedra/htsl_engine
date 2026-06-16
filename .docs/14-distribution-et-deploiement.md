@@ -48,9 +48,10 @@ n'est donc pas à concevoir, elle est à **distribuer**.
   `npm run build -w htsl-playground` → `upload-pages-artifact` (`playground/dist`)
   → `deploy-pages`. Déclenché sur push `main` + `workflow_dispatch`. Permissions
   OIDC minimales (`pages: write`, `id-token: write`), `concurrency` sur `pages`.
-- **Pré-requis manuel** (le dépôt n'a pas encore de remote) : créer le dépôt
-  GitHub, pousser `main`, activer **Pages → Source : GitHub Actions**. Détaillé
-  dans `playground/README.md`.
+- **Déployé** : dépôt public `oscarmedra/htsl_engine`, Pages activé
+  (`build_type=workflow`). **URL publique : https://oscarmedra.github.io/htsl_engine/**
+  La procédure (création remote + activation Pages) reste documentée dans
+  `playground/README.md` pour reproduire ailleurs.
 - **Liens de partage** : `#z=` s'appuie sur `location.origin + location.pathname`,
   donc valides quel que soit l'hébergement (sous-chemin compris). Le travail de
   persistance (`.docs/13`) devient le **canal de distribution** du playground.
@@ -59,7 +60,10 @@ n'est donc pas à concevoir, elle est à **distribuer**.
 
 `npm run build -w htsl-playground` réussit (index + documentation, base relative,
 bundle ~225 kB gzip ; libs lourdes hors bundle car chargées au runtime). `dist`
-est gitignoré ; le build se fait en CI.
+est gitignoré ; le build se fait en CI. **En production** : le workflow a tourné
+(build + deploy verts), et `https://oscarmedra.github.io/htsl_engine/` répond
+`200` (page d'accueil, asset JS sur le sous-chemin → base relative OK, et
+`documentation.html`).
 
 ## Reste à faire (étapes 2-4)
 
