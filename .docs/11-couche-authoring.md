@@ -18,14 +18,14 @@ renvoie `path/aliases/kind/category/description/snippet/example`. Tests
 les éléments HTML sont `kind:"element"` et `isKnownObject` reste faux pour eux,
 chaque exemple **compile** (les aperçus de la palette ne lèvent jamais).
 
-## 2. Snippets à trous (htsl-codemirror)
+## 2. Snippets à trous (@noah-medra/htsl-codemirror)
 
 `htslCompletion(registry)` insère désormais le `snippet` de l'entrée via
 `snippet()` de `@codemirror/autocomplete` (placeholders navigables au Tab,
 premier trou sélectionné). Contrainte respectée : aucun défaut de placeholder ne
 contient d'accolade (`snippet()` n'en gère pas l'imbrication).
 
-## 3. Commande slash (htsl-codemirror)
+## 3. Commande slash (@noah-medra/htsl-codemirror)
 
 Taper `/` en début de ligne ouvre la même base (objets + balises HTML +
 composants). Le filtre porte sur le texte **après** le `/`, mais l'insertion

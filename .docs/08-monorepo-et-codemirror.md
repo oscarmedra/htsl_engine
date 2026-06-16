@@ -1,4 +1,4 @@
-# 08 — Monorepo + paquet htsl-codemirror
+# 08 — Monorepo + paquet @noah-medra/htsl-codemirror
 
 ## Restructuration en monorepo (npm workspaces)
 
@@ -7,7 +7,7 @@ Le projet passe d'un paquet unique à un monorepo :
 | Avant | Après |
 |-------|-------|
 | `src/`, `tests/`, `package.json` (htsl) à la racine | `packages/core/` (paquet `htsl`) |
-| _(éditeur dans le playground)_ | `packages/codemirror/` (`htsl-codemirror`) |
+| _(éditeur dans le playground)_ | `packages/codemirror/` (`@noah-medra/htsl-codemirror`) |
 | `playground/` | inchangé (privé) |
 
 - **Déménagement** du moteur (`git mv` de `src/`, `tests/`, `scripts/`, configs,
@@ -25,7 +25,7 @@ avec métadonnées (description, schéma d'attributs typé, exemple) pour **tout
 les collections ; `registry.list()` / `registry.describe()` ; introspection des
 composants/variables d'un document parsé. 11 tests (`introspect.test.ts`).
 
-## Paquet htsl-codemirror
+## Paquet @noah-medra/htsl-codemirror
 
 Extensions CodeMirror 6 **réutilisables**, extraites du playground :
 
@@ -44,7 +44,7 @@ Extensions CodeMirror 6 **réutilisables**, extraites du playground :
 
 ## Playground
 
-Consomme `htsl-codemirror` (aliasé sur les sources en dev) et **ne réimplémente
+Consomme `@noah-medra/htsl-codemirror` (aliasé sur les sources en dev) et **ne réimplémente
 plus rien** de l'éditeur : il compose `htslLanguage()`, `htslCompletion(registry)`,
 `htslLinter(parse)` avec `basicSetup`. Rendu en iframe (frameworks CSS au choix),
 KaTeX/Plotly injectés, exemples, boutons, build statique.
@@ -53,5 +53,5 @@ KaTeX/Plotly injectés, exemples, boutons, build statique.
 
 `npm test` vert sur tous les paquets (core 157 + codemirror 21). Aucune
 fonctionnalité du langage modifiée. Le playground prouve l'intégrabilité réelle
-de `htsl-codemirror` (coloration, complétion et soulignement d'erreurs vérifiés
+de `@noah-medra/htsl-codemirror` (coloration, complétion et soulignement d'erreurs vérifiés
 en navigateur).

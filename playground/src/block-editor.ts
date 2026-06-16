@@ -5,7 +5,7 @@
  *
  * It is mounted in the parent document (where CodeMirror already works), then
  * positioned over the element using the iframe's offset. It reuses the exact
- * same extensions as the main editor via htsl-codemirror.
+ * same extensions as the main editor via @noah-medra/htsl-codemirror.
  */
 import { EditorState } from "@codemirror/state";
 import { EditorView, keymap, tooltips } from "@codemirror/view";
@@ -19,8 +19,8 @@ import {
   closeBracketsKeymap,
   startCompletion,
 } from "@codemirror/autocomplete";
-import { parse, registry } from "htsl-engine";
-import { htslLanguage, htslCompletion, htslLinter } from "htsl-codemirror";
+import { parse, registry } from "@noah-medra/htsl-core";
+import { htslLanguage, htslCompletion, htslLinter } from "@noah-medra/htsl-codemirror";
 
 export interface Rect {
   left: number;

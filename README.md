@@ -25,14 +25,14 @@ extensions d'éditeur réutilisables, et un playground web.
 | Paquet | Dossier | Rôle | Doc |
 |--------|---------|------|-----|
 | **`htsl`** | [`packages/core`](packages/core) | Le **moteur** : lexer, parser, renderer, expansion composants/variables, registre d'objets `@`, API d'introspection, conversion HTML→HTSL. **Zéro dépendance** dans le cœur (KaTeX/Plotly sont des peerDependencies optionnelles). | [README](packages/core/README.md) |
-| **`htsl-codemirror`** | [`packages/codemirror`](packages/codemirror) | Extensions **CodeMirror 6** réutilisables : coloration, autocomplétion contextuelle (snippets + commande slash), indentation, linter. Tout est généré depuis l'introspection du moteur. | [README](packages/codemirror/README.md) |
+| **`@noah-medra/htsl-codemirror`** | [`packages/codemirror`](packages/codemirror) | Extensions **CodeMirror 6** réutilisables : coloration, autocomplétion contextuelle (snippets + commande slash), indentation, linter. Tout est généré depuis l'introspection du moteur. | [README](packages/codemirror/README.md) |
 | **`playground`** _(privé)_ | [`playground`](playground) | App **Vite** : édition live, rendu isolé en iframe, **couche d'authoring** (palette d'insertion, aide contextuelle), **édition directe depuis le rendu** (texte et blocs). Consomme les deux paquets ci-dessus. | [README](playground/README.md) |
 
 ```
 htsl_motor/
 ├─ packages/
 │  ├─ core/         → "htsl"             (le moteur, publiable)
-│  └─ codemirror/   → "htsl-codemirror" (extensions éditeur, publiable)
+│  └─ codemirror/   → "@noah-medra/htsl-codemirror" (extensions éditeur, publiable)
 ├─ playground/      → app web (privée)
 ├─ .docs/           → documentation d'étapes (00…11) + index
 └─ .history/        → journal des décisions
@@ -48,7 +48,7 @@ npm run build      # build tous les paquets
 npm run typecheck  # typecheck tous les paquets
 ```
 
-> Le playground importe le moteur et `htsl-codemirror` directement (workspaces),
+> Le playground importe le moteur et `@noah-medra/htsl-codemirror` directement (workspaces),
 > avec rechargement à chaud — modifier le cœur se reflète aussitôt.
 
 ## Architecture en bref

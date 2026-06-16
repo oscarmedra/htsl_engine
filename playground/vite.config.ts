@@ -8,8 +8,8 @@ export default defineConfig({
   base: "./",
   resolve: {
     alias: {
-      "htsl-engine": fromHere("../packages/core/src/index.ts"),
-      "htsl-codemirror": fromHere("../packages/codemirror/src/index.ts"),
+      "@noah-medra/htsl-core": fromHere("../packages/core/src/index.ts"),
+      "@noah-medra/htsl-codemirror": fromHere("../packages/codemirror/src/index.ts"),
     },
   },
   build: {

@@ -72,7 +72,7 @@ peut désormais cliquer l'élément lui-même.
   pré-rempli avec l'**appel propre à l'instance** (`{@carte[titre="…"]: ses
   children}`) — chaque instance montre **son** contenu, pas la définition partagée.
   Même expérience que l'éditeur principal (coloration, autocomplétion, linter,
-  pliage), via `htsl-codemirror` (`playground/src/block-editor.ts`).
+  pliage), via `@noah-medra/htsl-codemirror` (`playground/src/block-editor.ts`).
   `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est remplacé
   tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; `Échap` annule.
   L'objectif est de pouvoir **tout faire depuis le rendu** (l'éditeur principal

@@ -16,7 +16,7 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "paths": {
-      "htsl-engine": ["../core/src/index.ts"]
+      "@noah-medra/htsl-core": ["../core/src/index.ts"]
     }
   },
   "include": ["src", "tests"]

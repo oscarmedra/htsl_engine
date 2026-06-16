@@ -14,8 +14,8 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "paths": {
-      "htsl-engine": ["../packages/core/src/index.ts"],
-      "htsl-codemirror": ["../packages/codemirror/src/index.ts"]
+      "@noah-medra/htsl-core": ["../packages/core/src/index.ts"],
+      "@noah-medra/htsl-codemirror": ["../packages/codemirror/src/index.ts"]
     }
   },
   "include": ["src"]

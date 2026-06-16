@@ -23,7 +23,7 @@ n'est donc pas à concevoir, elle est à **distribuer**.
 | Public | Besoin | Livrable |
 |---|---|---|
 | Prof / blogueur (non-dev) | écrire du HTSL sans rien installer | **playground hébergé** + **balise `<script>` CDN** auto-hydratante |
-| Dev web | l'intégrer dans son app | `npm install htsl-engine` (+ `htsl-codemirror`) |
+| Dev web | l'intégrer dans son app | `npm install @noah-medra/htsl-core` (+ `@noah-medra/htsl-codemirror`) |
 | Auteur de polycopiés / CI | `doc.htsl` → HTML | **CLI** `npx htsl build` |
 | Écosystème | l'utiliser dans son framework | plugin Vite / remark / Astro |
 
@@ -31,11 +31,11 @@ n'est donc pas à concevoir, elle est à **distribuer**.
 
 1. **Déployer le playground** — *fait* (voir ci-dessous). Quasi zéro effort,
    transforme « local » en « produit partageable par lien ».
-2. **Publier npm `htsl-engine` + `htsl-codemirror`** + **bundle CDN** — *préparé*
-   (voir « Étape 2 » ci-dessous). Le nom `htsl` (sans scope) étant pris par un
-   package abandonné de 2018 — et l'org `@htsl` non créable (collision avec ce
-   package) — les deux packages sont **non scopés** : `htsl-engine` et
-   `htsl-codemirror`.
+2. **Publier npm `@noah-medra/htsl-core` + `@noah-medra/htsl-codemirror`** + **bundle
+   CDN** — *préparé* (voir « Étape 2 » ci-dessous). Le nom `htsl` (sans scope) est
+   pris par un package abandonné de 2018, et l'org `@htsl` n'est pas créable
+   (collision avec ce package) → les packages utilisent le **scope personnel de
+   l'auteur** `@noah-medra` (= son pseudo npm), qui ne nécessite aucune org.
 3. **CLI** `npx htsl build doc.htsl -o doc.html` (HTML autonome).
 4. **Plugins de framework**.
 
@@ -67,18 +67,19 @@ est gitignoré ; le build se fait en CI. **En production** : le workflow a tourn
 `200` (page d'accueil, asset JS sur le sous-chemin → base relative OK, et
 `documentation.html`).
 
-## Étape 2 préparée : publication npm `htsl-engine` + `htsl-codemirror` + CDN
+## Étape 2 préparée : publication npm `@noah-medra/htsl-core` + `@noah-medra/htsl-codemirror` + CDN
 
-- **Renommage** : `htsl` → **`htsl-engine`** et `@htsl/codemirror` →
-  **`htsl-codemirror`** (packages **non scopés** : l'org `@htsl` n'est pas
-  créable car le package `htsl` existe). Tous les imports source/tests, les alias
-  Vite, les `paths` tsconfig et les `peer/devDependencies` pointent sur
-  `htsl-engine` (la peerDep de codemirror est `htsl-engine: "^0.1.0"` — satisfaite
-  par le workspace local **et** valide une fois publiée).
+- **Renommage** : `htsl` → **`@noah-medra/htsl-core`** et `@htsl/codemirror` →
+  **`@noah-medra/htsl-codemirror`** (scope personnel `@noah-medra`, sans org). Tous
+  les imports source/tests, les alias Vite, les `paths` tsconfig et les
+  `peer/devDependencies` pointent sur `@noah-medra/htsl-core` (la peerDep de
+  codemirror est `@noah-medra/htsl-core: "^0.1.0"` — satisfaite par le workspace
+  local **et** valide une fois publiée).
 - **Métadonnées de publication** sur les deux packages : `repository` (avec
-  `directory`), `homepage`, `bugs`, `author`, `prepublishOnly` (build avant
-  publish), et `files` inclut `LICENSE` (+ `dist-min` pour le cœur). Fichier
-  `LICENSE` (MIT) ajouté à la racine et copié dans chaque package.
+  `directory`), `homepage`, `bugs`, `author`, `publishConfig.access: "public"`
+  (requis pour un scope public), `prepublishOnly` (build avant publish), et `files`
+  inclut `LICENSE` (+ `dist-min` pour le cœur). Fichier `LICENSE` (MIT) ajouté à la
+  racine et copié dans chaque package.
 - **Bundle CDN auto-hydratant** : nouvelle entrée `src/cdn.ts` →
   `dist-min/htsl.auto.global.js` (IIFE minifié) qui expose le global `htsl_engine`
   **et** appelle `installHtslRuntime()` au chargement (→ `window.HTSL`, hydratation
@@ -92,16 +93,16 @@ est gitignoré ; le build se fait en CI. **En production** : le workflow a tourn
 ### Vérifié
 
 `npm run typecheck` + tests (core 220, codemirror 37) verts après renommage ;
-`npm run build:all -w htsl-engine` produit dist + dist-min (3 bundles) ; playground
+`npm run build:all -w @noah-medra/htsl-core` produit dist + dist-min (3 bundles) ; playground
 re-vérifié en navigateur (éditeur monté, rendu présent, 0 erreur console) ;
 smoke-tests Node : `htsl.min.js` `compile()` OK et `htsl.auto.global.js` installe
 bien `window.HTSL` sans crash ; `npm pack --dry-run` montre des tarballs corrects
-(`htsl-engine` 211 kB avec dist+dist-min+LICENSE ; `htsl-codemirror` 17 kB).
+(`@noah-medra/htsl-core` 211 kB avec dist+dist-min+LICENSE ; `@noah-medra/htsl-codemirror` 17 kB).
 
 ## Reste à faire (publication effective + étapes 3-4)
 
-Côté utilisateur pour publier : `npm login`, puis `npm publish -w htsl-engine`
-et `npm publish -w htsl-codemirror` (ou via le workflow + secret `NPM_TOKEN`).
+Côté utilisateur pour publier : `npm login`, puis `npm publish -w @noah-medra/htsl-core`
+et `npm publish -w @noah-medra/htsl-codemirror` (ou via le workflow + secret `NPM_TOKEN`).
 Ensuite : CLI `npx htsl build` et plugins de framework. Le versioning reste
 manuel (bump des `version` dans les package.json) ;
 changesets pourra être ajouté plus tard si le rythme de releases le justifie.

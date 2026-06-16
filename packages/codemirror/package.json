@@ -1,5 +1,5 @@
 {
-  "name": "htsl-codemirror",
+  "name": "@noah-medra/htsl-codemirror",
   "version": "0.1.0",
   "description": "Extensions CodeMirror 6 pour HTSL : coloration, autocomplétion, linter.",
   "type": "module",
@@ -44,7 +44,7 @@
     "@codemirror/state": "^6",
     "@codemirror/view": "^6",
     "@lezer/highlight": "^1",
-    "htsl-engine": "^0.1.0"
+    "@noah-medra/htsl-core": "^0.1.0"
   },
   "devDependencies": {
     "@codemirror/autocomplete": "^6.18.0",
@@ -53,7 +53,7 @@
     "@codemirror/state": "^6.4.0",
     "@codemirror/view": "^6.30.0",
     "@lezer/highlight": "^1.2.0",
-    "htsl-engine": "^0.1.0",
+    "@noah-medra/htsl-core": "^0.1.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
     "vitest": "^1.4.0"

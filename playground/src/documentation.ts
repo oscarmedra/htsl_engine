@@ -3,7 +3,7 @@
  * from the engine's introspection registry, so they are always up to date.
  */
 import "./docs.css";
-import { registry, type RegistryEntry } from "htsl-engine";
+import { registry, type RegistryEntry } from "@noah-medra/htsl-core";
 
 const esc = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

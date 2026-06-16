@@ -8,7 +8,7 @@
 import { linter, type Diagnostic } from "@codemirror/lint";
 import type { Extension } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
-import type { Node, ParseOptions } from "htsl-engine";
+import type { Node, ParseOptions } from "@noah-medra/htsl-core";
 
 export type ParseFn = (source: string, options?: ParseOptions) => Node[];
 

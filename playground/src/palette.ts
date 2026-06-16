@@ -16,7 +16,7 @@
  */
 import { snippet, type Completion } from "@codemirror/autocomplete";
 import type { EditorView } from "@codemirror/view";
-import { registry, compile, parse, type RegistryEntry } from "htsl-engine";
+import { registry, compile, parse, type RegistryEntry } from "@noah-medra/htsl-core";
 
 /** A flat, render-ready palette item (built from registry or document). */
 interface Item {

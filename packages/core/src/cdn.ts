@@ -9,7 +9,7 @@
  * The full engine (`compile`, `parse`, …) is also exposed as `htsl_engine`, so
  * a page can compile HTSL on the fly:
  *
- *   <script src="https://unpkg.com/htsl-engine/dist-min/htsl.auto.global.js"></script>
+ *   <script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.auto.global.js"></script>
  *   <div id="out"></div>
  *   <script>
  *     document.getElementById("out").innerHTML =
