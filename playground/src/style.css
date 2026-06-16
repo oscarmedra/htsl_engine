@@ -225,3 +225,28 @@ body {
   padding: 0.5rem 0.6rem; color: var(--ink);
 }
 .cm-completionInfo code { font-family: var(--mono); background: #f1f3f5; padding: 0 0.2em; border-radius: 3px; }
+
+/* -------------------------------------------------------------------------- */
+/* Small screens (tablets portrait & phones): stack the panels vertically.    */
+/* Render on top, editor below — instead of the side-by-side desktop columns. */
+/* -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  /* Let the toolbar wrap instead of overflowing on narrow screens. */
+  .topbar { flex-wrap: wrap; gap: 0.4rem 0.75rem; }
+  .toolbar { flex-wrap: wrap; row-gap: 0.4rem; }
+
+  /* Switch the grid to a vertical flex stack (ignores the desktop columns,
+     including any drag-set inline grid-template-columns). */
+  #panels { display: flex; flex-direction: column; }
+  #panels .gutter { display: none; }              /* no horizontal resize on touch */
+
+  .panel { flex: 1 1 0; min-height: 0; }
+  #panel-render { order: 1; border-left: none; border-bottom: 1px solid var(--border); }
+  #panel-editor { order: 2; }
+  #panel-ast    { order: 3; border-left: none; border-top: 1px solid var(--border); }
+
+  /* Render alone: fill the height (don't cap/centre as on wide screens). */
+  .no-editor.no-ast #panel-render { align-items: stretch; }
+  .no-editor.no-ast #panel-render .panel-head,
+  .no-editor.no-ast #panel-render .render-frame { max-width: none; }
+}

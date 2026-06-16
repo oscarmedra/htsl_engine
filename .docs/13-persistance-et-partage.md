@@ -88,3 +88,15 @@ Au boot, `restorePanelPrefs()` lit ces flags **avant** `relayout()` ; chaque
 `change` les ré-enregistre. Défaut au tout premier accès (flag absent) : **les
 deux masqués**. Vérifié : cocher « Éditeur » puis actualiser → l'éditeur reste
 affiché (flag « 1 ») ; le décocher → reste masqué après refresh (flag « 0 »).
+
+## Disposition responsive (mobile & tablette)
+
+Sur petit écran (`@media max-width: 860px` → tablettes portrait + téléphones), la
+grille 3 colonnes du playground devient une **pile verticale en flex** : **rendu
+en haut, éditeur en bas** (`order` 1/2/3 ; l'AST en dernier). Les poignées de
+redimensionnement sont masquées (pas de drag horizontal au doigt), et la topbar/
+toolbar passent à la ligne (`flex-wrap`) au lieu de déborder. Le passage en
+`display:flex` ignore proprement les `grid-template-columns` du desktop (y compris
+l'inline éventuel posé par le drag). Vérifié en navigateur : à 375×812 et 820×1100,
+rendu au-dessus de l'éditeur ; éditeur masqué → le rendu remplit la hauteur ;
+desktop inchangé (grille côte à côte) ; 0 erreur console.

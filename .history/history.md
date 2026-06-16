@@ -425,3 +425,12 @@ Les cases « Éditeur » et « AST » mémorisent leur état dans `localStorage`
 restaure au boot avant `relayout()` ; chaque `change` sauvegarde. Défaut premier
 accès : les deux masqués. Vérifié en navigateur (cocher → refresh → reste affiché ;
 décocher → reste masqué ; 0 erreur ; typecheck OK). Détails : `.docs/13`.
+
+## Disposition responsive : panneaux empilés sur mobile/tablette (playground)
+
+`@media (max-width: 860px)` : `#panels` passe de la grille 3 colonnes à une pile
+flex verticale — **rendu en haut, éditeur en bas** (`order`), AST en dernier ;
+poignées masquées ; topbar/toolbar en `flex-wrap`. Le `display:flex` neutralise
+les `grid-template-columns` (desktop + inline du drag). Vérifié à 375×812 et
+820×1100 (rendu au-dessus, éditeur masqué → rendu plein écran) ; desktop non
+régressé ; 0 erreur. Détails : `.docs/13`.
