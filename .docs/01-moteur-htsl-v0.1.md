@@ -55,7 +55,7 @@ composés uniquement d'espaces (mise en forme) sont supprimés.
 ## API publique
 
 ```ts
-import { parse, render, compile } from "htsl";
+import { parse, render, compile } from "@htsl/core";
 const ast  = parse("{p:Bonjour}", { mode: "strict" });
 const html = render(ast, { prettyPrint: true });
 const out  = compile("{p:Bonjour}");

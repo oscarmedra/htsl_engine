@@ -3,7 +3,7 @@
  *
  * Public API:
  *
- *   import { parse, render, compile } from "htsl";
+ *   import { parse, render, compile } from "@htsl/core";
  *
  *   const ast  = parse("{p:Bonjour}", { mode: "strict" });
  *   const html = render(ast, { prettyPrint: true });

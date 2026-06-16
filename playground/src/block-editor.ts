@@ -19,7 +19,7 @@ import {
   closeBracketsKeymap,
   startCompletion,
 } from "@codemirror/autocomplete";
-import { parse, registry } from "htsl";
+import { parse, registry } from "@htsl/core";
 import { htslLanguage, htslCompletion, htslLinter } from "@htsl/codemirror";
 
 export interface Rect {

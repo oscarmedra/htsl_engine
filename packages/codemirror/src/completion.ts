@@ -16,8 +16,8 @@ import {
   type CompletionResult,
   type CompletionSource,
 } from "@codemirror/autocomplete";
-import { parse } from "htsl";
-import type { ComponentInfo, Node, ObjectMeta, RegistryEntry } from "htsl";
+import { parse } from "@htsl/core";
+import type { ComponentInfo, Node, ObjectMeta, RegistryEntry } from "@htsl/core";
 
 /** Minimal shape of the introspection registry needed for completion. */
 export interface CompletionRegistry {

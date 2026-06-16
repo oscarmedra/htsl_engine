@@ -362,3 +362,27 @@ sans toucher au code) et le build importe le moteur depuis les sources. Les lien
 de création du dépôt + activation Pages documentée dans `playground/README.md`.
 Build vérifié (~225 kB gzip, libs lourdes hors bundle). Pré-requis restant côté
 utilisateur : créer le remote GitHub et activer Pages (pas de remote pour l'instant).
+
+## Distribution étape 2 : packages npm `@htsl/core` + `@htsl/codemirror` + CDN
+
+Préparation de la publication npm (le nom `htsl` sans scope est pris par un
+package abandonné de 2018 → cœur renommé **`@htsl/core`**, scope `@htsl` conservé
+pour codemirror). Détails : `.docs/14-distribution-et-deploiement.md`.
+
+- Renommage complet : imports source/tests, alias Vite, `paths` tsconfig,
+  peer/devDeps (`@htsl/core: "^0.1.0"`, satisfait par le workspace local et valide
+  une fois publié), dep playground.
+- Métadonnées de publication sur les deux packages : `repository`/`homepage`/
+  `bugs`/`author`, `publishConfig.access:"public"`, `prepublishOnly`, `files` +=
+  `LICENSE` (et `dist-min` pour le cœur). Fichier `LICENSE` (MIT) ajouté (racine
+  + chaque package).
+- Bundle CDN auto-hydratant : `src/cdn.ts` → `dist-min/htsl.auto.global.js` (IIFE)
+  qui expose `htsl_engine` ET appelle `installHtslRuntime()` au chargement
+  (`window.HTSL` + hydratation des `data-htsl-*`). Variantes `htsl.global.js` /
+  `htsl.min.js` conservées.
+- Workflow `.github/workflows/release.yml` : `npm publish` des deux packages sur
+  Release GitHub (secret `NPM_TOKEN` requis).
+- Vérifié : typecheck + tests (220 + 37) verts, `build:all` OK, playground
+  re-testé en navigateur (0 erreur), smoke-tests Node (compile + window.HTSL),
+  `npm pack --dry-run` tarballs corrects. Reste côté user : créer l'org npm
+  `htsl`, `npm login`, publier.

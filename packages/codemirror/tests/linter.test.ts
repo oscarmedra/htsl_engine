@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parse } from "htsl";
+import { parse } from "@htsl/core";
 import { htslDiagnostics } from "../src/linter.js";
 
 describe("htslDiagnostics", () => {

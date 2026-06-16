@@ -16,7 +16,7 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "paths": {
-      "htsl": ["../core/src/index.ts"]
+      "@htsl/core": ["../core/src/index.ts"]
     }
   },
   "include": ["src", "tests"]

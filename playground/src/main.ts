@@ -7,8 +7,8 @@ import { bracketMatching, codeFolding, foldGutter, foldKeymap } from "@codemirro
 import { autocompletion, completionKeymap, closeBrackets, startCompletion } from "@codemirror/autocomplete";
 import { lintGutter } from "@codemirror/lint";
 
-import { parse, render, registry, mathCss, HTSLError } from "htsl";
-import type { Node } from "htsl";
+import { parse, render, registry, mathCss, HTSLError } from "@htsl/core";
+import type { Node } from "@htsl/core";
 import katex from "katex";
 
 // Editor behaviour comes entirely from the reusable @htsl/codemirror package.

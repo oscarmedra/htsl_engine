@@ -31,9 +31,9 @@ n'est donc pas à concevoir, elle est à **distribuer**.
 
 1. **Déployer le playground** — *fait* (voir ci-dessous). Quasi zéro effort,
    transforme « local » en « produit partageable par lien ».
-2. **Publier npm `htsl` + `@htsl/codemirror`** (scope conservé) + **bundle CDN**
-   IIFE qui appelle `installHtslRuntime`. Pré-requis : versioning (changesets),
-   fichier `LICENSE`, champ `repository`, déréférencer les deps workspace `*`.
+2. **Publier npm `@htsl/core` + `@htsl/codemirror`** + **bundle CDN** — *préparé*
+   (voir « Étape 2 » ci-dessous). Le nom `htsl` (sans scope) étant pris par un
+   package abandonné de 2018, le cœur est renommé **`@htsl/core`** (scope `@htsl`).
 3. **CLI** `npx htsl build doc.htsl -o doc.html` (HTML autonome).
 4. **Plugins de framework**.
 
@@ -65,8 +65,42 @@ est gitignoré ; le build se fait en CI. **En production** : le workflow a tourn
 `200` (page d'accueil, asset JS sur le sous-chemin → base relative OK, et
 `documentation.html`).
 
-## Reste à faire (étapes 2-4)
+## Étape 2 préparée : publication npm `@htsl/core` + `@htsl/codemirror` + CDN
 
-`LICENSE` (le champ `license: MIT` existe mais pas le fichier), champ
-`repository`/`homepage` dans les `package.json`, cible de build CDN/IIFE,
-changesets, puis CLI et plugins.
+- **Renommage** : `htsl` (pris sur npm) → **`@htsl/core`** ; `@htsl/codemirror`
+  conservé. Tous les imports source/tests, les alias Vite, les `paths` tsconfig
+  et les `peer/devDependencies` pointent désormais sur `@htsl/core` (la peerDep de
+  codemirror passe de `htsl: "*"` à `@htsl/core: "^0.1.0"` — satisfaite par le
+  workspace local **et** valide une fois publiée).
+- **Métadonnées de publication** sur les deux packages : `repository` (avec
+  `directory`), `homepage`, `bugs`, `author`, `publishConfig.access: "public"`
+  (obligatoire pour un scope public), `prepublishOnly` (build avant publish), et
+  `files` inclut `LICENSE` (+ `dist-min` pour le cœur). Fichier `LICENSE` (MIT)
+  ajouté à la racine et copié dans chaque package.
+- **Bundle CDN auto-hydratant** : nouvelle entrée `src/cdn.ts` →
+  `dist-min/htsl.auto.global.js` (IIFE minifié) qui expose le global `htsl_engine`
+  **et** appelle `installHtslRuntime()` au chargement (→ `window.HTSL`, hydratation
+  des `data-htsl-*`, chargement KaTeX/Plotly/Three à la demande). Un prof colle
+  une seule balise `<script>` et écrit/compile du HTSL sans build. Les variantes
+  `htsl.global.js` (sans auto-runtime) et `htsl.min.js` (ESM) restent produites.
+- **Workflow de publication** : `.github/workflows/release.yml` — sur Release
+  GitHub (ou dispatch), `npm publish` des deux packages avec `--access public`.
+  Pré-requis utilisateur : créer l'org npm `htsl`, un token Automation, et le
+  secret `NPM_TOKEN`.
+
+### Vérifié
+
+`npm run typecheck` + tests (core 220, codemirror 37) verts après renommage ;
+`npm run build:all -w @htsl/core` produit dist + dist-min (3 bundles) ; playground
+re-vérifié en navigateur (éditeur monté, rendu présent, 0 erreur console) ;
+smoke-tests Node : `htsl.min.js` `compile()` OK et `htsl.auto.global.js` installe
+bien `window.HTSL` sans crash ; `npm pack --dry-run` montre des tarballs corrects
+(`@htsl/core` 211 kB avec dist+dist-min+LICENSE ; `@htsl/codemirror` 17 kB).
+
+## Reste à faire (publication effective + étapes 3-4)
+
+Côté utilisateur pour publier : créer l'org npm `htsl`, `npm login`, puis
+`npm publish -w @htsl/core` et `npm publish -w @htsl/codemirror` (ou via le
+workflow + secret `NPM_TOKEN`). Ensuite : CLI `npx htsl build` et plugins de
+framework. Le versioning reste manuel (bump des `version` dans les package.json) ;
+changesets pourra être ajouté plus tard si le rythme de releases le justifie.

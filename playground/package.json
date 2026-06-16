@@ -16,9 +16,9 @@
     "@codemirror/state": "^6.4.0",
     "@codemirror/view": "^6.30.0",
     "@htsl/codemirror": "*",
+    "@htsl/core": "*",
     "@lezer/highlight": "^1.2.0",
     "codemirror": "^6.0.1",
-    "htsl": "*",
     "katex": "^0.16.9",
     "morphdom": "^2.7.8",
     "plotly.js-dist-min": "^2.27.0"

@@ -30,9 +30,52 @@ récursif** (tokens → AST) et un **renderer** (AST → HTML). Aucune dépendan
 
 ## Installation
 
+### Comme dépendance (npm)
+
+```bash
+npm install @htsl/core
+```
+
+```js
+import { compile } from "@htsl/core";
+
+document.body.innerHTML = compile("{h1:Bonjour} {@mte: E = mc^2}");
+```
+
+`compile()` ne produit que du **HTML inerte** (nœuds `data-htsl-*`, aucun JS issu
+du contenu). Pour activer le rendu riche (KaTeX, Plotly, Three.js — chargés à la
+demande), installe le **runtime** côté navigateur :
+
+```js
+import { installHtslRuntime } from "@htsl/core";
+
+installHtslRuntime(); // expose window.HTSL, hydrate les data-htsl-* au chargement
+```
+
+### Sans build, par balise `<script>` (CDN)
+
+Pour une page statique (prof, blog…), un seul script suffit : il expose le global
+`htsl_engine` **et** auto-installe le runtime (`window.HTSL`).
+
+```html
+<script src="https://unpkg.com/@htsl/core/dist-min/htsl.auto.global.js"></script>
+<div id="out"></div>
+<script>
+  document.getElementById("out").innerHTML =
+    htsl_engine.compile("{h1:Bonjour} {@mte: E = mc^2}");
+  // le MutationObserver du runtime hydrate la formule automatiquement
+</script>
+```
+
+Variantes dans `dist-min/` : `htsl.global.js` (IIFE sans auto-runtime),
+`htsl.min.js` (ESM minifié).
+
+### Développement local (monorepo)
+
 ```bash
 npm install        # installe les dépendances de développement
 npm run build      # compile vers dist/ (ESM + types) via tsup
+npm run build:all  # + bundles CDN minifiés dans dist-min/
 npm test           # lance la suite Vitest
 npm run demo       # compile demo.htsl et affiche le HTML
 ```
@@ -97,7 +140,7 @@ sont ignorés).
 ## API
 
 ```ts
-import { parse, render, compile } from "htsl";
+import { parse, render, compile } from "@htsl/core";
 
 // Parse → AST (tableau de nœuds)
 const ast = parse("{p:Bonjour}", { mode: "strict" });
@@ -115,8 +158,8 @@ Pour un usage en namespace (`htsl_engine.compile(...)`), le moteur est aussi
 exposé comme objet — disponible en ESM comme export par défaut **et** nommé :
 
 ```ts
-import htsl_engine from "htsl";        // export par défaut
-// ou : import { htsl_engine } from "htsl";
+import htsl_engine from "@htsl/core";        // export par défaut
+// ou : import { htsl_engine } from "@htsl/core";
 
 htsl_engine.compile("{p:Bonjour}");
 htsl_engine.parse("{p:x}");
@@ -200,7 +243,7 @@ feuille de style par défaut exportée sous `mathCss`.
 
 ```ts
 import katex from "katex";
-import { compile, mathCss } from "htsl";
+import { compile, mathCss } from "@htsl/core";
 
 compile("{@mte[label=e]: E = mc^2}", { katex });
 ```
@@ -376,7 +419,7 @@ Comme le renderer ne produit que des **données** (jamais de JS exécutable), un
 une fois installé) et c'est la **seule** couche JS que le moteur exécute.
 
 ```ts
-import { hydrate, purge, loadDependency, installHtslRuntime } from "htsl";
+import { hydrate, purge, loadDependency, installHtslRuntime } from "@htsl/core";
 ```
 
 | Fonction | Rôle |
@@ -448,7 +491,7 @@ Le moteur sait aussi reconvertir du HTML en HTSL, via un petit parser HTML
 maison (zéro dépendance, Node + navigateur) :
 
 ```ts
-import { fromHtml, parseHtml, toHtsl } from "htsl";
+import { fromHtml, parseHtml, toHtsl } from "@htsl/core";
 
 fromHtml('<div class="box"><p>Salut</p></div>');
 // → "{div.box:\n  {p:Salut}\n}"
@@ -479,7 +522,7 @@ vérité pour les outils (autocomplétion, palette du playground) — aucune lis
 n'est codée en dur ailleurs.
 
 ```ts
-import { registry, parse } from "htsl";
+import { registry, parse } from "@htsl/core";
 
 registry.list();            // toutes les entrées (objets + éléments HTML courants)
 registry.describe("mte");   // métadonnées d'une entrée (alias résolu)

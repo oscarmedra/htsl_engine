@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EditorState } from "@codemirror/state";
 import { CompletionContext, type CompletionResult } from "@codemirror/autocomplete";
-import { registry } from "htsl";
+import { registry } from "@htsl/core";
 import { htslCompletion } from "../src/completion.js";
 
 const source = htslCompletion(registry);

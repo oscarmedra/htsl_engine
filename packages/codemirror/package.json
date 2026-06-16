@@ -14,10 +14,23 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oscarmedra/htsl_engine.git",
+    "directory": "packages/codemirror"
+  },
+  "homepage": "https://oscarmedra.github.io/htsl_engine/",
+  "bugs": "https://github.com/oscarmedra/htsl_engine/issues",
+  "author": "oscarmedra",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -31,7 +44,7 @@
     "@codemirror/state": "^6",
     "@codemirror/view": "^6",
     "@lezer/highlight": "^1",
-    "htsl": "*"
+    "@htsl/core": "^0.1.0"
   },
   "devDependencies": {
     "@codemirror/autocomplete": "^6.18.0",
@@ -40,7 +53,7 @@
     "@codemirror/state": "^6.4.0",
     "@codemirror/view": "^6.30.0",
     "@lezer/highlight": "^1.2.0",
-    "htsl": "*",
+    "@htsl/core": "^0.1.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
     "vitest": "^1.4.0"
