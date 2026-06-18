@@ -79,26 +79,36 @@ export function htslCompletion(registry: CompletionRegistry): CompletionSource {
       ast = [];
     }
 
-    // {@ object / component → insert a snippet (replacing from the "{@")
+    // {@ object / component. Filtering must run on the NAME query only, so the
+    // result starts AFTER the "{@" (otherwise CodeMirror matches option labels
+    // like "mti" against "{@m" and hides everything). The snippet still replaces
+    // from the "{@" via a custom apply — same pattern as the slash command.
     let m = /\{@([A-Za-z0-9_.-]*)$/.exec(before);
     if (m) {
+      const at = m.index; // position of "{@"
+      const withApply = (base: Completion, template: string): Completion => ({
+        ...base,
+        apply: (v, c, _from, to) => {
+          // closeBrackets auto-inserts a "}" right after the "{@"; the snippet
+          // already provides its own closing brace, so consume the stray one.
+          const end = v.state.sliceDoc(to, to + 1) === "}" ? to + 1 : to;
+          snippet(template)(v, c, at, end);
+        },
+      });
       const options: Completion[] = [];
       for (const e of registry.list()) {
         if (e.kind !== "object") continue;
-        options.push(entryCompletion(e));
+        options.push(withApply(entryCompletion(e), e.snippet));
         for (const a of e.aliases) {
-          options.push({ ...entryCompletion(e), label: a, detail: e.path });
+          options.push(withApply({ ...entryCompletion(e), label: a, detail: e.path }, e.snippet));
         }
       }
       for (const c of registry.components(ast)) {
-        options.push({
-          label: c.name,
-          detail: "composant",
-          type: "function",
-          apply: snippet(componentSnippet(c)),
-        });
+        options.push(
+          withApply({ label: c.name, detail: "composant", type: "function" }, componentSnippet(c)),
+        );
       }
-      return { from: m.index, options, validFor: /^\{@[A-Za-z0-9_.-]*$/ };
+      return { from: at + 2, options, validFor: /^[\w.-]*$/ };
     }
 
     // Slash command at line start → all entries (objects, HTML, components).

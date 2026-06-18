@@ -200,13 +200,23 @@ const extensions: Extension[] = [
   autocompletion({ override: [htslCompletion(registry)], activateOnTyping: true }),
   EditorView.updateListener.of((u) => {
     if (u.selectionSet || u.docChanged) updateHelp(view, helpEl);
-    // Open the slash menu when "/" is typed alone at the start of a line.
-    if (u.docChanged) {
+    // Auto-open the completion menu while typing a trigger. Recent versions of
+    // @codemirror/autocomplete no longer auto-activate on non-word triggers like
+    // "{@", so we start it explicitly (same mechanism as the slash command).
+    // Only on real typing — never on programmatic edits (shared-link restore,
+    // edits written back from the rendered preview…).
+    if (u.docChanged && u.transactions.some((t) => t.isUserEvent("input"))) {
       const pos = u.state.selection.main.head;
       const line = u.state.doc.lineAt(pos);
-      if (/^\s*\/$/.test(u.state.sliceDoc(line.from, pos))) {
-        setTimeout(() => startCompletion(view), 0); // defer: avoid dispatch-in-update
-      }
+      const lineBefore = u.state.sliceDoc(line.from, pos);
+      const before = u.state.sliceDoc(Math.max(0, pos - 60), pos);
+      const atTrigger =
+        /^\s*\/[\w.-]*$/.test(lineBefore) || // /slash command (line start)
+        /\{@[\w.-]*$/.test(before) || //        {@ object / component
+        /\{\$[\w-]*$/.test(before) || //        {$ variable
+        /\{![a-zA-Z]*$/.test(before) || //      {! directive
+        /\[[\w-]*$/.test(before); //            [ attribute (the source gates it)
+      if (atTrigger) setTimeout(() => startCompletion(view), 0); // defer: avoid dispatch-in-update
     }
   }),
   updateListener,

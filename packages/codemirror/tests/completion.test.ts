@@ -24,8 +24,10 @@ describe("htslCompletion", () => {
   it("inserts a hole-snippet (not just the name) after {@", () => {
     const r = complete("{@mte");
     const opt = r!.options.find((o) => o.label === "math.text.equation");
-    expect(opt?.apply).toBeTypeOf("function"); // snippet() apply
-    expect(r!.from).toBe(0); // replaces from the "{@"
+    expect(opt?.apply).toBeTypeOf("function"); // snippet() apply (replaces from "{@")
+    // Filtering must run on the NAME query only, so `from` is AFTER the "{@"
+    // (otherwise CodeMirror matches "mte" against "{@mte" and hides everything).
+    expect(r!.from).toBe(2);
   });
 
   it("does not suggest HTML elements after {@ (only @-objects)", () => {

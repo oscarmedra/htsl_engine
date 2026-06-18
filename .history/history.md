@@ -458,3 +458,25 @@ désormais dans `playground/src/ai-prompt.txt` importé en `?raw` (évite tout
 échappement des backslashes LaTeX / backticks ; `vite-env.d.ts` ajouté pour les
 types). `buildPrompt()`/`objectReference()` retirés de `documentation.ts`.
 Vérifié en navigateur : textarea remplie, backslashes intacts, 0 erreur.
+
+## Fix autocomplétion : ouverture sur amorces + filtrage du {@
+
+Régression signalée : l'autocomplétion ne s'ouvrait plus en tapant dans le
+playground (seul le slash marchait). Deux causes :
+
+1. **Ouverture auto** : les versions récentes de `@codemirror/autocomplete`
+   n'auto-activent plus sur des amorces à caractères non-mot (`{@`). Fix
+   (`playground/src/main.ts`) : l'`updateListener` appelle explicitement
+   `startCompletion` sur une vraie saisie quand le texte avant le curseur matche
+   `{@…`, `{$…`, `{!…`, `[…` ou `/…` (comme le faisait déjà le slash). Gardé sur
+   `isUserEvent("input")` → jamais sur une édition programmatique.
+2. **Filtrage de `{@`** (bug isolé dans `packages/codemirror/src/completion.ts`) :
+   la branche `{@` renvoyait `from = position du {`, donc CodeMirror filtrait les
+   labels (`mti`…) contre `{@m` → 0 résultat. Corrigé en renvoyant `from = après
+   {@` (filtre sur le nom seul) avec un `apply` qui remplace depuis le `{@` — même
+   schéma que le slash. L'`apply` avale aussi le `}` auto-inséré par `closeBrackets`
+   pour éviter un `}` en trop (`{@mti: formule}` propre).
+
+Vérifié en navigateur : `{@`→96 objets, `{@mt`→21 filtrés, accepter `{@mti`→
+`{@mti: formule}` (sans double brace), `[`→attributs filtrés. Tests codemirror
+37/37 (test du `from` mis à jour : 0 → 2), typecheck OK, 0 erreur console.
