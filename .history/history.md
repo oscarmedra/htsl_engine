@@ -480,3 +480,12 @@ playground (seul le slash marchait). Deux causes :
 Vérifié en navigateur : `{@`→96 objets, `{@mt`→21 filtrés, accepter `{@mti`→
 `{@mti: formule}` (sans double brace), `[`→attributs filtrés. Tests codemirror
 37/37 (test du `from` mis à jour : 0 → 2), typecheck OK, 0 erreur console.
+
+## Éditeur flottant repassé en opaque (fin de la translucidité)
+
+La translucidité de l'éditeur de bloc (fond `rgba(...,.22)` + `backdrop-filter:
+blur` + ombre de texte pour la lisibilité) gênait la lecture. Repassé en
+**opaque/normal** : `background: var(--panel)`, bordure 1px accent, ombre portée,
+plus de flou ni d'ombre de texte ; surfaces CodeMirror sur fond blanc, barre
+d'aide en gris clair neutre. Vérifié en navigateur (double-clic composant) :
+fond `rgb(255,255,255)`, `backdrop-filter: none`, texte net ; 0 erreur console.

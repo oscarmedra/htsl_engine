@@ -81,13 +81,14 @@ peut désormais cliquer l'élément lui-même.
   popups sont rendus dans `<body>` (`tooltips({ parent })`) pour échapper à
   l'`overflow:hidden`. Le clic sur un **texte** garde l'édition de texte simple
   (les deux modes cohabitent : texte = sans syntaxe, élément = source du bloc).
-- **Translucide** : l'overlay est semi-transparent + flou d'arrière-plan
-  (`background: rgba(...,.55)` + `backdrop-filter: blur`) et ne masque pas
-  l'élément rendu — le **rendu reste visible dessous pendant l'édition** (utile
-  quand une audience suit le rendu pendant que quelqu'un édite). L'éditeur
-  principal (le fichier) n'est jamais couvert (l'overlay est sur le panneau de
-  rendu) : cliquer dedans valide l'overlay et rend la main sur le fichier — on
-  peut donc éditer indifféremment depuis le rendu **ou** depuis le fichier.
+- **Apparence opaque (normale)** : l'overlay a un fond plein (`background:
+  var(--panel)`, bordure accent, ombre portée), sans translucidité ni flou — le
+  code reste net et confortable à lire. *(Une version translucide avait été
+  essayée pour laisser voir le rendu dessous ; jugée gênante, repassée en
+  opaque.)* L'éditeur principal (le fichier) n'est jamais couvert (l'overlay est
+  sur le panneau de rendu) : cliquer dedans valide l'overlay et rend la main sur
+  le fichier — on peut donc éditer indifféremment depuis le rendu **ou** depuis
+  le fichier.
 - Tests (`tests/editable.test.ts`) : plage = `{…}`/`{@…/}` exact, absente par
   défaut, et instance de composant exposant l'appel (une seule plage).
 

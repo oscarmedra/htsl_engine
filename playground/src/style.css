@@ -93,31 +93,22 @@ body {
 .pal-hint { font-family: var(--mono); }
 
 /* Floating block editor: a full HTSL CodeMirror over a clicked element.
-   Translucent + blurred so the render stays visible underneath (handy when an
-   audience is watching the preview while someone edits). */
+   Opaque (normal) panel so the code is crisp and easy to read. */
 .block-editor {
   position: fixed; z-index: 200;
-  background: rgba(255, 251, 235, 0.22);
-  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-  border: 2px solid rgba(245, 158, 11, 0.85); border-radius: 8px;
-  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.18);
+  background: var(--panel);
+  border: 1px solid var(--accent); border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
 }
 /* The autocompletion popup must float above the editor and never be clipped. */
 .cm-tooltip.cm-tooltip-autocomplete { z-index: 600; }
-/* Let the translucent wrapper show through CodeMirror's own surfaces, so the
-   render stays visible underneath even while someone is typing. */
-.block-editor .cm-editor,
-.block-editor .cm-scroller,
-.block-editor .cm-gutters { background: transparent; }
-.block-editor .cm-gutters { border-right: none; }
-.block-editor .cm-editor { font-size: 13px; }
+.block-editor .cm-editor { font-size: 13px; background: var(--panel); }
 .block-editor .cm-editor.cm-focused { outline: none; }
-/* Keep the syntax-coloured text legible over whatever shows through. */
-.block-editor .cm-content { text-shadow: 0 0 2px rgba(255, 255, 255, 0.95), 0 0 1px rgba(255, 255, 255, 0.95); }
-.block-editor .cm-gutters { color: #b08a3a; }
+.block-editor .cm-gutters { border-right: 1px solid var(--border); }
 .block-editor-hint {
-  font-size: 0.68rem; color: #92760a; background: rgba(255, 250, 240, 0.4);
-  padding: 0.2rem 0.55rem; border-top: 1px solid rgba(253, 233, 200, 0.6);
+  font-size: 0.68rem; color: var(--muted); background: #f6f7f9;
+  padding: 0.2rem 0.55rem; border-top: 1px solid var(--border);
   border-radius: 0 0 6px 6px;
 }
 /* Toggle switches (Éditeur / AST). The native checkbox keeps its id + change
