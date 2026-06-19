@@ -51,8 +51,34 @@ export function latexOfObject(obj: ObjectNode): string {
       return systemLatex(obj);
     case "math.object.fraction":
       return `\\frac{${childLatex(obj, "num")}}{${childLatex(obj, "den")}}`;
+    case "math.object.vector":
+      return env("pmatrix", lines(obj, "c"));
+    case "math.object.matrix":
+      return env(
+        "pmatrix",
+        lines(obj, "row").map((r) =>
+          r
+            .split(",")
+            .map((cell) => cell.trim())
+            .join(" & "),
+        ),
+      );
+    case "math.object.set":
+      return `\\left\\{ ${latexOfChildren(obj.children).trim()} \\right\\}`;
+    case "math.object.complex":
+      return complexLatex(obj);
+    case "math.object.interval":
+      return intervalLatex(obj);
     case "math.constant.pi":
       return "\\pi";
+    case "math.constant.e":
+      return "e";
+    case "math.constant.inf":
+      return "\\infty";
+    case "math.constant.phi":
+      return "\\varphi";
+    case "math.constant.i":
+      return "i";
     case "math.text.ref":
       return ""; // resolved at the HTML level
     default:
@@ -87,6 +113,28 @@ function casesLatex(obj: ObjectNode): string {
 function systemLatex(obj: ObjectNode): string {
   const rows = lines(obj, "line").join(" \\\\ ");
   return `\\left\\{ \\begin{array}{l} ${rows} \\end{array} \\right.`;
+}
+
+/** Complex number a + bi from `re`/`im` attributes, with sign/unit handling. */
+function complexLatex(obj: ObjectNode): string {
+  const re = (obj.attrs["re"] ?? "0").trim();
+  const im = (obj.attrs["im"] ?? "0").trim();
+  if (im === "" || im === "0") return re || "0";
+  const negative = im.startsWith("-");
+  const magnitude = (negative ? im.slice(1) : im.replace(/^\+/, "")).trim();
+  const imTerm = magnitude === "1" ? "i" : `${magnitude}i`;
+  if (re === "" || re === "0") return negative ? `-${imTerm}` : imTerm;
+  return `${re} ${negative ? "-" : "+"} ${imTerm}`;
+}
+
+/** Interval from `from`/`to`, with `open` = none | left | right | both. */
+function intervalLatex(obj: ObjectNode): string {
+  const from = (obj.attrs["from"] ?? "").trim();
+  const to = (obj.attrs["to"] ?? "").trim();
+  const open = (obj.attrs["open"] ?? "none").trim();
+  const left = open === "left" || open === "both" ? "\\left]" : "\\left[";
+  const right = open === "right" || open === "both" ? "\\right[" : "\\right]";
+  return `${left} ${from}, ${to} ${right}`;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -114,6 +114,48 @@ describe("math — nested objects resolve to LaTeX", () => {
   });
 });
 
+describe("math — structured objects (vector, matrix, complex, set, interval)", () => {
+  it("renders a column vector (mov) as a pmatrix", () => {
+    expect(latexOfObject(obj("{@mov:{c:1}{c:2}{c:3}}"))).toBe(
+      "\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}",
+    );
+  });
+
+  it("renders a matrix (mom), splitting row cells on commas", () => {
+    expect(latexOfObject(obj("{@mom:{row:1,2}{row:3,4}}"))).toBe(
+      "\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}",
+    );
+  });
+
+  it("renders a set (mos) wrapped in braces", () => {
+    expect(latexOfObject(obj("{@mos: 1, 2, 3}"))).toBe("\\left\\{ 1, 2, 3 \\right\\}");
+  });
+
+  it("renders a complex number (moc) with sign and unit handling", () => {
+    expect(latexOfObject(obj("{@moc[re=3, im=2]/}"))).toBe("3 + 2i");
+    expect(latexOfObject(obj("{@moc[re=3, im=-2]/}"))).toBe("3 - 2i");
+    expect(latexOfObject(obj("{@moc[re=0, im=1]/}"))).toBe("i");
+    expect(latexOfObject(obj("{@moc[re=5, im=0]/}"))).toBe("5");
+  });
+
+  it("renders an interval (moi) with open/closed bounds", () => {
+    expect(latexOfObject(obj('{@moi[from=0, to=1]/}'))).toBe("\\left[ 0, 1 \\right]");
+    expect(latexOfObject(obj('{@moi[from=0, to=1, open="right"]/}'))).toBe(
+      "\\left[ 0, 1 \\right[",
+    );
+    expect(latexOfObject(obj('{@moi[from=0, to=1, open="both"]/}'))).toBe(
+      "\\left] 0, 1 \\right[",
+    );
+  });
+
+  it("renders the extra constants (e, inf, phi, i)", () => {
+    expect(latexOfObject(obj("{@mc.e/}"))).toBe("e");
+    expect(latexOfObject(obj("{@mc.inf/}"))).toBe("\\infty");
+    expect(latexOfObject(obj("{@mc.phi/}"))).toBe("\\varphi");
+    expect(latexOfObject(obj("{@mc.i/}"))).toBe("i");
+  });
+});
+
 describe("math — equation numbering", () => {
   it("numbers equations sequentially in document order", () => {
     const html = compile("{@mte:a}{@mte:b}{@mte[label=z]:c}");

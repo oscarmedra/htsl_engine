@@ -489,3 +489,22 @@ blur` + ombre de texte pour la lisibilité) gênait la lecture. Repassé en
 plus de flou ni d'ombre de texte ; surfaces CodeMirror sur fond blanc, barre
 d'aide en gris clair neutre. Vérifié en navigateur (double-clic composant) :
 fond `rgb(255,255,255)`, `backdrop-filter: none`, texte net ; 0 erreur console.
+
+## Objets mathématiques manquants implémentés (vecteur, matrice, complexe, ensemble, intervalle, constantes)
+
+La doc/prompt annonçait des objets `mo*`/`mc.*` qui **ne rendaient rien de
+correct** (seuls `mof` et `mc.pi` existaient ; les autres fuyaient leur texte ou
+rendaient vide). Implémentés dans le cœur (registre + `latexOfObject`) :
+
+- **mov** (vecteur colonne) → `\begin{pmatrix} … \end{pmatrix}` (enfants `{c:…}`).
+- **mom** (matrice) → `pmatrix`, cellules de `{row:a,b}` séparées par `,` → `&`.
+- **moc** (complexe) → `a + bi` avec gestion du signe et de l'unité (im=±1, re=0…).
+- **mos** (ensemble) → `\left\{ … \right\}`.
+- **moi** (intervalle) → bornes `[ ]`/`] [` selon `open` (none|left|right|both).
+- **mc.e / mc.inf / mc.phi / mc.i** → `e`, `\infty`, `\varphi`, `i`.
+
+Les alias plats (`mov`…`moi`) + alias de collection (`mc.e`…) résolvent comme
+prévu. Le catalogue de la doc et le prompt IA se génèrent depuis le registre →
+désormais **exacts**. Tests : core **226** (6 nouveaux). KaTeX rend tout sans
+erreur (vérifié en navigateur : vecteur colonne, matrice 2×2, 3−2i, {1,2,3},
+[0,1[, ½·π, e/∞/φ/i). 0 erreur console.

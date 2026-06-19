@@ -264,6 +264,70 @@ registerObject({
   example: "{@mof:{num:1}{den:2}}",
 });
 registerObject({
+  path: "math.object.vector",
+  contentModel: "html",
+  category: "formules",
+  aliases: ["mov"],
+  description: "Vecteur colonne (un enfant {c:...} par composante).",
+  attrs: [],
+  snippet: "{@mov:{c:${1:1}}{c:${2:2}}{c:${3:3}}}",
+  example: "{@mov:{c:1}{c:2}{c:3}}",
+});
+registerObject({
+  path: "math.object.matrix",
+  contentModel: "html",
+  category: "formules",
+  aliases: ["mom"],
+  description: "Matrice (un enfant {row:a,b,…} par ligne, colonnes séparées par des virgules).",
+  attrs: [],
+  snippet: "{@mom:{row:${1:1,2}}{row:${2:3,4}}}",
+  example: "{@mom:{row:1,2}{row:3,4}}",
+});
+registerObject({
+  path: "math.object.complex",
+  contentModel: "void",
+  category: "formules",
+  aliases: ["moc"],
+  description: "Nombre complexe a + bi (attributs re, im).",
+  attrs: [
+    { name: "re", type: "number", required: false, default: "0", description: "Partie réelle." },
+    { name: "im", type: "number", required: false, default: "0", description: "Partie imaginaire." },
+  ],
+  snippet: "{@moc[re=${1:3}, im=${2:2}]/}",
+  example: "{@moc[re=3, im=2]/}",
+});
+registerObject({
+  path: "math.object.set",
+  contentModel: "math",
+  category: "formules",
+  aliases: ["mos"],
+  description: "Ensemble { … } (le corps en est le contenu).",
+  attrs: [],
+  snippet: "{@mos: ${1:1, 2, 3}}",
+  example: "{@mos: 1, 2, 3}",
+});
+registerObject({
+  path: "math.object.interval",
+  contentModel: "void",
+  category: "formules",
+  aliases: ["moi"],
+  description: "Intervalle (attributs from, to, open = none|left|right|both).",
+  attrs: [
+    { name: "from", type: "number", required: false, description: "Borne inférieure." },
+    { name: "to", type: "number", required: false, description: "Borne supérieure." },
+    {
+      name: "open",
+      type: "enum",
+      required: false,
+      default: "none",
+      values: ["none", "left", "right", "both"],
+      description: "Borne(s) ouverte(s).",
+    },
+  ],
+  snippet: "{@moi[from=${1:0}, to=${2:1}, open=${3:\"right\"}]/}",
+  example: "{@moi[from=0, to=1, open=\"right\"]/}",
+});
+registerObject({
   path: "math.constant.pi",
   contentModel: "void",
   category: "formules",
@@ -272,6 +336,46 @@ registerObject({
   attrs: [],
   snippet: "{@mc.pi/}",
   example: "{@mc.pi/}",
+});
+registerObject({
+  path: "math.constant.e",
+  contentModel: "void",
+  category: "formules",
+  aliases: [],
+  description: "Constante e (Euler).",
+  attrs: [],
+  snippet: "{@mc.e/}",
+  example: "{@mc.e/}",
+});
+registerObject({
+  path: "math.constant.inf",
+  contentModel: "void",
+  category: "formules",
+  aliases: [],
+  description: "Infini ∞.",
+  attrs: [],
+  snippet: "{@mc.inf/}",
+  example: "{@mc.inf/}",
+});
+registerObject({
+  path: "math.constant.phi",
+  contentModel: "void",
+  category: "formules",
+  aliases: [],
+  description: "Nombre d'or φ.",
+  attrs: [],
+  snippet: "{@mc.phi/}",
+  example: "{@mc.phi/}",
+});
+registerObject({
+  path: "math.constant.i",
+  contentModel: "void",
+  category: "formules",
+  aliases: [],
+  description: "Unité imaginaire i.",
+  attrs: [],
+  snippet: "{@mc.i/}",
+  example: "{@mc.i/}",
 });
 
 // --- 2D geometry ---
