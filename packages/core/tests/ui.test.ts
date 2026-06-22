@@ -35,3 +35,41 @@ describe("{@tabs}", () => {
     expect(html).not.toContain("ignoré");
   });
 });
+
+describe("{@quiz}", () => {
+  it("renders options with a data-correct flag and a hidden explanation", () => {
+    const html = compile(
+      "{@quiz: {q:Q ?} {opt[correct=true]:A} {opt:B} {opt:C} {explain:car…}}",
+    );
+    expect(html).toContain("data-htsl-quiz");
+    expect(html).toContain("<div class=\"htsl-quiz-q\">Q ?</div>");
+    const flags = [...html.matchAll(/data-correct="(\d)"/g)].map((m) => m[1]);
+    expect(flags).toEqual(["1", "0", "0"]); // first option correct
+    expect(html).toContain('class="htsl-quiz-explain" hidden>car…');
+    expect(html).not.toContain("<script>");
+  });
+
+  it("treats correct=false as a wrong option", () => {
+    const html = compile("{@quiz: {q:x} {opt[correct=false]:A} {opt[correct=true]:B}}");
+    expect([...html.matchAll(/data-correct="(\d)"/g)].map((m) => m[1])).toEqual(["0", "1"]);
+  });
+});
+
+describe("{@flashcard}", () => {
+  it("renders a pure-CSS flip card (checkbox + label, two faces)", () => {
+    const html = compile("{@flashcard: {front:Question} {back:Réponse}}");
+    expect(html).toContain('class="htsl-fc-toggle"');
+    expect(html).toContain('class="htsl-fc-inner"');
+    expect(html).toContain("htsl-fc-front");
+    expect(html).toContain("htsl-fc-back");
+    expect(html).toContain("Question");
+    expect(html).toContain("Réponse");
+    expect(html).not.toContain("<script>");
+  });
+
+  it("gives each card a unique toggle id", () => {
+    const html = compile("{@flashcard:{front:a}{back:b}}{@flashcard:{front:c}{back:d}}");
+    const ids = [...html.matchAll(/id="(htsl-fc-\d+)"/g)].map((m) => m[1]);
+    expect(new Set(ids).size).toBe(2);
+  });
+});

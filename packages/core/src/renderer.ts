@@ -66,6 +66,7 @@ class Renderer {
   private readonly options: RenderOptions;
   private ctx: MathContext = { numbers: new Map(), labels: new Map() };
   private calloutCtx: CalloutContext = { info: new Map(), labels: new Map() };
+  private flashcardCounter = 0;
 
   constructor(options: RenderOptions) {
     this.options = options;
@@ -116,6 +117,8 @@ class Renderer {
     if (node.path === "reveal") return this.reveal(node);
     if (node.path === "tabs") return this.tabsBlock(node, hashAttr);
     if (node.path === "tabs.tab") return this.tabsTab(node);
+    if (node.path === "quiz") return this.quiz(node, hashAttr);
+    if (node.path === "flashcard") return this.flashcard(node);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr);
     return renderMathObject(node, this.ctx, {
@@ -243,6 +246,61 @@ class Renderer {
       .filter((c) => c.type !== "comment")
       .map((c) => this.compact(c))
       .join("");
+  }
+
+  /** Direct element children of `node` whose tag is `tag` (e.g. `q`, `opt`). */
+  private els(node: ObjectNode, tag: string): ElementNode[] {
+    return node.children.filter((c): c is ElementNode => c.type === "element" && c.tag === tag);
+  }
+
+  /** Render an element's own children (compact), dropping comments. */
+  private elementBody(el: ElementNode): string {
+    return el.children
+      .filter((c) => c.type !== "comment")
+      .map((c) => this.compact(c))
+      .join("");
+  }
+
+  /**
+   * Multiple-choice question ({@quiz: {q:…} {opt:…} {opt[correct=true]:…} {explain:…}}).
+   * Options carry data-correct; the runtime grades on click. No JS from content.
+   */
+  private quiz(node: ObjectNode, hashAttr: string): string {
+    const q = this.els(node, "q")[0];
+    const explain = this.els(node, "explain")[0];
+    const question = q ? this.elementBody(q) : "";
+    const opts = this.els(node, "opt")
+      .map((o) => {
+        const correct = o.attrs["correct"] !== undefined && o.attrs["correct"] !== "false" ? "1" : "0";
+        return `<button type="button" class="htsl-quiz-opt" data-correct="${correct}">${this.elementBody(o)}</button>`;
+      })
+      .join("");
+    const explainHtml = explain
+      ? `<div class="htsl-quiz-explain" hidden>${this.elementBody(explain)}</div>`
+      : "";
+    return (
+      `<div class="htsl-quiz" data-htsl-quiz${hashAttr}>` +
+      `<div class="htsl-quiz-q">${question}</div>` +
+      `<div class="htsl-quiz-opts">${opts}</div>` +
+      explainHtml +
+      `</div>`
+    );
+  }
+
+  /** Flip card ({@flashcard: {front:…} {back:…}}) — pure CSS (checkbox + label). */
+  private flashcard(node: ObjectNode): string {
+    const front = this.els(node, "front")[0];
+    const back = this.els(node, "back")[0];
+    const id = `htsl-fc-${this.flashcardCounter++}`;
+    return (
+      `<div class="htsl-flashcard">` +
+      `<input type="checkbox" id="${id}" class="htsl-fc-toggle" />` +
+      `<label class="htsl-fc-inner" for="${id}">` +
+      `<span class="htsl-fc-face htsl-fc-front">${front ? this.elementBody(front) : ""}</span>` +
+      `<span class="htsl-fc-face htsl-fc-back">${back ? this.elementBody(back) : ""}</span>` +
+      `</label>` +
+      `</div>`
+    );
   }
 
   /* ----------------------------------------------------------------------- */

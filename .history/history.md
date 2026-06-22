@@ -576,3 +576,19 @@ morph-safe). Détails : `.docs/17`.
 - Prompt IA + doc (#interactive) + catalogue (auto) à jour.
 - Tests cœur 243 (+4). Vérifié en navigateur : bascule d'onglets au clic + KaTeX
   dans les panneaux, `<details>` ouvrable ; typecheck OK ; 0 erreur console.
+
+## Lot 3 « pédagogie » : @quiz (QCM) + @flashcard
+
+Auto-évaluation. `{@quiz:}` ({q}/{opt}/{opt[correct=true]}/{explain}) gradé par le
+runtime (✓/✗ + révélation + explication, verrouillé). `{@flashcard:}`
+({front}/{back}) = retournement 100% CSS (checkbox+label+rotateY 3D, id unique
+par compteur renderer). Détails : `.docs/18`.
+
+- Registre : quiz (alias qcm) + flashcard (alias carte). Renderer : quiz()/
+  flashcard() + helpers els()/elementBody(). Runtime : quiz-client.ts (hydrateQuiz,
+  listener unique/fenêtre, état data-htsl-answered) ; flashcard sans runtime. CSS
+  (mathCss) : options ✓/✗, explication, carte 3D + print.
+- Booléen sans valeur non supporté → `[correct=true]`. Prompt IA + doc (#quiz) +
+  catalogue (auto) à jour.
+- Tests cœur 247 (+4). Vérifié en navigateur (graduation quiz, flip flashcard
+  verso au-dessus) ; typecheck OK ; 0 erreur console.

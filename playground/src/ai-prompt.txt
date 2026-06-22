@@ -144,6 +144,20 @@ Des cadres stylés et **auto-numérotés** (par type), idéaux pour un cours.
 
 Un encadré peut contenir n'importe quel HTSL (formules, listes, scènes…).
 
+### Auto-évaluation (QCM & cartes)
+- **`{@quiz:}`** — question à choix : `{q:…}` (énoncé), des `{opt:…}` (options ; `{opt[correct=true]:…}` = bonne réponse), `{explain:…}` (optionnel). Au clic, feedback ✓/✗, la bonne réponse est révélée et l'explication s'affiche.
+- **`{@flashcard:}`** — carte à retourner : `{front:…}` et `{back:…}`. Clic = retourne (CSS pur).
+
+```
+{@quiz:
+  {q: Quelle est l'hypoténuse ?}
+  {opt[correct=true]: Le côté opposé à l'angle droit}
+  {opt: Le plus petit côté}
+  {explain: C'est le plus long côté.}
+}
+{@flashcard: {front: $e^{i\pi}+1$} {back: $= 0$}}
+```
+
 ### Correction cachée & onglets
 - **`{@reveal[title="Solution"]: …}`** : bloc dépliable (clic pour révéler la correction). `open=true` pour l'ouvrir d'emblée. Idéal pour cacher une solution.
 - **`{@tabs:}`** avec des **`{@tabs.tab[title="…"]: …}`** : onglets (ex. « Énoncé / Indice / Solution » ou « Méthode 1 / Méthode 2 »). Navigation gérée par le runtime.

@@ -477,6 +477,31 @@ registerObject({
   example: '{@tabs.tab[title="Indice"]: {p:…}}',
 });
 
+// --- quiz / flashcard (self-assessment) ---
+registerObject({
+  path: "quiz",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["qcm"],
+  description:
+    "Question à choix : {q:…} (énoncé), {opt:…} (options, {opt[correct=true]:…} = bonne réponse), {explain:…} (optionnel). Feedback ✓/✗ au clic (runtime).",
+  attrs: [],
+  snippet:
+    "{@quiz:\n  {q: ${1:Question ?}}\n  {opt[correct=true]: ${2:Bonne réponse}}\n  {opt: ${3:Mauvaise}}\n  {opt: ${4:Mauvaise}}\n}",
+  example:
+    "{@quiz:\n  {q: Quelle est l'hypoténuse ?}\n  {opt[correct=true]: Le côté opposé à l'angle droit}\n  {opt: Le plus petit côté}\n}",
+});
+registerObject({
+  path: "flashcard",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["carte"],
+  description: "Carte à retourner : {front:…} (recto) et {back:…} (verso). Clic = retourne (CSS pur).",
+  attrs: [],
+  snippet: "{@flashcard:\n  {front: ${1:Question}}\n  {back: ${2:Réponse}}\n}",
+  example: "{@flashcard:\n  {front: $e^{i\\pi}+1$}\n  {back: $= 0$}\n}",
+});
+
 // --- 2D geometry ---
 registerObject({
   path: "math.geometry.2d.scene",

@@ -171,4 +171,49 @@ export const mathCss = `
 .htsl-tab-panel > :first-child { margin-top: 0; }
 .htsl-tab-panel > :last-child { margin-bottom: 0; }
 @media print { .htsl-tab-panel { display: block !important; } .htsl-tabs-bar { display: none; } }
+
+/* Quiz ({@quiz}) — graded by the runtime. */
+.htsl-quiz { border: 1px solid #e3e6ea; border-radius: 10px; margin: 1em 0; padding: 0.9em 1em; background: #fff; }
+.htsl-quiz-q { font-weight: 600; margin-bottom: 0.7em; }
+.htsl-quiz-opts { display: flex; flex-direction: column; gap: 0.4rem; }
+.htsl-quiz-opt {
+  text-align: left; cursor: pointer;
+  border: 1px solid #e3e6ea; border-radius: 8px; background: #f8fafc;
+  padding: 0.55em 0.8em; font: inherit; color: inherit;
+  transition: background 0.12s, border-color 0.12s;
+}
+.htsl-quiz-opt:hover:not([disabled]) { background: #eef2ff; border-color: #93a4f4; }
+.htsl-quiz-opt[disabled] { cursor: default; }
+.htsl-quiz-opt.is-correct { background: #f0fdf4; border-color: #16a34a; color: #15803d; }
+.htsl-quiz-opt.is-correct::after { content: " ✓"; font-weight: 700; }
+.htsl-quiz-opt.is-wrong { background: #fff0f0; border-color: #dc2626; color: #b91c1c; }
+.htsl-quiz-opt.is-wrong::after { content: " ✗"; font-weight: 700; }
+.htsl-quiz-explain { margin-top: 0.7em; padding: 0.55em 0.8em; background: #f8fafc; border-left: 3px solid #3b5bdb; border-radius: 0 6px 6px 0; font-size: 0.95em; }
+
+/* Flashcard ({@flashcard}) — pure CSS flip (checkbox + label). */
+.htsl-flashcard { perspective: 1000px; margin: 1em 0; max-width: 22rem; }
+.htsl-fc-toggle { position: absolute; opacity: 0; width: 0; height: 0; }
+.htsl-fc-inner {
+  position: relative; display: block; min-height: 8rem; cursor: pointer;
+  transform-style: preserve-3d; transition: transform 0.5s;
+}
+.htsl-fc-toggle:checked + .htsl-fc-inner { transform: rotateY(180deg); }
+.htsl-fc-toggle:focus-visible + .htsl-fc-inner { outline: 2px solid #3b5bdb; outline-offset: 3px; border-radius: 12px; }
+.htsl-fc-face {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 1em; border: 1px solid #e3e6ea; border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+.htsl-fc-front { background: #fff; }
+.htsl-fc-back { background: #eef2ff; transform: rotateY(180deg); }
+.htsl-fc-inner::after {
+  content: "↻"; position: absolute; right: 0.6em; bottom: 0.4em;
+  color: #94a3b8; font-size: 0.9em; backface-visibility: hidden;
+}
+@media print {
+  .htsl-fc-inner { min-height: auto; }
+  .htsl-fc-face { position: static; backface-visibility: visible; transform: none; margin-bottom: 0.4em; }
+  .htsl-fc-inner::after { display: none; }
+}
 `.trim();

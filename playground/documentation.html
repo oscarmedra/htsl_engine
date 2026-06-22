@@ -22,6 +22,7 @@
         <a href="#math">Mathématiques</a>
         <a href="#callouts">Encadrés (théorèmes…)</a>
         <a href="#interactive">Correction & onglets</a>
+        <a href="#quiz">Auto-évaluation (QCM)</a>
         <a href="#components">Composants & variables</a>
         <div class="group">Visualiser</div>
         <a href="#plots">Graphes 2D</a>
@@ -163,6 +164,27 @@
   {@tabs.tab[title="Indice"]: {p:Utiliser $a^2+b^2=c^2$.}}
   {@tabs.tab[title="Solution"]: {@reveal[title="Voir le détail"]: {p:$c=5$.}}}
 }</code></pre>
+        </section>
+
+        <section id="quiz">
+          <h2>Auto-évaluation : QCM & cartes</h2>
+          <ul>
+            <li><code>{@quiz:}</code> — une <strong>question à choix</strong> : <code>{q:…}</code>
+              (énoncé), des <code>{opt:…}</code> (la bonne réponse est
+              <code>{opt[correct=true]:…}</code>) et un <code>{explain:…}</code> optionnel. Au
+              clic sur une option : feedback <strong>✓ / ✗</strong>, la bonne réponse est
+              révélée et l'explication s'affiche (géré par le runtime).</li>
+            <li><code>{@flashcard:}</code> — une <strong>carte à retourner</strong> :
+              <code>{front:…}</code> et <code>{back:…}</code>. Un clic la retourne — c'est du
+              <strong>CSS pur</strong> (zéro JS).</li>
+          </ul>
+          <pre><code>{@quiz:
+  {q: Quelle est l'hypoténuse d'un triangle rectangle ?}
+  {opt[correct=true]: Le côté opposé à l'angle droit}
+  {opt: Le plus petit côté}
+  {explain: C'est toujours le plus long côté.}
+}
+{@flashcard: {front: $e^{i\pi} + 1$} {back: $= 0$}}</code></pre>
         </section>
 
         <section id="components">
