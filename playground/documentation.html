@@ -25,6 +25,7 @@
         <a href="#plots">Graphes 2D</a>
         <a href="#geometry">Géométrie (Plotly)</a>
         <a href="#three">Scènes 3D animées</a>
+        <a href="#slides">Présentations</a>
         <div class="group">Intégrer</div>
         <a href="#frameworks">Frameworks CSS</a>
         <a href="#render-edit">Éditer depuis le rendu</a>
@@ -179,6 +180,30 @@
             <code>color</code>, <code>fade</code>, <code>transform</code> (morph de géométrie
             réel + couleur). Options : <code>duration</code>, <code>delay</code>, <code>at</code>,
             <code>easing</code> ; la scène <code>loop</code>e par défaut.</p>
+        </section>
+
+        <section id="slides">
+          <h2>Présentations</h2>
+          <p>Un <strong>diaporama navigable</strong> : le conteneur <code>{@slider:…}</code>
+            et un <code>{@slider.slide:…}</code> par slide. Boutons ⟵ / ⟶, <strong>flèches
+            clavier</strong> ←/→, plein écran, compteur et barre de progression — le tout géré
+            par le <strong>runtime</strong> du moteur. <strong>Aucun JavaScript n'est émis depuis
+            le contenu</strong> : un slide reste un nœud déclaratif (voir <a href="#security">Sécurité</a>).</p>
+          <pre><code>{@slider:
+  {@slider.slide: {h1:Titre de la présentation}}
+  {@slider.slide: {h2:Une équation} {@mte: e^{i\pi} + 1 = 0}}
+  {@slider.slide: {h2:Un graphe} {@plot[fn="sin(x)/x", xrange="(-15,15)"]/}}
+}</code></pre>
+          <ul>
+            <li>Un slide peut contenir <strong>n'importe quel HTSL</strong> : titres, texte,
+              formules, scènes 2D/3D, graphes…</li>
+            <li>Seuls les <code>{@slider.slide:…}</code> deviennent des slides ; les autres
+              enfants sont ignorés.</li>
+            <li>À l'<strong>export PDF</strong>, chaque slide devient une page (la barre de
+              navigation est masquée) — pratique pour distribuer un cours.</li>
+            <li><strong>Dégradation gracieuse</strong> : même sans le runtime, le premier slide
+              s'affiche.</li>
+          </ul>
         </section>
 
         <section id="frameworks">

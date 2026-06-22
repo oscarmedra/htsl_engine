@@ -537,3 +537,11 @@ méthode `slides()` collecte désormais les enfants objets `slider.slide` (et re
 un `{@slider.slide:}` isolé comme `<section>`). CSS + runtime **inchangés** (ils
 ciblent `.htsl-deck` / `<section>`). Tests, prompt IA et `.docs/15` mis à jour.
 Core 231 verts, typecheck OK, navigation revérifiée en navigateur (1/3 → 2/3).
+
+## Doc playground : section dédiée « Présentations »
+
+Ajout d'une section `#slides` (+ entrée de nav sous « Visualiser ») dans
+`documentation.html` expliquant `{@slider:}` / `{@slider.slide:}` (boutons,
+clavier, plein écran, PDF 1 slide/page, dégradation gracieuse). Le catalogue
+auto liste déjà `slider.deck`/`slider.slide`. Vérifié en navigateur (nav,
+section, bouton Copier, catalogue) ; 0 erreur.
