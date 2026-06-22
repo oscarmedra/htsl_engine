@@ -22,6 +22,7 @@
 import { hydrateScenes, pendingScenes, purgeScenes, type PlotlyLike } from "./scene-client.js";
 import { hydrateThree, pendingThree, purgeThree, type ThreeNS } from "./three-client.js";
 import { hydrateSlides, purgeSlides } from "./slides-client.js";
+import { hydrateTabs, purgeTabs } from "./tabs-client.js";
 
 /** External dependency of a dynamic type. KaTeX (formulas) will join later. */
 const PLOTLY_URL = "https://cdn.plot.ly/plotly-2.27.0.min.js";
@@ -93,8 +94,9 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
 
   let drawn = 0;
 
-  // Slide decks (pure DOM, no external dependency → always hydrated, cheap).
+  // Slide decks + tabs (pure DOM, no external dependency → always hydrated, cheap).
   drawn += hydrateSlides(root, w);
+  drawn += hydrateTabs(root, w);
 
   // Scenes (Plotly).
   if (pendingScenes(root).length > 0) {
@@ -135,6 +137,7 @@ export function purge(removed: Iterable<Element>, win?: RuntimeWindow): void {
   purgeScenes(removed, w?.Plotly);
   purgeThree(removed);
   purgeSlides();
+  purgeTabs();
 }
 
 /**

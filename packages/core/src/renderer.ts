@@ -113,6 +113,9 @@ class Renderer {
     if (isSlidePath(node.path)) return this.slides(node, hashAttr);
     if (node.path === CALLOUT_REF_PATH) return this.calloutRef(node);
     if (isCalloutPath(node.path)) return this.callout(node);
+    if (node.path === "reveal") return this.reveal(node);
+    if (node.path === "tabs") return this.tabsBlock(node, hashAttr);
+    if (node.path === "tabs.tab") return this.tabsTab(node);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr);
     return renderMathObject(node, this.ctx, {
@@ -192,6 +195,54 @@ class Renderer {
     const target = to ? this.calloutCtx.labels.get(to) : undefined;
     if (!target) return `<span class="htsl-ref htsl-ref-broken">(réf. ?)</span>`;
     return `<a class="htsl-ref" href="#${target.id}">${escapeHtml(target.name)}&nbsp;${target.number}</a>`;
+  }
+
+  /** Collapsible block (hidden solution): a native <details> — zero JS. */
+  private reveal(node: ObjectNode): string {
+    const title = escapeHtml(node.attrs["title"] ?? "Solution");
+    const open = node.attrs["open"] === "true" ? " open" : "";
+    const body = this.childrenHtml(node);
+    return (
+      `<details class="htsl-reveal"${open}>` +
+      `<summary class="htsl-reveal-summary">${title}</summary>` +
+      `<div class="htsl-reveal-body">${body}</div>` +
+      `</details>`
+    );
+  }
+
+  /** Tabbed content ({@tabs: {@tabs.tab[title=…]:…}}). The runtime wires the bar. */
+  private tabsBlock(node: ObjectNode, hashAttr: string): string {
+    const tabs = node.children.filter(
+      (c): c is ObjectNode => c.type === "object" && c.path === "tabs.tab",
+    );
+    const bar = tabs
+      .map(
+        (t, i) =>
+          `<button type="button" class="htsl-tab-btn" data-htsl-tab-to="${i}">${escapeHtml(
+            t.attrs["title"] ?? `Onglet ${i + 1}`,
+          )}</button>`,
+      )
+      .join("");
+    const panels = tabs.map((t) => `<div class="htsl-tab-panel">${this.childrenHtml(t)}</div>`).join("");
+    return (
+      `<div class="htsl-tabs" data-htsl-tabs data-htsl-tab="0"${hashAttr}>` +
+      `<div class="htsl-tabs-bar" role="tablist">${bar}</div>` +
+      `<div class="htsl-tabs-panels">${panels}</div>` +
+      `</div>`
+    );
+  }
+
+  /** A standalone {@tabs.tab:…} (outside {@tabs:}) → just its content panel. */
+  private tabsTab(node: ObjectNode): string {
+    return `<div class="htsl-tab-panel">${this.childrenHtml(node)}</div>`;
+  }
+
+  /** Render an object's children (compact), dropping comments. */
+  private childrenHtml(node: ObjectNode): string {
+    return node.children
+      .filter((c) => c.type !== "comment")
+      .map((c) => this.compact(c))
+      .join("");
   }
 
   /* ----------------------------------------------------------------------- */

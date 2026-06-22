@@ -139,4 +139,36 @@ export const mathCss = `
 .htsl-ref { color: #3b5bdb; text-decoration: none; border-bottom: 1px dotted #93a4f4; }
 .htsl-ref:hover { border-bottom-style: solid; }
 .htsl-ref-broken { color: #c92a2a; border-bottom: none; }
+
+/* Reveal ({@reveal}) — native <details>, zero JS. */
+.htsl-reveal { border: 1px solid #e3e6ea; border-radius: 8px; margin: 1em 0; background: #fff; overflow: hidden; }
+.htsl-reveal-summary {
+  cursor: pointer; list-style: none; user-select: none;
+  padding: 0.55em 0.9em; font-weight: 600; font-size: 0.92em; color: #3b5bdb; background: #f8fafc;
+}
+.htsl-reveal-summary::-webkit-details-marker { display: none; }
+.htsl-reveal-summary::before { content: "▸ "; color: #94a3b8; }
+.htsl-reveal[open] .htsl-reveal-summary::before { content: "▾ "; }
+.htsl-reveal[open] .htsl-reveal-summary { border-bottom: 1px solid #eef0f3; }
+.htsl-reveal-body { padding: 0.7em 0.9em; }
+.htsl-reveal-body > :first-child { margin-top: 0; }
+.htsl-reveal-body > :last-child { margin-bottom: 0; }
+
+/* Tabs ({@tabs}) — hydrated by the runtime. */
+.htsl-tabs { border: 1px solid #e3e6ea; border-radius: 10px; margin: 1em 0; background: #fff; overflow: hidden; }
+.htsl-tabs-bar { display: flex; flex-wrap: wrap; gap: 0.15rem; padding: 0.3rem 0.3rem 0; background: #f8fafc; border-bottom: 1px solid #eef0f3; }
+.htsl-tab-btn {
+  border: none; background: transparent; cursor: pointer;
+  padding: 0.45em 0.85em; border-radius: 8px 8px 0 0;
+  font-size: 0.9em; color: #64748b; border-bottom: 2px solid transparent;
+}
+.htsl-tab-btn:hover { color: #334155; background: #eef2ff; }
+.htsl-tab-btn.is-active { color: #3b5bdb; font-weight: 600; background: #fff; border-bottom-color: #3b5bdb; }
+.htsl-tab-panel { display: none; padding: 0.8em 0.95em; }
+/* Graceful without the runtime: show the first panel. With it: only the active one. */
+.htsl-tabs:not(.htsl-tabs--ready) .htsl-tab-panel:first-child { display: block; }
+.htsl-tabs.htsl-tabs--ready .htsl-tab-panel.is-active { display: block; }
+.htsl-tab-panel > :first-child { margin-top: 0; }
+.htsl-tab-panel > :last-child { margin-bottom: 0; }
+@media print { .htsl-tab-panel { display: block !important; } .htsl-tabs-bar { display: none; } }
 `.trim();

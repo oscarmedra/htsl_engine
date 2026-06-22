@@ -440,6 +440,43 @@ registerObject({
   example: "{@ref[to=pyth]/}",
 });
 
+// --- interactive UI (reveal / tabs) ---
+registerObject({
+  path: "reveal",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["solution", "spoiler"],
+  description: "Bloc dépliable (correction cachée). `title` = libellé, `open=true` pour l'ouvrir.",
+  attrs: [
+    { name: "title", type: "string", required: false, description: "Libellé du bouton (défaut « Solution »)." },
+    { name: "open", type: "boolean", required: false, default: "false", description: "Ouvert au chargement." },
+  ],
+  snippet: "{@reveal[title=${1:\"Solution\"}]: ${2:contenu caché}}",
+  example: '{@reveal[title="Solution"]: {p:On a $c=5$.}}',
+});
+registerObject({
+  path: "tabs",
+  contentModel: "html",
+  category: "structure",
+  aliases: [],
+  description: "Onglets : conteneur de {@tabs.tab[title=…]:…} (navigation gérée par le runtime).",
+  attrs: [],
+  snippet:
+    "{@tabs:\n  {@tabs.tab[title=${1:\"Énoncé\"}]: ${2:…}}\n  {@tabs.tab[title=${3:\"Solution\"}]: ${4:…}}\n}",
+  example:
+    '{@tabs:\n  {@tabs.tab[title="Énoncé"]: {p:…}}\n  {@tabs.tab[title="Solution"]: {p:…}}\n}',
+});
+registerObject({
+  path: "tabs.tab",
+  contentModel: "html",
+  category: "structure",
+  aliases: [],
+  description: "Un onglet d'un {@tabs:…} (attribut title = libellé de l'onglet).",
+  attrs: [{ name: "title", type: "string", required: false, description: "Libellé de l'onglet." }],
+  snippet: '{@tabs.tab[title=${1:"Onglet"}]: ${2:contenu}}',
+  example: '{@tabs.tab[title="Indice"]: {p:…}}',
+});
+
 // --- 2D geometry ---
 registerObject({
   path: "math.geometry.2d.scene",

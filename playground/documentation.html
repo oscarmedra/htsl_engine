@@ -21,6 +21,7 @@
         <a href="#syntax">Syntaxe de base</a>
         <a href="#math">Mathématiques</a>
         <a href="#callouts">Encadrés (théorèmes…)</a>
+        <a href="#interactive">Correction & onglets</a>
         <a href="#components">Composants & variables</a>
         <div class="group">Visualiser</div>
         <a href="#plots">Graphes 2D</a>
@@ -142,6 +143,26 @@
 {@example: {p:Avec $a=3$, $b=4$ : $c=5$.}}
 {@proof: {p:On découpe le carré de côté $a+b$ de deux façons.}}
 {p:Ce résultat est {@ref[to=pyth]/}.}</code></pre>
+        </section>
+
+        <section id="interactive">
+          <h2>Correction cachée & onglets</h2>
+          <p>Deux objets parfaits pour les <strong>exercices corrigés</strong> :</p>
+          <ul>
+            <li><code>{@reveal[title="Solution"]: …}</code> — un <strong>bloc dépliable</strong>
+              (clic pour révéler la correction). C'est un <code>&lt;details&gt;</code> natif :
+              <strong>aucun JavaScript</strong>. Option <code>open=true</code> pour l'ouvrir
+              d'emblée.</li>
+            <li><code>{@tabs:}</code> avec des <code>{@tabs.tab[title="…"]: …}</code> — des
+              <strong>onglets</strong> (« Énoncé / Indice / Solution », « Méthode 1 / 2 »…). La
+              navigation est gérée par le <strong>runtime</strong> (clic sur un onglet) ; sans le
+              runtime, le premier onglet reste visible.</li>
+          </ul>
+          <pre><code>{@tabs:
+  {@tabs.tab[title="Énoncé"]: {p:Calculer $c$ pour $a=3$, $b=4$.}}
+  {@tabs.tab[title="Indice"]: {p:Utiliser $a^2+b^2=c^2$.}}
+  {@tabs.tab[title="Solution"]: {@reveal[title="Voir le détail"]: {p:$c=5$.}}}
+}</code></pre>
         </section>
 
         <section id="components">

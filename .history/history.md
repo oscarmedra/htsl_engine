@@ -561,3 +561,18 @@ title + label, renvoi cliquable `{@ref[to=…]/}`. Détails : `.docs/16`.
 - Prompt IA + doc playground (section #callouts) + catalogue (auto) à jour.
 - Tests cœur 239 (+8). Vérifié en navigateur (5 encadrés, KaTeX dedans, renvoi
   cliquable) ; typecheck OK ; 0 erreur console.
+
+## Lot 2 « pédagogie » : @reveal (correction cachée) + @tabs (onglets)
+
+Workflow exercice corrigé. `{@reveal[title=…, open=]}` = `<details>` natif (zéro
+JS). `{@tabs:}` + `{@tabs.tab[title=…]:}` = onglets hydratés par le runtime
+(`tabs-client.ts`, listener unique/fenêtre, index dans `data-htsl-tab`,
+morph-safe). Détails : `.docs/17`.
+
+- Registre : reveal (alias solution/spoiler), tabs, tabs.tab (cat. structure).
+  Renderer : reveal()/tabsBlock()/tabsTab() + helper childrenHtml(). Runtime :
+  hydrateTabs branché dans hydrate()+purge(). CSS (mathCss) : `<summary>` ▸/▾,
+  barre d'onglets (actif souligné), dégradation gracieuse + print.
+- Prompt IA + doc (#interactive) + catalogue (auto) à jour.
+- Tests cœur 243 (+4). Vérifié en navigateur : bascule d'onglets au clic + KaTeX
+  dans les panneaux, `<details>` ouvrable ; typecheck OK ; 0 erreur console.

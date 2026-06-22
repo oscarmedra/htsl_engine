@@ -144,6 +144,18 @@ Des cadres stylés et **auto-numérotés** (par type), idéaux pour un cours.
 
 Un encadré peut contenir n'importe quel HTSL (formules, listes, scènes…).
 
+### Correction cachée & onglets
+- **`{@reveal[title="Solution"]: …}`** : bloc dépliable (clic pour révéler la correction). `open=true` pour l'ouvrir d'emblée. Idéal pour cacher une solution.
+- **`{@tabs:}`** avec des **`{@tabs.tab[title="…"]: …}`** : onglets (ex. « Énoncé / Indice / Solution » ou « Méthode 1 / Méthode 2 »). Navigation gérée par le runtime.
+
+```
+{@tabs:
+  {@tabs.tab[title="Énoncé"]: {p:…}}
+  {@tabs.tab[title="Indice"]: {p:…}}
+  {@tabs.tab[title="Solution"]: {@reveal[title="Voir"]: {p:…}}}
+}
+```
+
 ### Présentations (objet slider)
 Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteur) géré par le runtime — aucun JS dans le contenu. Le conteneur est `{@slider:…}` et chaque slide est un `{@slider.slide:…}` ; les enfants qui ne sont pas des slides sont ignorés.
 
