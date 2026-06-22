@@ -128,18 +128,18 @@ Scène 3D temps réel, contrôle souris et timeline d'animations. Donne un `id` 
 - Autres objets : `s3.vector[from, to]`, `s3.line[points="(x,y,z);…"]`, `s3.surface[z="f(x,y)", xrange, yrange]`, `s3.curve[x=…, y=…, z=…]` (fonctions de t), `s3.label[text, x, y, z]`.
 - Animations `{@s3.animate[target="<id>", action="…", …]/}` — actions : `move` (`to="(x,y,z)"`), `rotate` (`axis`, `angle`), `scale` (`value`), `color` (`color`), `fade`, `transform` (`to="<id>"` : VRAI morph de forme + couleur ; le gabarit ciblé n'est utilisé que pour sa forme et sa couleur, sa position est ignorée). Options : `duration`, `delay`, `at` (départ absolu), `easing` (`linear` | `easeIn` | `easeOut` | `easeInOut`).
 
-### Présentations (objet slide)
-Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteur) géré par le runtime — aucun JS dans le contenu. Chaque enfant `{section:…}` est un slide ; les enfants non-`section` sont ignorés.
+### Présentations (objet slider)
+Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteur) géré par le runtime — aucun JS dans le contenu. Le conteneur est `{@slider:…}` et chaque slide est un `{@slider.slide:…}` ; les enfants qui ne sont pas des slides sont ignorés.
 
 ```
-{@slide:
-  {section: {h1:Titre de la présentation}}
-  {section: {h2:Une équation} {@mte[label=eq]: e^{i\pi} + 1 = 0}}
-  {section: {h2:Un graphe} {@plot[fn="sin(x)/x", xrange="(-15,15)"]/}}
+{@slider:
+  {@slider.slide: {h1:Titre de la présentation}}
+  {@slider.slide: {h2:Une équation} {@mte[label=eq]: e^{i\pi} + 1 = 0}}
+  {@slider.slide: {h2:Un graphe} {@plot[fn="sin(x)/x", xrange="(-15,15)"]/}}
 }
 ```
 
-- On peut mettre n'importe quoi dans un slide (titres, texte, formules, scènes 2D/3D, graphes).
+- Un slide peut contenir n'importe quel HTSL (titres, texte, formules, scènes 2D/3D, graphes).
 - À l'export PDF, chaque slide devient une page.
 
 ### Style (Tailwind CSS)

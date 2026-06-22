@@ -1,16 +1,16 @@
-# 15 — Présentations : l'objet `{@slide}`
+# 15 — Présentations : l'objet `{@slider}`
 
 ## Besoin
 
 Un tag pour faire des **présentations** (diaporamas) : un conteneur dont les
-enfants `{section:…}` sont des slides, avec des **boutons jolis** pour aller au
+enfants `{@slider.slide:…}` sont des slides, avec des **boutons jolis** pour aller au
 suivant / revenir au précédent.
 
 ## La contrainte centrale : navigation = interactivité = JS
 
 Le moteur garde « **zéro JS depuis le contenu** » (un `{script:}` inline est
 inerte). Faire défiler des slides demande pourtant du JS. La solution **dans le
-respect de l'architecture** : `@slide` est un **objet de première classe hydraté
+respect de l'architecture** : `@slider` est un **objet de première classe hydraté
 par le runtime** — exactement comme les scènes Plotly/Three. Le contenu n'émet
 jamais de `<script>` ; c'est la couche JS unique et de confiance du moteur qui
 câble la navigation.
@@ -18,27 +18,28 @@ câble la navigation.
 ## Syntaxe
 
 ```htsl
-{@slide:
-  {section: {h1:Titre}}
-  {section: {h2:Une équation} {@mte: e^{i\pi}+1=0}}
-  {section: {@plot[fn="sin(x)/x", xrange="(-15,15)"]/}}
+{@slider:
+  {@slider.slide: {h1:Titre}}
+  {@slider.slide: {h2:Une équation} {@mte: e^{i\pi}+1=0}}
+  {@slider.slide: {@plot[fn="sin(x)/x", xrange="(-15,15)"]/}}
 }
 ```
 
-Seuls les enfants `section` deviennent des slides ; les autres sont **ignorés**
-(la contrainte « que des sections » demandée).
+Seuls les enfants `{@slider.slide:…}` deviennent des slides ; les autres sont
+**ignorés**.
 
 ## Implémentation (packages/core)
 
-- **Registre** (`registry.ts`) : objet `slide.deck` (alias `slide`), catégorie
+- **Registre** (`registry.ts`) : objet `slider.deck` + `slider.slide` (alias `slider`), catégorie
   `structure`, `contentModel: "html"`. Apparaît donc automatiquement dans le
   catalogue de la doc et le prompt IA.
-- **`objects/slides.ts`** : `isSlidePath` + `SLIDE_PATH`.
+- **`objects/slides.ts`** : `isSlidePath` + `SLIDER_DECK_PATH`/`SLIDER_SLIDE_PATH`.
 - **Renderer** (`renderer.ts`, méthode `slides()`) : émet une structure
   **déclarative** —
   `<div class="htsl-deck" data-htsl-slides data-htsl-index="0" tabindex="0">`
-  contenant une barre de progression, le `stage` (les `section`), et une nav
-  (boutons `‹` / `›` / plein écran + compteur). Filtre les enfants non-`section`.
+  contenant une barre de progression, le `stage` (un `<section>` par
+  `{@slider.slide:}`), et une nav (boutons `‹` / `›` / plein écran + compteur).
+  Filtre les enfants qui ne sont pas des `slider.slide`.
 - **Runtime** (`slides-client.ts`, branché dans `runtime.ts#hydrate`) :
   `hydrateSlides` installe **une seule fois par fenêtre** des écouteurs
   `click`/`keydown` (délégation), l'état courant vit dans `data-htsl-index`

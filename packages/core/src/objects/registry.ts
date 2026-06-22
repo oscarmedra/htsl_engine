@@ -380,15 +380,26 @@ registerObject({
 
 // --- presentation ---
 registerObject({
-  path: "slide.deck",
+  path: "slider.deck",
   contentModel: "html",
   category: "structure",
-  aliases: ["slide"],
+  aliases: ["slider"],
   description:
-    "Présentation : chaque enfant {section:…} devient un slide, navigable par boutons/flèches (runtime). Les enfants non-section sont ignorés.",
+    "Présentation : conteneur de slides {@slider.slide:…}, navigable par boutons/flèches (runtime). Les enfants qui ne sont pas des slides sont ignorés.",
   attrs: [],
-  snippet: "{@slide:\n  {section: ${1:Premier slide}}\n  {section: ${2:Deuxième slide}}\n}",
-  example: "{@slide:\n  {section: {h1:Titre}}\n  {section: {h2:Suite} {@mtb: E=mc^2}}\n}",
+  snippet:
+    "{@slider:\n  {@slider.slide: ${1:Premier slide}}\n  {@slider.slide: ${2:Deuxième slide}}\n}",
+  example: "{@slider:\n  {@slider.slide: {h1:Titre}}\n  {@slider.slide: {h2:Suite} {@mtb: E=mc^2}}\n}",
+});
+registerObject({
+  path: "slider.slide",
+  contentModel: "html",
+  category: "structure",
+  aliases: [],
+  description: "Un slide d'une présentation {@slider:…} (peut contenir n'importe quel HTSL).",
+  attrs: [],
+  snippet: "{@slider.slide: ${1:contenu du slide}}",
+  example: "{@slider.slide: {h2:Mon slide} {p:…}}",
 });
 
 // --- 2D geometry ---

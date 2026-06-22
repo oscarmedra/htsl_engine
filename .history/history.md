@@ -526,3 +526,14 @@ Détails : `.docs/15-presentations-slide.md`.
   dégradation gracieuse sans runtime, `@media print` = 1 slide/page).
 - Tests cœur 231 (+5). Vérifié en navigateur : nav boutons + clavier, compteur,
   barre, boutons désactivés aux bornes ; 0 erreur console ; typecheck OK.
+
+## Renommage @slide → @slider (+ slides internes en @slider.slide)
+
+Sur demande, le tag de présentation est renommé : conteneur `{@slide}` → **`{@slider}`**
+et chaque slide `{section:…}` → **`{@slider.slide:…}`** (collection `slider`,
+cohérent avec mg2/s3). Registre : `slider.deck` (alias `slider`) + `slider.slide`.
+`objects/slides.ts` : `SLIDER_DECK_PATH`/`SLIDER_SLIDE_PATH`. Renderer : la
+méthode `slides()` collecte désormais les enfants objets `slider.slide` (et rend
+un `{@slider.slide:}` isolé comme `<section>`). CSS + runtime **inchangés** (ils
+ciblent `.htsl-deck` / `<section>`). Tests, prompt IA et `.docs/15` mis à jour.
+Core 231 verts, typecheck OK, navigation revérifiée en navigateur (1/3 → 2/3).

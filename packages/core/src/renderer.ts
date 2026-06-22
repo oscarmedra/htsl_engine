@@ -111,16 +111,19 @@ class Renderer {
   }
 
   /**
-   * Slide deck (`{@slide: {section:…}}`). Only `section` children become slides
-   * (others are ignored). Emits a declarative structure — the runtime wires up
-   * the navigation; no executable JS is produced.
+   * Slider object: the deck (`{@slider: {@slider.slide:…}}`) or a single slide.
+   * Only `{@slider.slide:…}` children become slides (others are ignored). Emits a
+   * declarative structure — the runtime wires up the navigation; no JS is produced.
    */
   private slides(node: ObjectNode, hashAttr: string): string {
-    const sections = node.children.filter(
-      (c): c is ElementNode => c.type === "element" && c.tag === "section",
+    // A standalone `{@slider.slide:…}` just renders as a <section>.
+    if (node.path === "slider.slide") return this.slideSection(node);
+
+    const slides = node.children.filter(
+      (c): c is ObjectNode => c.type === "object" && c.path === "slider.slide",
     );
-    const stage = sections.map((s) => this.compact(s)).join("");
-    const n = sections.length;
+    const stage = slides.map((s) => this.slideSection(s)).join("");
+    const n = slides.length;
     return (
       `<div class="htsl-deck" data-htsl-slides data-htsl-index="0" tabindex="0"${hashAttr}>` +
       `<div class="htsl-deck-progress"><span class="htsl-deck-fill"></span></div>` +
@@ -133,6 +136,15 @@ class Renderer {
       `</div>` +
       `</div>`
     );
+  }
+
+  /** Render one `{@slider.slide:…}` as a `<section>` (its children = slide body). */
+  private slideSection(node: ObjectNode): string {
+    const inner = node.children
+      .filter((c) => c.type !== "comment")
+      .map((c) => this.compact(c))
+      .join("");
+    return `<section>${inner}</section>`;
   }
 
   /* ----------------------------------------------------------------------- */
