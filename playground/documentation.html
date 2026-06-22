@@ -20,6 +20,7 @@
         <div class="group">Écrire</div>
         <a href="#syntax">Syntaxe de base</a>
         <a href="#math">Mathématiques</a>
+        <a href="#callouts">Encadrés (théorèmes…)</a>
         <a href="#components">Composants & variables</a>
         <div class="group">Visualiser</div>
         <a href="#plots">Graphes 2D</a>
@@ -116,6 +117,31 @@
           </ul>
           <pre><code>{@mte[label=ham]: H = \tfrac{1}{2}\big(p^2 + \omega^2 q^2\big)}
 {p:Le hamiltonien {@mtr[to=ham]/} décrit l'énergie totale.}</code></pre>
+        </section>
+
+        <section id="callouts">
+          <h2>Encadrés sémantiques (théorèmes, définitions…)</h2>
+          <p>Des cadres stylés et <strong>auto-numérotés par type</strong>, pour structurer un
+            cours (l'équivalent de <code>amsthm</code> en LaTeX). Un encadré peut contenir
+            n'importe quel HTSL (formules, listes, scènes…).</p>
+          <ul>
+            <li><strong>Numérotés</strong> : <code>{@theorem:…}</code> (alias <code>theoreme</code>,
+              <code>thm</code>), <code>{@definition:…}</code> (<code>def</code>),
+              <code>{@property:…}</code> (<code>propriete</code>), <code>{@example:…}</code>
+              (<code>exemple</code>, <code>ex</code>).</li>
+            <li><strong>Non numérotés</strong> : <code>{@proof:…}</code> (<code>preuve</code>),
+              <code>{@remark:…}</code> (<code>remarque</code>), <code>{@warning:…}</code>
+              (<code>attention</code>).</li>
+            <li>Attributs optionnels : <code>title="…"</code> (affiché après le numéro) et
+              <code>label=…</code> pour un <strong>renvoi cliquable</strong>
+              <code>{@ref[to=label]/}</code> → « Théorème N ».</li>
+          </ul>
+          <pre><code>{@theorem[title="Pythagore", label=pyth]:
+  {p:Dans un triangle rectangle d'hypoténuse $c$ : $$a^2 + b^2 = c^2$$}
+}
+{@example: {p:Avec $a=3$, $b=4$ : $c=5$.}}
+{@proof: {p:On découpe le carré de côté $a+b$ de deux façons.}}
+{p:Ce résultat est {@ref[to=pyth]/}.}</code></pre>
         </section>
 
         <section id="components">

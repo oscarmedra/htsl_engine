@@ -128,6 +128,22 @@ Scène 3D temps réel, contrôle souris et timeline d'animations. Donne un `id` 
 - Autres objets : `s3.vector[from, to]`, `s3.line[points="(x,y,z);…"]`, `s3.surface[z="f(x,y)", xrange, yrange]`, `s3.curve[x=…, y=…, z=…]` (fonctions de t), `s3.label[text, x, y, z]`.
 - Animations `{@s3.animate[target="<id>", action="…", …]/}` — actions : `move` (`to="(x,y,z)"`), `rotate` (`axis`, `angle`), `scale` (`value`), `color` (`color`), `fade`, `transform` (`to="<id>"` : VRAI morph de forme + couleur ; le gabarit ciblé n'est utilisé que pour sa forme et sa couleur, sa position est ignorée). Options : `duration`, `delay`, `at` (départ absolu), `easing` (`linear` | `easeIn` | `easeOut` | `easeInOut`).
 
+### Encadrés sémantiques (théorèmes, définitions…)
+Des cadres stylés et **auto-numérotés** (par type), idéaux pour un cours.
+- Numérotés : `{@theorem:…}` (alias `theoreme`, `thm`), `{@definition:…}` (`def`), `{@property:…}` (`propriete`, `prop`), `{@example:…}` (`exemple`, `ex`).
+- Non numérotés : `{@proof:…}` (`preuve`), `{@remark:…}` (`remarque`), `{@warning:…}` (`attention`).
+- Attribut optionnel `title="…"` (affiché après le numéro) et `label=…` (pour un renvoi).
+- Renvoi cliquable : `{@ref[to=label]/}` → « Théorème N ».
+
+```
+{@theorem[title="Pythagore", label=pyth]: {p:Dans un triangle rectangle : $$a^2+b^2=c^2$$}}
+{@example: {p:Avec $a=3$, $b=4$ : $c=5$.}}
+{@proof: {p:On découpe le carré de côté $a+b$…}}
+{p:D'après {@ref[to=pyth]/}, …}
+```
+
+Un encadré peut contenir n'importe quel HTSL (formules, listes, scènes…).
+
 ### Présentations (objet slider)
 Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteur) géré par le runtime — aucun JS dans le contenu. Le conteneur est `{@slider:…}` et chaque slide est un `{@slider.slide:…}` ; les enfants qui ne sont pas des slides sont ignorés.
 

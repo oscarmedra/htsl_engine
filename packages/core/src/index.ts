@@ -37,6 +37,7 @@ export type { PlotlyLike } from "./scene-client.js";
 export { hydrateThree, pendingThree, purgeThree } from "./three-client.js";
 export { hydrateSlides, pendingSlides, purgeSlides } from "./slides-client.js";
 export { isSlidePath, SLIDER_DECK_PATH, SLIDER_SLIDE_PATH } from "./objects/slides.js";
+export { isCalloutPath, buildCalloutContext, CALLOUT_TYPES } from "./objects/callout.js";
 export { threeSpec, isThreePath, renderThree } from "./objects/three.js";
 export type { ThreeSpec, ThreeObject } from "./objects/three.js";
 export { renderPlot, isPlotPath } from "./objects/plot.js";

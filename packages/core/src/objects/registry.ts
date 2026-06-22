@@ -13,6 +13,8 @@
  *   - "void": self-closing only, no content
  */
 
+import { CALLOUT_TYPES, CALLOUT_REF_PATH } from "./callout.js";
+
 export type ContentModel = "math" | "html" | "void";
 
 export type AttrType =
@@ -400,6 +402,42 @@ registerObject({
   attrs: [],
   snippet: "{@slider.slide: ${1:contenu du slide}}",
   example: "{@slider.slide: {h2:Mon slide} {p:…}}",
+});
+
+// --- semantic callouts (theorem / definition / example / proof …) ---
+for (const t of CALLOUT_TYPES) {
+  registerObject({
+    path: t.path,
+    contentModel: "html",
+    category: "document",
+    aliases: t.aliases,
+    description: `Encadré « ${t.name} »${t.numbered ? " (numéroté)" : ""} — attributs optionnels title${t.numbered ? ", label" : ""}.`,
+    attrs: [
+      { name: "title", type: "string", required: false, description: "Titre court affiché après le numéro." },
+      ...(t.numbered
+        ? [
+            {
+              name: "label",
+              type: "string" as const,
+              required: false,
+              description: "Étiquette pour un renvoi {@ref}.",
+            },
+          ]
+        : []),
+    ],
+    snippet: `{@${t.aliases[0]}: \${1:contenu}}`,
+    example: `{@${t.aliases[0]}: ${t.numbered ? "{p:énoncé}" : "…"}}`,
+  });
+}
+registerObject({
+  path: CALLOUT_REF_PATH,
+  contentModel: "void",
+  category: "document",
+  aliases: ["ref"],
+  description: "Renvoi cliquable vers un encadré numéroté (attribut to = son label).",
+  attrs: [{ name: "to", type: "string", required: true, description: "Label de l'encadré cible." }],
+  snippet: "{@ref[to=${1:pyth}]/}",
+  example: "{@ref[to=pyth]/}",
 });
 
 // --- 2D geometry ---

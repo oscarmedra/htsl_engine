@@ -545,3 +545,19 @@ Ajout d'une section `#slides` (+ entrée de nav sous « Visualiser ») dans
 clavier, plein écran, PDF 1 slide/page, dégradation gracieuse). Le catalogue
 auto liste déjà `slider.deck`/`slider.slide`. Vérifié en navigateur (nav,
 section, bouton Copier, catalogue) ; 0 erreur.
+
+## Lot 1 « pédagogie » : encadrés sémantiques (@theorem, @definition, @proof…)
+
+Premier lot de la feuille de route pédagogique : des encadrés stylés et
+auto-numérotés (équivalent amsthm). 7 types (théorème/définition/propriété/
+exemple numérotés ; démonstration/remarque/attention non), alias FR, attributs
+title + label, renvoi cliquable `{@ref[to=…]/}`. Détails : `.docs/16`.
+
+- `objects/callout.ts` : `CALLOUT_TYPES`, `buildCalloutContext` (numérotation
+  par type + labels, renvois en avant). Registre : 7 encadrés (cat. document) +
+  `callout.ref` enregistrés par boucle. Renderer : `callout()`/`calloutRef()`
+  (pur HTML, aucun JS), encadré labellisé = ancre `id`. CSS par type dans
+  `mathCss` (bordure + en-tête teinté, ∎ pour proof, break-inside print).
+- Prompt IA + doc playground (section #callouts) + catalogue (auto) à jour.
+- Tests cœur 239 (+8). Vérifié en navigateur (5 encadrés, KaTeX dedans, renvoi
+  cliquable) ; typecheck OK ; 0 erreur console.

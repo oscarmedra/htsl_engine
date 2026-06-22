@@ -17,6 +17,14 @@ import {
 import { isThreePath, renderThree } from "./objects/three.js";
 import { isPlotPath, renderPlot } from "./objects/plot.js";
 import { isSlidePath } from "./objects/slides.js";
+import {
+  buildCalloutContext,
+  calloutId,
+  calloutType,
+  isCalloutPath,
+  CALLOUT_REF_PATH,
+  type CalloutContext,
+} from "./objects/callout.js";
 import type { ElementNode, Node, ObjectNode, RenderOptions, TextNode } from "./types.js";
 
 export { escapeHtml } from "./escape.js";
@@ -57,6 +65,7 @@ class Renderer {
   private readonly allowedTags: Set<string> | null;
   private readonly options: RenderOptions;
   private ctx: MathContext = { numbers: new Map(), labels: new Map() };
+  private calloutCtx: CalloutContext = { info: new Map(), labels: new Map() };
 
   constructor(options: RenderOptions) {
     this.options = options;
@@ -66,6 +75,7 @@ class Renderer {
 
   renderTop(nodes: Node[]): string {
     this.ctx = buildMathContext(nodes);
+    this.calloutCtx = buildCalloutContext(nodes);
     const visible = nodes.filter((n) => n.type !== "comment");
     if (this.pretty) {
       return visible
@@ -101,6 +111,8 @@ class Renderer {
   private object(node: ObjectNode): string {
     const hashAttr = this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "";
     if (isSlidePath(node.path)) return this.slides(node, hashAttr);
+    if (node.path === CALLOUT_REF_PATH) return this.calloutRef(node);
+    if (isCalloutPath(node.path)) return this.callout(node);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr);
     return renderMathObject(node, this.ctx, {
@@ -145,6 +157,41 @@ class Renderer {
       .map((c) => this.compact(c))
       .join("");
     return `<section>${inner}</section>`;
+  }
+
+  /**
+   * Semantic callout ({@theorem}, {@definition}, {@proof}…). Numbered types carry
+   * a per-type number (pre-computed) and an optional title; a labelled callout
+   * gets an id so {@ref} can link to it. Pure HTML, no JS.
+   */
+  private callout(node: ObjectNode): string {
+    const t = calloutType(node.path);
+    const meta = this.calloutCtx.info.get(node);
+    const tone = t?.tone ?? "remark";
+    let head = t?.name ?? "";
+    if (meta?.number !== undefined) head += ` ${meta.number}`;
+    const title = node.attrs["title"];
+    if (title) head += ` — ${escapeHtml(title)}`;
+    const label = node.attrs["label"];
+    const idAttr = label ? ` id="${calloutId(tone, label)}"` : "";
+    const body = node.children
+      .filter((c) => c.type !== "comment")
+      .map((c) => this.compact(c))
+      .join("");
+    return (
+      `<div class="htsl-callout htsl-callout-${tone}"${idAttr}>` +
+      `<div class="htsl-callout-head">${head}</div>` +
+      `<div class="htsl-callout-body">${body}</div>` +
+      `</div>`
+    );
+  }
+
+  /** Cross-reference to a numbered callout: {@ref[to=label]/} → "Théorème N". */
+  private calloutRef(node: ObjectNode): string {
+    const to = node.attrs["to"];
+    const target = to ? this.calloutCtx.labels.get(to) : undefined;
+    if (!target) return `<span class="htsl-ref htsl-ref-broken">(réf. ?)</span>`;
+    return `<a class="htsl-ref" href="#${target.id}">${escapeHtml(target.name)}&nbsp;${target.number}</a>`;
   }
 
   /* ----------------------------------------------------------------------- */

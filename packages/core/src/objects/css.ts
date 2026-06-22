@@ -102,4 +102,41 @@ export const mathCss = `
   .htsl-deck-nav, .htsl-deck-progress { display: none; }
   .htsl-deck-stage > section { display: block !important; break-after: page; padding: 0.5em 0; }
 }
+
+/* Semantic callouts ({@theorem}, {@definition}, {@proof}…). */
+.htsl-callout {
+  border: 1px solid #e3e6ea;
+  border-left: 4px solid #94a3b8;
+  border-radius: 8px;
+  background: #fff;
+  margin: 1em 0;
+  overflow: hidden;
+  break-inside: avoid;
+}
+.htsl-callout-head {
+  font-weight: 600; font-size: 0.92em;
+  padding: 0.5em 0.9em;
+  background: #f8fafc; border-bottom: 1px solid #eef0f3; color: #334155;
+}
+.htsl-callout-body { padding: 0.7em 0.9em; }
+.htsl-callout-body > :first-child { margin-top: 0; }
+.htsl-callout-body > :last-child { margin-bottom: 0; }
+.htsl-callout-theorem { border-left-color: #3b5bdb; }
+.htsl-callout-theorem .htsl-callout-head { background: #eef2ff; color: #3730a3; }
+.htsl-callout-definition { border-left-color: #7c3aed; }
+.htsl-callout-definition .htsl-callout-head { background: #f5f3ff; color: #5b21b6; }
+.htsl-callout-property { border-left-color: #0d9488; }
+.htsl-callout-property .htsl-callout-head { background: #f0fdfa; color: #0f766e; }
+.htsl-callout-example { border-left-color: #16a34a; }
+.htsl-callout-example .htsl-callout-head { background: #f0fdf4; color: #15803d; }
+.htsl-callout-proof { border-left-color: #94a3b8; }
+.htsl-callout-proof .htsl-callout-head { background: #f8fafc; color: #475569; font-style: italic; }
+.htsl-callout-proof .htsl-callout-body::after { content: " ∎"; color: #94a3b8; }
+.htsl-callout-remark { border-left-color: #64748b; }
+.htsl-callout-remark .htsl-callout-head { background: #f8fafc; color: #475569; }
+.htsl-callout-warning { border-left-color: #d97706; }
+.htsl-callout-warning .htsl-callout-head { background: #fffbeb; color: #b45309; }
+.htsl-ref { color: #3b5bdb; text-decoration: none; border-bottom: 1px dotted #93a4f4; }
+.htsl-ref:hover { border-bottom-style: solid; }
+.htsl-ref-broken { color: #c92a2a; border-bottom: none; }
 `.trim();
