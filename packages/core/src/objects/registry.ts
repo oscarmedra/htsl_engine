@@ -378,6 +378,19 @@ registerObject({
   example: "{@mc.i/}",
 });
 
+// --- presentation ---
+registerObject({
+  path: "slide.deck",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["slide"],
+  description:
+    "Présentation : chaque enfant {section:…} devient un slide, navigable par boutons/flèches (runtime). Les enfants non-section sont ignorés.",
+  attrs: [],
+  snippet: "{@slide:\n  {section: ${1:Premier slide}}\n  {section: ${2:Deuxième slide}}\n}",
+  example: "{@slide:\n  {section: {h1:Titre}}\n  {section: {h2:Suite} {@mtb: E=mc^2}}\n}",
+});
+
 // --- 2D geometry ---
 registerObject({
   path: "math.geometry.2d.scene",

@@ -508,3 +508,21 @@ prévu. Le catalogue de la doc et le prompt IA se génèrent depuis le registre 
 désormais **exacts**. Tests : core **226** (6 nouveaux). KaTeX rend tout sans
 erreur (vérifié en navigateur : vecteur colonne, matrice 2×2, 3−2i, {1,2,3},
 [0,1[, ½·π, e/∞/φ/i). 0 erreur console.
+
+## Objet @slide : présentations navigables (runtime, zéro JS depuis le contenu)
+
+Nouveau tag `{@slide: {section:…} {section:…}}` : un diaporama dont chaque
+`{section:…}` est un slide, avec boutons ⟵/⟶, flèches clavier, plein écran,
+compteur et barre de progression. La navigation est gérée par le **runtime du
+moteur** (objet de première classe, comme Plotly/Three) → le contenu n'émet
+jamais de `<script>`, le modèle « zéro JS depuis le contenu » est préservé.
+Détails : `.docs/15-presentations-slide.md`.
+
+- Registre `slide.deck` (alias `slide`, cat. structure) → visible au catalogue +
+  prompt IA. `objects/slides.ts` (isSlidePath). Renderer : méthode `slides()`
+  (nœud `data-htsl-slides`, ne garde que les `section`). `slides-client.ts` :
+  `hydrateSlides` (listeners globaux installés une fois, état dans
+  `data-htsl-index` → morph-safe, pur DOM). CSS dans `mathCss` (carte, fondu,
+  dégradation gracieuse sans runtime, `@media print` = 1 slide/page).
+- Tests cœur 231 (+5). Vérifié en navigateur : nav boutons + clavier, compteur,
+  barre, boutons désactivés aux bornes ; 0 erreur console ; typecheck OK.

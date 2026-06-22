@@ -61,4 +61,45 @@ export const mathCss = `
   padding: 1em;
   text-align: center;
 }
+
+/* Slide decks ({@slide: {section:…}}). */
+.htsl-deck {
+  position: relative;
+  border: 1px solid #e3e6ea;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  outline: none;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+  margin: 1em 0;
+}
+.htsl-deck-progress { height: 4px; background: #eef2ff; }
+.htsl-deck-fill { display: block; height: 100%; width: 0; background: #3b5bdb; transition: width 0.25s ease; }
+.htsl-deck-stage { padding: 1.6rem 1.8rem; }
+.htsl-deck-stage > section { display: none; animation: htsl-slide-in 0.28s ease; }
+/* Graceful without the runtime: show the first slide. With it: only the active one. */
+.htsl-deck:not(.htsl-deck--ready) .htsl-deck-stage > section:first-child { display: block; }
+.htsl-deck.htsl-deck--ready .htsl-deck-stage > section.is-active { display: block; }
+@keyframes htsl-slide-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.htsl-deck-nav {
+  display: flex; align-items: center; justify-content: center; gap: 0.9rem;
+  padding: 0.6rem; border-top: 1px solid #eef0f3; background: #fbfbfc;
+}
+.htsl-deck-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.1rem; height: 2.1rem; border-radius: 9px;
+  border: 1px solid #e3e6ea; background: #fff; color: #3b5bdb;
+  font-size: 1.15rem; line-height: 1; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s;
+}
+.htsl-deck-btn:hover { background: #eef2ff; border-color: #3b5bdb; }
+.htsl-deck-btn:active { transform: translateY(1px); }
+.htsl-deck-btn:disabled { opacity: 0.4; cursor: default; }
+.htsl-deck-counter { font: 500 0.85rem/1 ui-monospace, monospace; color: #6b7280; min-width: 3.2rem; text-align: center; }
+.htsl-deck:fullscreen { border-radius: 0; display: flex; flex-direction: column; }
+.htsl-deck:fullscreen .htsl-deck-stage { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+@media print {
+  .htsl-deck-nav, .htsl-deck-progress { display: none; }
+  .htsl-deck-stage > section { display: block !important; break-after: page; padding: 0.5em 0; }
+}
 `.trim();

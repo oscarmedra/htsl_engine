@@ -16,6 +16,7 @@ import {
 } from "./objects/math.js";
 import { isThreePath, renderThree } from "./objects/three.js";
 import { isPlotPath, renderPlot } from "./objects/plot.js";
+import { isSlidePath } from "./objects/slides.js";
 import type { ElementNode, Node, ObjectNode, RenderOptions, TextNode } from "./types.js";
 
 export { escapeHtml } from "./escape.js";
@@ -99,6 +100,7 @@ class Renderer {
   /** Render an `{@…}` object: declarative 3D scenes vs the math/geometry layer. */
   private object(node: ObjectNode): string {
     const hashAttr = this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "";
+    if (isSlidePath(node.path)) return this.slides(node, hashAttr);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr);
     return renderMathObject(node, this.ctx, {
@@ -106,6 +108,31 @@ class Renderer {
       ...(this.options.source !== undefined ? { source: this.options.source } : {}),
       ...(this.options.hashBlocks ? { hash: htslHash(node) } : {}),
     });
+  }
+
+  /**
+   * Slide deck (`{@slide: {section:…}}`). Only `section` children become slides
+   * (others are ignored). Emits a declarative structure — the runtime wires up
+   * the navigation; no executable JS is produced.
+   */
+  private slides(node: ObjectNode, hashAttr: string): string {
+    const sections = node.children.filter(
+      (c): c is ElementNode => c.type === "element" && c.tag === "section",
+    );
+    const stage = sections.map((s) => this.compact(s)).join("");
+    const n = sections.length;
+    return (
+      `<div class="htsl-deck" data-htsl-slides data-htsl-index="0" tabindex="0"${hashAttr}>` +
+      `<div class="htsl-deck-progress"><span class="htsl-deck-fill"></span></div>` +
+      `<div class="htsl-deck-stage">${stage}</div>` +
+      `<div class="htsl-deck-nav">` +
+      `<button type="button" class="htsl-deck-btn htsl-deck-prev" aria-label="Slide précédent">&#8249;</button>` +
+      `<span class="htsl-deck-counter">${n ? 1 : 0} / ${n}</span>` +
+      `<button type="button" class="htsl-deck-btn htsl-deck-next" aria-label="Slide suivant">&#8250;</button>` +
+      `<button type="button" class="htsl-deck-btn htsl-deck-full" aria-label="Plein écran">&#9974;</button>` +
+      `</div>` +
+      `</div>`
+    );
   }
 
   /* ----------------------------------------------------------------------- */

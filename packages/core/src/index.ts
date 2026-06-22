@@ -35,6 +35,8 @@ export type { Trace, SceneSpec } from "./objects/geometry.js";
 export { hydrateScenes, pendingScenes, purgeScenes } from "./scene-client.js";
 export type { PlotlyLike } from "./scene-client.js";
 export { hydrateThree, pendingThree, purgeThree } from "./three-client.js";
+export { hydrateSlides, pendingSlides, purgeSlides } from "./slides-client.js";
+export { isSlidePath, SLIDE_PATH } from "./objects/slides.js";
 export { threeSpec, isThreePath, renderThree } from "./objects/three.js";
 export type { ThreeSpec, ThreeObject } from "./objects/three.js";
 export { renderPlot, isPlotPath } from "./objects/plot.js";
