@@ -502,6 +502,35 @@ registerObject({
   example: "{@flashcard:\n  {front: $e^{i\\pi}+1$}\n  {back: $= 0$}\n}",
 });
 
+// --- data charts ---
+registerObject({
+  path: "chart",
+  contentModel: "html",
+  category: "géométrie",
+  aliases: ["graphique"],
+  description:
+    "Graphique de données (Plotly) : type bar|pie|line|histogram. Points via {pt[x=…, y=…]/} ; histogramme via l'attribut values=\"a,b,c\".",
+  attrs: [
+    {
+      name: "type",
+      type: "enum",
+      required: false,
+      default: "bar",
+      values: ["bar", "pie", "line", "histogram"],
+      description: "Type de graphique.",
+    },
+    { name: "title", type: "string", required: false, description: "Titre." },
+    { name: "xtitle", type: "string", required: false, description: "Titre de l'axe X." },
+    { name: "ytitle", type: "string", required: false, description: "Titre de l'axe Y." },
+    { name: "values", type: "string", required: false, description: "Valeurs « a,b,c » (histogramme)." },
+    { name: "bins", type: "number", required: false, description: "Nombre de classes (histogramme)." },
+  ],
+  snippet:
+    "{@chart[type=${1:\"bar\"}, title=${2:\"Titre\"}]:\n  {pt[x=${3:\"A\"}, y=${4:10}]/}\n  {pt[x=${5:\"B\"}, y=${6:20}]/}\n}",
+  example:
+    '{@chart[type="bar", title="Notes"]:\n  {pt[x="Lun", y=12]/}\n  {pt[x="Mar", y=19]/}\n}',
+});
+
 // --- 2D geometry ---
 registerObject({
   path: "math.geometry.2d.scene",

@@ -105,6 +105,19 @@ Une scène dessine ses enfants ; hors scène, les mêmes objets donnent leur not
 
 - Les expressions acceptent `+ - * / % ^`, les fonctions usuelles (`sin cos tan exp log ln sqrt abs min max` …) et les constantes (`pi e tau phi`). Évaluation sûre, jamais de `eval`.
 
+### Graphiques de données (objet chart, rendu Plotly)
+- `{@chart[type="bar|pie|line|histogram", title="…", xtitle="…", ytitle="…"]: …}`.
+- Points : un `{pt[x="…", y=…]/}` par valeur (x = catégorie/abscisse, y = valeur ; `color` optionnel).
+- Histogramme : valeurs brutes via l'attribut `values="a,b,c,…"` (+ `bins=N` optionnel), sans `{pt}`.
+
+```
+{@chart[type="bar", title="Notes", ytitle="Élèves"]:
+  {pt[x="10-15", y=11]/} {pt[x="15-20", y=5]/}
+}
+{@chart[type="pie"]: {pt[x="AB", y=10]/} {pt[x="TB", y=3]/}}
+{@chart[type="histogram", values="160,165,168,170,170,175", bins=6]/}
+```
+
 ### Scènes 3D animées (collection scene.3d, alias s3, rendu Three.js / WebGL)
 Scène 3D temps réel, contrôle souris et timeline d'animations. Donne un `id` aux objets pour les animer.
 

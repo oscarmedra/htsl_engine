@@ -26,6 +26,7 @@
         <a href="#components">Composants & variables</a>
         <div class="group">Visualiser</div>
         <a href="#plots">Graphes 2D</a>
+        <a href="#charts">Graphiques de données</a>
         <a href="#geometry">Géométrie (Plotly)</a>
         <a href="#three">Scènes 3D animées</a>
         <a href="#slides">Présentations</a>
@@ -217,6 +218,27 @@
           <p>Les expressions (<code>sin(x)/x</code>, <code>cos(x)</code>…) sont évaluées par un
             interpréteur sûr (pas de <code>eval</code>) : opérateurs <code>+ - * / % ^</code>,
             fonctions usuelles, constantes <code>pi e tau phi</code>.</p>
+        </section>
+
+        <section id="charts">
+          <h2>Graphiques de données</h2>
+          <p>Au-delà des fonctions, <code>{@chart}</code> trace de vraies <strong>données</strong>
+            (Plotly) : <strong>barres</strong>, <strong>camembert</strong>, <strong>ligne</strong> ou
+            <strong>histogramme</strong>. Idéal pour les statistiques.</p>
+          <ul>
+            <li>Chaque valeur est un <code>{pt[x="…", y=…]/}</code> (x = catégorie/abscisse,
+              y = valeur ; <code>color</code> optionnel).</li>
+            <li>Pour un <strong>histogramme</strong>, fournir les valeurs brutes via
+              <code>values="a,b,c,…"</code> (et <code>bins=N</code> optionnel), sans
+              <code>{pt}</code>.</li>
+            <li>Titres : <code>title</code>, <code>xtitle</code>, <code>ytitle</code>.</li>
+          </ul>
+          <pre><code>{@chart[type="bar", title="Notes au DS", ytitle="Élèves"]:
+  {pt[x="0-5", y=2]/}  {pt[x="5-10", y=6]/}
+  {pt[x="10-15", y=11]/}  {pt[x="15-20", y=5]/}
+}
+{@chart[type="pie"]: {pt[x="AB", y=10]/} {pt[x="TB", y=3]/}}
+{@chart[type="histogram", values="160,165,168,170,170,175", bins=6]/}</code></pre>
         </section>
 
         <section id="geometry">

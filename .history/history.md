@@ -592,3 +592,16 @@ par compteur renderer). Détails : `.docs/18`.
   catalogue (auto) à jour.
 - Tests cœur 247 (+4). Vérifié en navigateur (graduation quiz, flip flashcard
   verso au-dessus) ; typecheck OK ; 0 erreur console.
+
+## Lot 4 « pédagogie » : @chart (graphiques de données, Plotly)
+
+`{@chart[type="bar|pie|line|histogram", title…]: {pt[x=…, y=…]/} …}` (histogramme
+via `values="a,b,c"`). Réutilise la voie Plotly déclarative (`objects/chart.ts` :
+`renderChart` → figure `{data,layout}` → nœud `data-htsl-scene` dessiné par
+`hydrateScenes`). Aucun nouveau runtime. Détails : `.docs/19`.
+- Registre : objet `chart` (alias graphique, cat. géométrie) ; `pt` = élément.
+  Renderer : dispatch après `@plot`. Bar = couleur/catégorie, pie = labels+%,
+  line = scatter, histogram = nbinsx.
+- Tests cœur 253 (+6 ; bug de test `spec(src)`→`spec(compile(src))` corrigé).
+  Vérifié en navigateur (barres + camembert avec % + histogramme dessinés) ;
+  typecheck OK ; 0 erreur console. Prompt IA + doc (#charts) + catalogue (auto).
