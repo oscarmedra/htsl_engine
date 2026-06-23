@@ -232,4 +232,14 @@ export const mathCss = `
 .htsl-vt-arrow { min-height: 3.6rem; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; line-height: 1; color: #3b5bdb; }
 .htsl-vt-sign { display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 .htsl-vt-zero { color: #64748b; }
+
+/* Interactive parameter ({@param}) — slider; the runtime re-samples plots live. */
+.htsl-param {
+  display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+  margin: 0.6em 0; padding: 0.5em 0.8em;
+  border: 1px solid #e3e6ea; border-radius: 8px; background: #f8fafc;
+}
+.htsl-param-label { font-family: ui-monospace, monospace; font-size: 0.95em; color: #1f2430; white-space: nowrap; }
+.htsl-param-value { font-weight: 700; color: #3b5bdb; }
+.htsl-param-range { flex: 1; min-width: 8rem; accent-color: #3b5bdb; cursor: pointer; }
 `.trim();

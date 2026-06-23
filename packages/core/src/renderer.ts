@@ -18,6 +18,7 @@ import { isThreePath, renderThree } from "./objects/three.js";
 import { isPlotPath, renderPlot } from "./objects/plot.js";
 import { isChartPath, renderChart } from "./objects/chart.js";
 import { isVariationsPath, renderVariations } from "./objects/variations.js";
+import { isParamPath, renderParam, buildParamContext, paramValues, type ParamContext } from "./objects/param.js";
 import { isSlidePath } from "./objects/slides.js";
 import {
   buildCalloutContext,
@@ -68,6 +69,7 @@ class Renderer {
   private readonly options: RenderOptions;
   private ctx: MathContext = { numbers: new Map(), labels: new Map() };
   private calloutCtx: CalloutContext = { info: new Map(), labels: new Map() };
+  private paramCtx: ParamContext = new Map();
   private flashcardCounter = 0;
 
   constructor(options: RenderOptions) {
@@ -79,6 +81,7 @@ class Renderer {
   renderTop(nodes: Node[]): string {
     this.ctx = buildMathContext(nodes);
     this.calloutCtx = buildCalloutContext(nodes);
+    this.paramCtx = buildParamContext(nodes);
     const visible = nodes.filter((n) => n.type !== "comment");
     if (this.pretty) {
       return visible
@@ -122,7 +125,8 @@ class Renderer {
     if (node.path === "quiz") return this.quiz(node, hashAttr);
     if (node.path === "flashcard") return this.flashcard(node);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
-    if (isPlotPath(node.path)) return renderPlot(node, hashAttr);
+    if (isParamPath(node.path)) return renderParam(node);
+    if (isPlotPath(node.path)) return renderPlot(node, hashAttr, paramValues(this.paramCtx));
     if (isChartPath(node.path)) return renderChart(node, hashAttr);
     if (isVariationsPath(node.path)) return renderVariations(node, this.options.katex, hashAttr);
     return renderMathObject(node, this.ctx, {

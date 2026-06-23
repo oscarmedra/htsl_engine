@@ -536,6 +536,26 @@ registerObject({
     "{@signs[var=\"x\", fn=\"x-2\"]:\n  {pt[x=\"-\\\\infty\"]/} {s: -} {pt[x=\"2\", zero=true]/} {s: +} {pt[x=\"+\\\\infty\"]/}\n}",
 });
 
+// --- interactive parameter ---
+registerObject({
+  path: "param",
+  contentModel: "void",
+  category: "géométrie",
+  aliases: ["curseur"],
+  description:
+    "Paramètre interactif (curseur). Un {@plot} dont la fn utilise ce nom se met à jour en direct quand on bouge le curseur.",
+  attrs: [
+    { name: "name", type: "string", required: true, description: "Nom du paramètre (utilisé dans une fn de {@plot})." },
+    { name: "min", type: "number", required: false, default: "0", description: "Valeur minimale." },
+    { name: "max", type: "number", required: false, default: "10", description: "Valeur maximale." },
+    { name: "step", type: "number", required: false, default: "0.1", description: "Pas." },
+    { name: "value", type: "number", required: false, description: "Valeur initiale (déf. min)." },
+    { name: "label", type: "string", required: false, description: "Libellé affiché (déf. le nom)." },
+  ],
+  snippet: '{@param[name=${1:"a"}, min=${2:-3}, max=${3:3}, step=${4:0.1}, value=${5:1}]/}',
+  example: '{@param[name="a", min=-3, max=3, step=0.1, value=1]/}',
+});
+
 // --- data charts ---
 registerObject({
   path: "chart",

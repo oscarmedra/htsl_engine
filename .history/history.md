@@ -621,3 +621,22 @@ Détails : `.docs/20`.
 - Booléen sans valeur → `zero=true`. Prompt IA + doc (#tables) + catalogue (auto).
 - Tests cœur 257 (+4). Vérifié en navigateur (variations de x²-2x, signes de
   2x-2, 13 KaTeX) ; typecheck OK ; 0 erreur console.
+
+## Lot 6 « pédagogie » : @param — paramètre interactif (« moment Desmos »)
+
+Un curseur `{@param[name, min, max, step, value]/}` pilote en direct un `{@plot}`
+dont la fn l'utilise. Reste « zéro JS depuis le contenu » : le runtime écoute le
+curseur, ré-évalue la fonction avec l'interpréteur sûr (compileExpr) et fait un
+Plotly.restyle. Détails : `.docs/21`.
+
+- `objects/param.ts` (isParamPath, buildParamContext, paramValues, renderParam).
+  plot.ts : renderPlot(node, hashAttr, params) échantillonne avec les défauts +
+  émet data-htsl-fn/xrange/samples/params si une courbe unique utilise un param.
+  renderer : paramCtx + dispatch. runtime : param-client.ts (hydrateParams,
+  listener input 1×/fenêtre, window.__htslParams, restyle). PlotlyLike + restyle.
+  registry : param (alias curseur, cat. géométrie). css : .htsl-param.
+- Tests cœur 262 (+5). Vérifié en navigateur : y=a·sin(b·x), bouger a (1→3)
+  multiplie le graphe par ~3 en direct, curseurs indépendants ; typecheck OK ;
+  0 erreur. Prompt IA + doc (#param) + catalogue (auto).
+- Limite v1 : une ré-édition réinitialise les curseurs (morphdom).
+- Feuille de route pédagogique BOUCLÉE (lots 1–6).

@@ -20,6 +20,7 @@ import type { SceneSpec } from "./objects/geometry.js";
 export interface PlotlyLike {
   newPlot(el: Element, data: unknown[], layout: unknown, config?: unknown): unknown;
   react?(el: Element, data: unknown[], layout: unknown, config?: unknown): unknown;
+  restyle?(el: Element, update: Record<string, unknown>, traces?: number[]): unknown;
   purge?(el: Element): unknown;
 }
 

@@ -32,8 +32,14 @@ interface Curve {
 }
 
 /** Render `{@plot}` as a declarative Plotly scene node — one curve (attr `fn`)
- *  or several (`{@plot.curve}` children, with a legend). */
-export function renderPlot(node: ObjectNode, hashAttr: string): string {
+ *  or several (`{@plot.curve}` children, with a legend). When `params` (declared
+ *  `{@param}` values) appear in a single-curve `fn`, the node also carries the
+ *  expression so the runtime can re-sample it live as a slider moves. */
+export function renderPlot(
+  node: ObjectNode,
+  hashAttr: string,
+  params: Record<string, number> = {},
+): string {
   if (node.path !== "math.plot.fn") return "";
 
   // Gather curves: child `plot.curve` objects, else the single inline `fn`.
@@ -55,7 +61,7 @@ export function renderPlot(node: ObjectNode, hashAttr: string): string {
   const data = curves.map((c, i) => {
     const f = safeExpr(c.fn);
     const ys = xs.map((x) => {
-      const y = f({ x });
+      const y = f({ x, ...params }); // sample with the parameters' current values
       return Number.isFinite(y) ? y : null; // gaps at asymptotes / undefined
     });
     return {
@@ -89,8 +95,22 @@ export function renderPlot(node: ObjectNode, hashAttr: string): string {
 
   const spec = { data, layout };
   const json = escapeHtml(JSON.stringify(spec));
+
+  // Interactive plot: a single inline curve whose `fn` references a {@param}.
+  // The node carries the expression so the runtime can re-sample on slider move.
+  let interactive = "";
+  if (curves.length === 1) {
+    const fn = curves[0]!.fn;
+    const used = Object.keys(params).filter((p) => new RegExp(`\\b${p}\\b`).test(fn));
+    if (used.length > 0) {
+      interactive =
+        ` data-htsl-fn="${escapeHtml(fn)}" data-htsl-xrange="${x0},${x1}" ` +
+        `data-htsl-samples="${samples}" data-htsl-params="${escapeHtml(used.join(","))}"`;
+    }
+  }
+
   return (
-    `<div class="htsl-scene htsl-scene--2d" data-htsl-scene="${json}"${hashAttr} ` +
+    `<div class="htsl-scene htsl-scene--2d" data-htsl-scene="${json}"${interactive}${hashAttr} ` +
     `style="width:${width}px;height:${height}px">` +
     `<span class="htsl-scene-fallback">Graphe de fonction — Plotly requis.</span></div>`
   );

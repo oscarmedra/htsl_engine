@@ -120,6 +120,15 @@ Une scène dessine ses enfants ; hors scène, les mêmes objets donnent leur not
 }
 ```
 
+### Paramètre interactif (curseur lié à un graphe)
+`{@param[name="a", min=-3, max=3, step=0.1, value=1]/}` ajoute un **curseur**. Un `{@plot}` dont la `fn` utilise ce nom se **met à jour en direct** quand on bouge le curseur (recalcul par le runtime). Plusieurs paramètres possibles.
+
+```
+{@param[name="a", min=-3, max=3, step=0.1, value=1]/}
+{@param[name="b", min=0.5, max=4, step=0.1, value=1]/}
+{@plot[fn="a*sin(b*x)", xrange="(-6.28,6.28)", title="y = a·sin(b·x)"]/}
+```
+
 ### Graphiques de données (objet chart, rendu Plotly)
 - `{@chart[type="bar|pie|line|histogram", title="…", xtitle="…", ytitle="…"]: …}`.
 - Points : un `{pt[x="…", y=…]/}` par valeur (x = catégorie/abscisse, y = valeur ; `color` optionnel).

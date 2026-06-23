@@ -24,6 +24,7 @@ import { hydrateThree, pendingThree, purgeThree, type ThreeNS } from "./three-cl
 import { hydrateSlides, purgeSlides } from "./slides-client.js";
 import { hydrateTabs, purgeTabs } from "./tabs-client.js";
 import { hydrateQuiz, purgeQuiz } from "./quiz-client.js";
+import { hydrateParams, purgeParams } from "./param-client.js";
 
 /** External dependency of a dynamic type. KaTeX (formulas) will join later. */
 const PLOTLY_URL = "https://cdn.plot.ly/plotly-2.27.0.min.js";
@@ -99,6 +100,7 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
   drawn += hydrateSlides(root, w);
   drawn += hydrateTabs(root, w);
   drawn += hydrateQuiz(root, w);
+  drawn += hydrateParams(root, w);
 
   // Scenes (Plotly).
   if (pendingScenes(root).length > 0) {
@@ -141,6 +143,7 @@ export function purge(removed: Iterable<Element>, win?: RuntimeWindow): void {
   purgeSlides();
   purgeTabs();
   purgeQuiz();
+  purgeParams();
 }
 
 /**

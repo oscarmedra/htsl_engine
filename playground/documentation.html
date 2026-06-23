@@ -28,6 +28,7 @@
         <div class="group">Visualiser</div>
         <a href="#plots">Graphes 2D</a>
         <a href="#charts">Graphiques de données</a>
+        <a href="#param">Paramètre interactif</a>
         <a href="#geometry">Géométrie (Plotly)</a>
         <a href="#three">Scènes 3D animées</a>
         <a href="#slides">Présentations</a>
@@ -263,6 +264,22 @@
 }
 {@chart[type="pie"]: {pt[x="AB", y=10]/} {pt[x="TB", y=3]/}}
 {@chart[type="histogram", values="160,165,168,170,170,175", bins=6]/}</code></pre>
+        </section>
+
+        <section id="param">
+          <h2>Paramètre interactif</h2>
+          <p>Le « moment Desmos » : un <code>{@param}</code> ajoute un <strong>curseur</strong>, et
+            un <code>{@plot}</code> dont la fonction utilise ce paramètre se <strong>met à jour en
+            direct</strong> quand on le bouge — recalculé par le runtime (interpréteur sûr, jamais
+            <code>eval</code>). Aucun JavaScript dans le contenu.</p>
+          <ul>
+            <li><code>{@param[name="a", min=…, max=…, step=…, value=…]/}</code> — le
+              <code>name</code> est le nom utilisé dans une <code>fn</code> de <code>{@plot}</code>.
+              Plusieurs paramètres possibles.</li>
+          </ul>
+          <pre><code>{@param[name="a", min=-3, max=3, step=0.1, value=1]/}
+{@param[name="b", min=0.5, max=4, step=0.1, value=1]/}
+{@plot[fn="a*sin(b*x)", xrange="(-6.28,6.28)", title="y = a·sin(b·x)"]/}</code></pre>
         </section>
 
         <section id="geometry">
