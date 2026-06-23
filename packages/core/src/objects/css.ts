@@ -216,4 +216,20 @@ export const mathCss = `
   .htsl-fc-face { position: static; backface-visibility: visible; transform: none; margin-bottom: 0.4em; }
   .htsl-fc-inner::after { display: none; }
 }
+
+/* Variation / sign tables ({@variations}, {@signs}) — pure CSS grid. */
+.htsl-vt { overflow-x: auto; margin: 1em 0; }
+.htsl-vt-grid {
+  display: grid; align-items: stretch; min-width: max-content;
+  border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+}
+.htsl-vt-cell { border-right: 1px solid #e2e8f0; padding: 0.3em 0.5em; text-align: center; }
+.htsl-vt-r1 { background: #f8fafc; border-bottom: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; }
+.htsl-vt-label { font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.htsl-vt-val { min-height: 3.6rem; display: flex; justify-content: center; }
+.htsl-vt-val.htsl-vt-top { align-items: flex-start; }
+.htsl-vt-val.htsl-vt-bottom { align-items: flex-end; }
+.htsl-vt-arrow { min-height: 3.6rem; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; line-height: 1; color: #3b5bdb; }
+.htsl-vt-sign { display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.htsl-vt-zero { color: #64748b; }
 `.trim();

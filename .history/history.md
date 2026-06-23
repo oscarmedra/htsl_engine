@@ -605,3 +605,19 @@ via `values="a,b,c"`). Réutilise la voie Plotly déclarative (`objects/chart.ts
 - Tests cœur 253 (+6 ; bug de test `spec(src)`→`spec(compile(src))` corrigé).
   Vérifié en navigateur (barres + camembert avec % + histogramme dessinés) ;
   typecheck OK ; 0 erreur console. Prompt IA + doc (#charts) + catalogue (auto).
+
+## Lot 5 « pédagogie » : @variations + @signs (tableaux français)
+
+Le tableau de variations et le tableau de signes (différenciateur unique au
+lycée/prépa). `{@variations[var, fn]: {pt[x, y]/} {up|down/} …}` (positions
+haut/bas déduites des flèches) ; `{@signs: {pt[x]/} {pt[x, zero=true]/} {s:+|-} …}`.
+Rendu = grille CSS pure, valeurs en KaTeX (`inlineMath` exporté de math.ts).
+Détails : `.docs/20`.
+
+- `objects/variations.ts` (isVariationsPath, renderVariations/renderSigns,
+  collect()). Renderer : dispatch avec this.options.katex. Registre : variations
+  + signs (cat. formules) ; pt/up/down/s = éléments. CSS (mathCss) : grille,
+  alignement top/bottom, flèches ↗↘.
+- Booléen sans valeur → `zero=true`. Prompt IA + doc (#tables) + catalogue (auto).
+- Tests cœur 257 (+4). Vérifié en navigateur (variations de x²-2x, signes de
+  2x-2, 13 KaTeX) ; typecheck OK ; 0 erreur console.

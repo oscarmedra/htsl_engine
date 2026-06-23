@@ -502,6 +502,40 @@ registerObject({
   example: "{@flashcard:\n  {front: $e^{i\\pi}+1$}\n  {back: $= 0$}\n}",
 });
 
+// --- variation / sign tables ---
+registerObject({
+  path: "variations",
+  contentModel: "html",
+  category: "formules",
+  aliases: [],
+  description:
+    "Tableau de variations : enfants {pt[x=…, y=…]/} (abscisses + valeurs) et {up/}/{down/} entre eux. Attributs var, fn.",
+  attrs: [
+    { name: "var", type: "string", required: false, description: "Nom de la variable (déf. x)." },
+    { name: "fn", type: "string", required: false, description: "Nom de la fonction (déf. f(x))." },
+  ],
+  snippet:
+    "{@variations[var=${1:\"x\"}, fn=${2:\"f(x)\"}]:\n  {pt[x=${3:\"-\\\\infty\"}, y=${4:\"+\\\\infty\"}]/} {down/}\n  {pt[x=${5:\"0\"}, y=${6:\"-3\"}]/} {up/}\n  {pt[x=${7:\"+\\\\infty\"}, y=${8:\"+\\\\infty\"}]/}\n}",
+  example:
+    "{@variations[var=\"x\", fn=\"f(x)\"]:\n  {pt[x=\"-\\\\infty\", y=\"+\\\\infty\"]/} {down/}\n  {pt[x=\"0\", y=\"-3\"]/} {up/}\n  {pt[x=\"+\\\\infty\", y=\"+\\\\infty\"]/}\n}",
+});
+registerObject({
+  path: "signs",
+  contentModel: "html",
+  category: "formules",
+  aliases: [],
+  description:
+    "Tableau de signes : enfants {pt[x=…]/} (et {pt[x=…, zero=true]/} pour une racine) et {s: +|-} entre eux. Attributs var, fn.",
+  attrs: [
+    { name: "var", type: "string", required: false, description: "Nom de la variable (déf. x)." },
+    { name: "fn", type: "string", required: false, description: "Expression (déf. f(x))." },
+  ],
+  snippet:
+    "{@signs[var=${1:\"x\"}, fn=${2:\"f(x)\"}]:\n  {pt[x=${3:\"-\\\\infty\"}]/} {s: ${4:-}} {pt[x=${5:\"0\"}, zero=true]/} {s: ${6:+}} {pt[x=${7:\"+\\\\infty\"}]/}\n}",
+  example:
+    "{@signs[var=\"x\", fn=\"x-2\"]:\n  {pt[x=\"-\\\\infty\"]/} {s: -} {pt[x=\"2\", zero=true]/} {s: +} {pt[x=\"+\\\\infty\"]/}\n}",
+});
+
 // --- data charts ---
 registerObject({
   path: "chart",

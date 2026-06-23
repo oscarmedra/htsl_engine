@@ -21,6 +21,7 @@
         <a href="#syntax">Syntaxe de base</a>
         <a href="#math">Mathématiques</a>
         <a href="#callouts">Encadrés (théorèmes…)</a>
+        <a href="#tables">Variations & signes</a>
         <a href="#interactive">Correction & onglets</a>
         <a href="#quiz">Auto-évaluation (QCM)</a>
         <a href="#components">Composants & variables</a>
@@ -145,6 +146,29 @@
 {@example: {p:Avec $a=3$, $b=4$ : $c=5$.}}
 {@proof: {p:On découpe le carré de côté $a+b$ de deux façons.}}
 {p:Ce résultat est {@ref[to=pyth]/}.}</code></pre>
+        </section>
+
+        <section id="tables">
+          <h2>Tableaux de variations & de signes</h2>
+          <p>Le fameux <strong>tableau de variations</strong> (et le tableau de signes),
+            central au lycée et en prépa — rendu en grille CSS, valeurs en KaTeX.</p>
+          <ul>
+            <li><code>{@variations[var="x", fn="f(x)"]:…}</code> : un <code>{pt[x="…", y="…"]/}</code>
+              par point (abscisse + valeur), séparés par <code>{up/}</code> ou <code>{down/}</code>.
+              Les positions (haut = maximum, bas = minimum) sont <strong>déduites des
+              flèches</strong>. Utilisez <code>\infty</code> pour l'infini.</li>
+            <li><code>{@signs[var="x", fn="…"]:…}</code> : des <code>{pt[x="…"]/}</code>
+              (<code>{pt[x="…", zero=true]/}</code> pour une racine) séparés par <code>{s: +}</code>
+              ou <code>{s: -}</code>.</li>
+          </ul>
+          <pre><code>{@variations[var="x", fn="f(x)"]:
+  {pt[x="-\infty", y="+\infty"]/} {down/}
+  {pt[x="1", y="-1"]/} {up/}
+  {pt[x="+\infty", y="+\infty"]/}
+}
+{@signs[var="x", fn="f'(x)"]:
+  {pt[x="-\infty"]/} {s: -} {pt[x="1", zero=true]/} {s: +} {pt[x="+\infty"]/}
+}</code></pre>
         </section>
 
         <section id="interactive">

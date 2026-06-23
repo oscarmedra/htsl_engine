@@ -17,6 +17,7 @@ import {
 import { isThreePath, renderThree } from "./objects/three.js";
 import { isPlotPath, renderPlot } from "./objects/plot.js";
 import { isChartPath, renderChart } from "./objects/chart.js";
+import { isVariationsPath, renderVariations } from "./objects/variations.js";
 import { isSlidePath } from "./objects/slides.js";
 import {
   buildCalloutContext,
@@ -123,6 +124,7 @@ class Renderer {
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr);
     if (isChartPath(node.path)) return renderChart(node, hashAttr);
+    if (isVariationsPath(node.path)) return renderVariations(node, this.options.katex, hashAttr);
     return renderMathObject(node, this.ctx, {
       ...(this.options.katex !== undefined ? { katex: this.options.katex } : {}),
       ...(this.options.source !== undefined ? { source: this.options.source } : {}),

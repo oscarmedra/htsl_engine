@@ -44,6 +44,7 @@ export { threeSpec, isThreePath, renderThree } from "./objects/three.js";
 export type { ThreeSpec, ThreeObject } from "./objects/three.js";
 export { renderPlot, isPlotPath } from "./objects/plot.js";
 export { renderChart, isChartPath } from "./objects/chart.js";
+export { renderVariations, isVariationsPath } from "./objects/variations.js";
 export { compileExpr, safeExpr } from "./objects/expr.js";
 export type { CompiledExpr } from "./objects/expr.js";
 export { loadDependency, hydrate, purge, installHtslRuntime } from "./runtime.js";

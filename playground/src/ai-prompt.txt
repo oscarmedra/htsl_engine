@@ -105,6 +105,21 @@ Une scène dessine ses enfants ; hors scène, les mêmes objets donnent leur not
 
 - Les expressions acceptent `+ - * / % ^`, les fonctions usuelles (`sin cos tan exp log ln sqrt abs min max` …) et les constantes (`pi e tau phi`). Évaluation sûre, jamais de `eval`.
 
+### Tableaux de variations & de signes
+- **`{@variations[var="x", fn="f(x)"]: …}`** : enfants `{pt[x="…", y="…"]/}` (abscisse + valeur) séparés par `{up/}` ou `{down/}`. Les positions (haut = max, bas = min) sont déduites des flèches. Utilise `\\infty` pour l'infini.
+- **`{@signs[var="x", fn="…"]: …}`** : enfants `{pt[x="…"]/}` (et `{pt[x="…", zero=true]/}` pour une racine) séparés par `{s: +}` / `{s: -}`.
+
+```
+{@variations[var="x", fn="f(x)"]:
+  {pt[x="-\infty", y="+\infty"]/} {down/}
+  {pt[x="1", y="-1"]/} {up/}
+  {pt[x="+\infty", y="+\infty"]/}
+}
+{@signs[var="x", fn="f'(x)"]:
+  {pt[x="-\infty"]/} {s: -} {pt[x="1", zero=true]/} {s: +} {pt[x="+\infty"]/}
+}
+```
+
 ### Graphiques de données (objet chart, rendu Plotly)
 - `{@chart[type="bar|pie|line|histogram", title="…", xtitle="…", ytitle="…"]: …}`.
 - Points : un `{pt[x="…", y=…]/}` par valeur (x = catégorie/abscisse, y = valeur ; `color` optionnel).

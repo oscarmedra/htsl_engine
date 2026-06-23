@@ -268,7 +268,9 @@ function block(tex: string, katex: KatexLike | undefined, hashAttr: string): str
   return `<div class="htsl-math-block"${hashAttr}>${displayMath(tex, katex)}</div>`;
 }
 
-function inlineMath(tex: string, katex: KatexLike | undefined): string {
+/** Render a short LaTeX string inline (KaTeX if available, else raw). Reused by
+ *  the variation/sign tables for their cell values. */
+export function inlineMath(tex: string, katex: KatexLike | undefined): string {
   if (katex) return katexCached(tex, false, katex);
   return `<span class="htsl-math-raw">${escapeHtml(tex)}</span>`;
 }
