@@ -14,7 +14,6 @@ import { bracketMatching } from "@codemirror/language";
 import {
   autocompletion,
   completionKeymap,
-  completionStatus,
   closeBrackets,
   closeBracketsKeymap,
   startCompletion,
@@ -93,17 +92,8 @@ export function openBlockEditor(opts: BlockEditOptions): () => void {
         keymap.of([...closeBracketsKeymap, ...completionKeymap]),
         localKeys,
         keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
-        // Commit when focus truly leaves (click elsewhere, into the iframe, …),
-        // but ignore transient blurs from interacting with the completion popup.
-        EditorView.domEventHandlers({
-          blur: () => {
-            setTimeout(() => {
-              // Don't close while the autocompletion popup is open/being used.
-              if (!view.hasFocus && !completionStatus(view.state)) finish(true);
-            }, 0);
-            return false;
-          },
-        }),
+        // No auto-commit on blur: changes are applied only via the « Valider »
+        // button (or ⌘/Ctrl+Entrée). Clicking elsewhere leaves the editor open.
         EditorView.theme({
           "&": { maxHeight: "340px" },
           ".cm-scroller": { overflow: "auto" },
@@ -112,10 +102,34 @@ export function openBlockEditor(opts: BlockEditOptions): () => void {
     }),
   });
 
-  const hint = document.createElement("div");
+  // Footer: keyboard hint + explicit Cancel / Validate buttons. Changes are
+  // applied only on « Valider » (or ⌘/Ctrl+Entrée), never automatically.
+  const foot = document.createElement("div");
+  foot.className = "block-editor-foot";
+
+  const hint = document.createElement("span");
   hint.className = "block-editor-hint";
-  hint.textContent = "⌘/Ctrl + Entrée valider · Échap annuler";
-  wrap.appendChild(hint);
+  hint.textContent = "⌘/Ctrl + Entrée · Échap";
+
+  const actions = document.createElement("span");
+  actions.className = "block-editor-actions";
+
+  const mkBtn = (label: string, klass: string, commit: boolean): HTMLButtonElement => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = `be-btn ${klass}`;
+    b.textContent = label;
+    // Keep the click from blurring/refocusing oddly before it registers.
+    b.addEventListener("mousedown", (e) => e.preventDefault());
+    b.addEventListener("click", () => finish(commit));
+    return b;
+  };
+  actions.appendChild(mkBtn("Annuler", "be-cancel", false));
+  actions.appendChild(mkBtn("Valider", "be-commit", true));
+
+  foot.appendChild(hint);
+  foot.appendChild(actions);
+  wrap.appendChild(foot);
 
   document.body.appendChild(wrap);
   view.focus();

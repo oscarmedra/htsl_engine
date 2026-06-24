@@ -106,11 +106,21 @@ body {
 .block-editor .cm-editor { font-size: 13px; background: var(--panel); }
 .block-editor .cm-editor.cm-focused { outline: none; }
 .block-editor .cm-gutters { border-right: 1px solid var(--border); }
-.block-editor-hint {
-  font-size: 0.68rem; color: var(--muted); background: #f6f7f9;
-  padding: 0.2rem 0.55rem; border-top: 1px solid var(--border);
-  border-radius: 0 0 6px 6px;
+.block-editor-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  background: #f6f7f9; border-top: 1px solid var(--border);
+  border-radius: 0 0 6px 6px; padding: 0.3rem 0.5rem;
 }
+.block-editor-hint { font-size: 0.68rem; color: var(--muted); font-family: var(--mono); }
+.block-editor-actions { display: flex; gap: 0.4rem; }
+.be-btn {
+  font-size: 0.78rem; padding: 0.25rem 0.7rem; border-radius: 7px;
+  border: 1px solid var(--border); background: #fff; color: var(--ink); cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, filter 0.12s;
+}
+.be-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+.be-commit { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.be-commit:hover { filter: brightness(1.08); background: var(--accent); }
 /* Toggle switches (Éditeur / AST). The native checkbox keeps its id + change
    events; only its appearance is replaced by a sliding switch. */
 .toggle {

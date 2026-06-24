@@ -665,3 +665,16 @@ tout l'accumulé depuis 0.1.0 : objets math complets, @slider, fix autocompléti
 et les 6 lots pédagogie. Publication débloquée par un token d'accès qui contourne
 la 2FA (les tokens « Publish » ne passent pas). Sécurité : tokens exposés en
 session → à révoquer côté utilisateur.
+
+## Éditeur de bloc flottant : boutons Annuler/Valider (fin de la validation auto)
+
+L'éditeur de bloc (double-clic sur une instance de composant dans le rendu)
+ne valide plus automatiquement à la perte de focus. Ajout d'une barre
+« Annuler » / « Valider » (block-editor.ts) ; suppression du handler `blur`
+auto-commit (et de l'import `completionStatus` devenu inutile). « Valider » (ou
+⌘/Ctrl+Entrée) applique, « Annuler » (ou Échap) abandonne ; cliquer ailleurs
+laisse l'éditeur ouvert. CSS `.block-editor-foot`/`.be-btn` (Valider = accent).
+Vérifié en navigateur : ouverture avec le bon contenu, blur n'applique rien
+(éditeur reste ouvert, doc inchangé), Valider applique et ferme. typecheck OK.
+(NB repéré au passage : `carte` est désormais réservé — alias de @flashcard —
+donc inutilisable comme nom de composant.)

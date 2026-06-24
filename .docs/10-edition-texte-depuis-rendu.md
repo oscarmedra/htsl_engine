@@ -73,8 +73,12 @@ peut désormais cliquer l'élément lui-même.
   children}`) — chaque instance montre **son** contenu, pas la définition partagée.
   Même expérience que l'éditeur principal (coloration, autocomplétion, linter,
   pliage), via `@noah-medra/htsl-codemirror` (`playground/src/block-editor.ts`).
-  `⌘/Ctrl + Entrée` (ou perte de focus) valide → `source[début:fin]` est remplacé
-  tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; `Échap` annule.
+  Une **barre de boutons** « Annuler » / « Valider » (+ rappel clavier) ferme
+  l'éditeur : **« Valider »** (ou `⌘/Ctrl + Entrée`) → `source[début:fin]` est
+  remplacé tel quel (HTSL brut, pas de ré-échappement) puis re-rendu ; **« Annuler »**
+  (ou `Échap`) abandonne. **Plus de validation automatique à la perte de focus** :
+  cliquer ailleurs laisse l'éditeur ouvert (rien n'est appliqué tant qu'on n'a pas
+  cliqué « Valider ») — comportement de fenêtre modale, plus prévisible.
   L'objectif est de pouvoir **tout faire depuis le rendu** (l'éditeur principal
   devient optionnel). Détails : l'éditeur est monté dans le document parent (où
   CodeMirror fonctionne déjà) puis positionné via l'offset de l'iframe ; ses
