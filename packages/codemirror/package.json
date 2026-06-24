@@ -1,6 +1,6 @@
 {
   "name": "@noah-medra/htsl-codemirror",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Extensions CodeMirror 6 pour HTSL : coloration, autocomplétion, linter.",
   "type": "module",
   "main": "./dist/index.js",
@@ -34,7 +34,13 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["htsl", "codemirror", "editor", "syntax", "autocomplete"],
+  "keywords": [
+    "htsl",
+    "codemirror",
+    "editor",
+    "syntax",
+    "autocomplete"
+  ],
   "license": "MIT",
   "sideEffects": false,
   "peerDependencies": {
