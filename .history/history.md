@@ -678,3 +678,17 @@ Vérifié en navigateur : ouverture avec le bon contenu, blur n'applique rien
 (éditeur reste ouvert, doc inchangé), Valider applique et ferme. typecheck OK.
 (NB repéré au passage : `carte` est désormais réservé — alias de @flashcard —
 donc inutilisable comme nom de composant.)
+
+## Composants : un `{!define}` masque un objet intégré (fin des collisions de noms)
+
+Avant, nommer un composant comme un objet/alias intégré levait « collision avec
+un objet enregistré » — donc `carte` (alias de @flashcard), `ref`, `graphique`…
+étaient de fait réservés. Nouveau modèle « l'intention de l'auteur gagne » :
+la table des composants (`expand.ts`) est indexée par le **nom exact écrit** et
+l'usage est résolu via `rawPath`. Un `{!define carte}` masque alors uniquement
+`{@carte}` ; le nom canonique `{@flashcard}` atteint toujours l'objet intégré.
+Plus de mot réservé ; seul le doublon de define reste une erreur. `isKnownObject`/
+`resolvePath` retirés de expand.ts (import inutile). Tests components.test.ts :
++2 (ombrage + nom canonique encore joignable) → 22 ; suite core 263 verte.
+Vérifié en navigateur : `{@carte}` rend le composant utilisateur (`p.mine`),
+`{@flashcard}` rend bien la flashcard intégrée, aucune bannière d'erreur.

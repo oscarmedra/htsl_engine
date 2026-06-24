@@ -16,7 +16,6 @@
  *   interpolate inside attribute values via `{$name}`.
  */
 import { HTSLError } from "../errors.js";
-import { isKnownObject, resolvePath } from "../objects/registry.js";
 import type { DefineNode, Loc, Node } from "../types.js";
 
 const MAX_COMPONENT_DEPTH = 64;
@@ -55,14 +54,11 @@ function collectDefines(nodes: Node[], source: string | undefined): Map<string, 
 
   const walk = (node: Node): void => {
     if (node.type === "define") {
-      const key = resolvePath(node.name);
-      if (isKnownObject(node.name)) {
-        throw new HTSLError(
-          `le composant "${node.name}" entre en collision avec un objet enregistré.`,
-          node.loc,
-          source,
-        );
-      }
+      // Keyed by the *exact name as written*. A user define therefore shadows a
+      // built-in object only for that precise name — e.g. `{!define carte}` makes
+      // `{@carte}` the component while `{@flashcard}` still reaches the built-in.
+      // Author intent wins, with no reserved-word collisions to trip over.
+      const key = node.name;
       if (map.has(key)) {
         throw new HTSLError(`composant "${node.name}" déjà défini.`, node.loc, source);
       }
@@ -133,7 +129,9 @@ function expandNode(node: Node, ctx: Ctx): Node[] {
     }
 
     case "object": {
-      const component = ctx.components.get(node.path);
+      // Match the user component by the *exact* name written (rawPath), so a
+      // define only shadows that literal name — never an alias family.
+      const component = ctx.components.get(node.rawPath);
       if (component) return expandComponent(component, node, ctx);
       return [
         {
@@ -165,7 +163,7 @@ function expandComponent(
   usage: Extract<Node, { type: "object" }>,
   ctx: Ctx,
 ): Node[] {
-  const key = resolvePath(component.name);
+  const key = component.name;
 
   if (ctx.stack.includes(key)) {
     throw new HTSLError(

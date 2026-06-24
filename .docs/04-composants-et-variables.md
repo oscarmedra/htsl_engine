@@ -49,17 +49,28 @@ Intégration : `render` appelle `expand` en tête (avec `source` pour les
 excerpts d'erreur), puis construit le contexte math et rend. `expand` est
 exporté publiquement.
 
+## Ombrage des noms (l'intention de l'auteur gagne)
+
+La table des composants est désormais indexée par le **nom exact écrit** (et
+l'usage est résolu par `rawPath`). Un `{!define}` peut donc porter le même nom
+qu'un objet intégré (ou un de ses alias) : il **masque** alors ce nom précis,
+sans erreur de collision. Ex. : `{!define carte[…]}` rend `{@carte}` égal au
+composant, tandis que `{@flashcard}` (le nom canonique) atteint toujours l'objet
+intégré. Aucun mot n'est « réservé » côté auteur ; seul un **doublon de define**
+(même nom défini deux fois) reste une erreur.
+
 ## Erreurs localisées
 
 Paramètre obligatoire manquant, variable inconnue, récursion infinie, profondeur
-max (64), collision de nom, composant/variable jamais fermé.
+max (64), doublon de define (même nom), composant/variable jamais fermé.
 
-## Tests (`tests/components.test.ts`, 20)
+## Tests (`tests/components.test.ts`, 22)
 
 Expansion + injection params/children, défauts et override, paramètre manquant,
 usage avant définition, self-closing, composant dans composant, récursion directe
-et mutuelle, collision registre, doublon, variables (texte, attributs,
-redéfinition, var→var, inconnue, var document dans composant), composant + math.
+et mutuelle, **ombrage d'un objet intégré par un define (et nom canonique encore
+joignable)**, doublon, variables (texte, attributs, redéfinition, var→var,
+inconnue, var document dans composant), composant + math.
 
 ## Démo
 

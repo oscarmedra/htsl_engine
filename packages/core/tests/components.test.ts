@@ -81,10 +81,22 @@ describe("components — nesting & recursion", () => {
 });
 
 describe("components — registry sharing", () => {
-  it("errors when a component name collides with a registered object", () => {
-    expect(() => compile(`{!define mti[x]:{p:{$x}}}{@mti[x=1]/}`)).toThrow(
-      /collision avec un objet enregistré/,
+  it("lets a user define shadow a built-in object for that exact name", () => {
+    // `carte` is a built-in alias (@flashcard). Defining it shadows only the
+    // literal `{@carte}` call; the canonical `{@flashcard}` still works.
+    const html = compile(`{!define carte[t]:{p.mine:{$t}}}{@carte[t=Salut]/}`);
+    expect(html).toContain('class="mine"');
+    expect(html).toContain("Salut");
+    expect(html).not.toContain("htsl-flashcard");
+  });
+
+  it("keeps the built-in reachable under its canonical name when shadowed", () => {
+    const html = compile(
+      `{!define carte[t]:{p.mine:{$t}}}{@flashcard:{front:A}{back:B}}`,
     );
+    // The canonical call renders the built-in flashcard, not the user component.
+    expect(html).toContain("htsl-flashcard");
+    expect(html).not.toContain('class="mine"');
   });
 
   it("errors on a duplicate component definition", () => {
