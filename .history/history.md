@@ -656,3 +656,12 @@ Vérifié : compile sans erreur (0 marqueur), et en navigateur (nouvel utilisate
 localStorage vidé) tout rend — 52 KaTeX, 11 Plotly, scène 3D (3 canvas), 5
 encadrés, quiz, 2 flashcards, onglets, slider, 2 curseurs, 2 tableaux ; éditeur
 masqué par défaut (rendu plein écran) ; 0 erreur console ; typecheck OK.
+
+## Publication npm 0.1.1 (2026-06-24)
+
+`@noah-medra/htsl-core@0.1.1` et `@noah-medra/htsl-codemirror@0.1.1` publiés
+(visibles via `npm view`, CDN unpkg `htsl.auto.global.js@0.1.1` → 200). Inclut
+tout l'accumulé depuis 0.1.0 : objets math complets, @slider, fix autocomplétion,
+et les 6 lots pédagogie. Publication débloquée par un token d'accès qui contourne
+la 2FA (les tokens « Publish » ne passent pas). Sécurité : tokens exposés en
+session → à révoquer côté utilisateur.
