@@ -640,3 +640,19 @@ Plotly.restyle. Détails : `.docs/21`.
   0 erreur. Prompt IA + doc (#param) + catalogue (auto).
 - Limite v1 : une ré-édition réinitialise les curseurs (morphdom).
 - Feuille de route pédagogique BOUCLÉE (lots 1–6).
+
+## Contenu par défaut du playground : « grand tour » complet (showcase)
+
+Le document par défaut (examples[0], affiché aux nouveaux visiteurs via
+`initialDoc()` = `loadLocal() ?? examples[0]`) devient une démonstration
+exhaustive utilisant TOUS les objets pédagogiques (encadrés, formules/objets
+imbriqués, géométrie 2D/3D + plan complexe, graphes + paramètre interactif,
+tableaux variations/signes, charts, scène 3D animée, quiz/flashcard/tabs/reveal,
+slider). Stocké dans `playground/src/grand-tour.txt` importé en `?raw` (évite la
+corruption des backslashes LaTeX), branché via `import grandTour` dans
+`examples.ts` (remplace l'ancien String.raw inline).
+
+Vérifié : compile sans erreur (0 marqueur), et en navigateur (nouvel utilisateur,
+localStorage vidé) tout rend — 52 KaTeX, 11 Plotly, scène 3D (3 canvas), 5
+encadrés, quiz, 2 flashcards, onglets, slider, 2 curseurs, 2 tableaux ; éditeur
+masqué par défaut (rendu plein écran) ; 0 erreur console ; typecheck OK.
