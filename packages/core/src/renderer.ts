@@ -444,6 +444,32 @@ function rawTextOf(node: ElementNode): string {
     .join("");
 }
 
+/** HTML boolean attributes: rendered bare (`controls`) when truthy, omitted when
+ * `false`. Lets `{video[controls]:…}` (or `[controls=true]`) emit idiomatic HTML. */
+const BOOLEAN_ATTRS = new Set([
+  "allowfullscreen",
+  "async",
+  "autofocus",
+  "autoplay",
+  "checked",
+  "controls",
+  "default",
+  "defer",
+  "disabled",
+  "hidden",
+  "ismap",
+  "loop",
+  "multiple",
+  "muted",
+  "novalidate",
+  "open",
+  "playsinline",
+  "readonly",
+  "required",
+  "reversed",
+  "selected",
+]);
+
 function openTag(node: ElementNode, extra = ""): string {
   let s = `<${node.tag}${extra}`;
   if (node.id !== null) s += ` id="${escapeHtml(node.id)}"`;
@@ -451,6 +477,10 @@ function openTag(node: ElementNode, extra = ""): string {
     s += ` class="${escapeHtml(node.classes.join(" "))}"`;
   }
   for (const [name, value] of Object.entries(node.attrs)) {
+    if (BOOLEAN_ATTRS.has(name)) {
+      if (value !== "false") s += ` ${name}`;
+      continue;
+    }
     s += ` ${name}="${escapeHtml(value)}"`;
   }
   return s + ">";

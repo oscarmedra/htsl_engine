@@ -692,3 +692,26 @@ Plus de mot réservé ; seul le doublon de define reste une erreur. `isKnownObje
 +2 (ombrage + nom canonique encore joignable) → 22 ; suite core 263 verte.
 Vérifié en navigateur : `{@carte}` rend le composant utilisateur (`p.mine`),
 `{@flashcard}` rend bien la flashcard intégrée, aucune bannière d'erreur.
+
+## Médias de première classe : images, vidéos, audio, embeds + attributs booléens nus
+
+Images étaient déjà gérées (`{img}` enregistré). Désormais `figure`, `figcaption`,
+`video`, `audio`, `source`, `iframe` sont **enregistrés** (autocomplétion, snippets,
+doc, validation d'attributs) — avant ils « marchaient » seulement faute de liste
+blanche de balises. Ajout des **attributs booléens nus** : `{video[controls]:}`
+(parser accepte `[attr]` sans `=` → stocké "true" ; renderer émet l'attribut **nu**
+`<video controls>` pour un jeu de booléens HTML, l'omet si `=false`). Rétro-compatible
+(`[controls=true]` donne `<video controls>` au lieu de `controls="true"`).
+
+- parser.ts : attribut nu = booléen "true".
+- renderer.ts : `BOOLEAN_ATTRS` → émission nue / omission.
+- registry.ts : figure/figcaption/video/audio/source/iframe + attrs (poster, controls,
+  autoplay, loop, muted, playsinline, allowfullscreen…) ; img gagne width/height.
+- tests : media.test.ts (13) ; parser.test.ts mis à jour (bare attr = boolean) ;
+  suite core 275 verte ; codemirror 37 verte.
+- AI prompt (playground) : section « Médias » + règle attributs booléens.
+- doc : .docs/22-medias-images-video.md.
+
+Vérifié en navigateur : image data-URI décodée (naturalWidth>0), figure/figcaption,
+`<video controls>` (attribut **nu**) + `<source>`, `<audio>`, `<iframe allowfullscreen>` ;
+0 erreur console.

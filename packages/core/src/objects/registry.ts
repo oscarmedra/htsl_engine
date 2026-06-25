@@ -1126,8 +1126,70 @@ el(
   "{table:{tr:{th:A}{th:B}}{tr:{td:1}{td:2}}}",
 );
 el("img", "Image.", "{img[src=${1:\"image.png\"}, alt=${2:\"description\"}]/}", "{img[src=\"image.png\", alt=\"une image\"]/}", [
-  { name: "src", type: "string", required: true, description: "Chemin de l'image." },
+  { name: "src", type: "string", required: true, description: "Chemin/URL de l'image." },
   { name: "alt", type: "string", required: false, description: "Texte alternatif." },
+  { name: "width", type: "number", required: false, description: "Largeur (px)." },
+  { name: "height", type: "number", required: false, description: "Hauteur (px)." },
 ]);
+el(
+  "figure",
+  "Figure (image + légende).",
+  "{figure:{img[src=${1:\"image.png\"}, alt=${2:\"description\"}]/}{figcaption:${3:Légende}}}",
+  "{figure:{img[src=\"schema.png\", alt=\"schéma\"]/}{figcaption:Figure 1 — le schéma}}",
+);
+el("figcaption", "Légende d'une figure.", "{figcaption:${1:Légende}}", "{figcaption:Figure 1.}");
+el(
+  "video",
+  "Vidéo (avec contrôles natifs).",
+  "{video[src=${1:\"film.mp4\"}, controls]:}",
+  "{video[src=\"film.mp4\", controls, width=\"480\"]:}",
+  [
+    { name: "src", type: "string", required: false, description: "URL de la vidéo (ou utiliser {source}/)." },
+    { name: "poster", type: "string", required: false, description: "Image d'aperçu." },
+    { name: "width", type: "number", required: false, description: "Largeur (px)." },
+    { name: "height", type: "number", required: false, description: "Hauteur (px)." },
+    bool("controls", "false", "Afficher les contrôles de lecture."),
+    bool("autoplay", "false", "Lecture automatique (souvent exige muted)."),
+    bool("loop", "false", "Lecture en boucle."),
+    bool("muted", "false", "Démarrer sans le son."),
+    bool("playsinline", "false", "Lecture en ligne sur mobile (pas de plein écran forcé)."),
+  ],
+);
+el(
+  "audio",
+  "Audio (avec contrôles natifs).",
+  "{audio[src=${1:\"son.mp3\"}, controls]:}",
+  "{audio[src=\"son.mp3\", controls]:}",
+  [
+    { name: "src", type: "string", required: false, description: "URL du son (ou utiliser {source}/)." },
+    bool("controls", "false", "Afficher les contrôles de lecture."),
+    bool("autoplay", "false", "Lecture automatique."),
+    bool("loop", "false", "Lecture en boucle."),
+    bool("muted", "false", "Démarrer sans le son."),
+  ],
+);
+el(
+  "source",
+  "Source média (dans {video}/{audio}).",
+  "{source[src=${1:\"film.mp4\"}, type=${2:\"video/mp4\"}]/}",
+  "{source[src=\"film.mp4\", type=\"video/mp4\"]/}",
+  [
+    { name: "src", type: "string", required: true, description: "URL de la ressource média." },
+    { name: "type", type: "string", required: false, description: "Type MIME (ex. video/mp4)." },
+  ],
+);
+el(
+  "iframe",
+  "Cadre embarqué (YouTube, carte, etc.).",
+  "{iframe[src=${1:\"https://www.youtube.com/embed/ID\"}, width=${2:\"560\"}, height=${3:\"315\"}]/}",
+  "{iframe[src=\"https://www.youtube.com/embed/ID\", width=\"560\", height=\"315\"]/}",
+  [
+    { name: "src", type: "string", required: true, description: "URL à embarquer." },
+    { name: "width", type: "number", required: false, description: "Largeur (px)." },
+    { name: "height", type: "number", required: false, description: "Hauteur (px)." },
+    { name: "title", type: "string", required: false, description: "Titre accessible du cadre." },
+    bool("allowfullscreen", "false", "Autoriser le plein écran."),
+  ],
+);
 el("hr", "Séparateur horizontal.", "{hr/}", "{hr/}");
 el("div", "Conteneur (avec classes CSS).", "{div[class=${1:\"\"}]:${2:contenu}}", "{div[class=\"box\"]:contenu}", [CLASS]);

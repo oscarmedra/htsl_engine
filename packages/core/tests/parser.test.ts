@@ -113,8 +113,8 @@ describe("parser — errors (§5), strict mode", () => {
     expect(() => parse("{a[x=]:y}")).toThrow(/attribut malformé/);
   });
 
-  it("detects a malformed attribute (missing equals)", () => {
-    expect(() => parse("{a[x]:y}")).toThrow(/attribut malformé/);
+  it("treats a bare attribute as a boolean (present → \"true\")", () => {
+    expect(firstElement("{a[x]:y}").attrs).toEqual({ x: "true" });
   });
 
   it("detects an invalid identifier", () => {

@@ -430,21 +430,23 @@ class Parser {
       }
       this.advance();
 
-      this.expect(
-        "EQUALS",
-        `attribut malformé : "=" attendu après "${name.value}".`,
-        this.peek().loc,
-      );
-
-      const value = this.peek();
-      if (value.type === "STRING" || value.type === "IDENT") {
-        this.advance();
-        attrs[name.value] = value.value;
+      // Bare boolean attribute: `[controls]` (no `=value`) is shorthand for a
+      // present HTML boolean attribute. We store "true" so renderers/consumers
+      // that test attrs uniformly keep working; the renderer emits it bare.
+      if (!this.check("EQUALS")) {
+        attrs[name.value] = "true";
       } else {
-        this.fail(
-          `attribut malformé : valeur attendue pour "${name.value}".`,
-          value.loc,
-        );
+        this.advance(); // consume "="
+        const value = this.peek();
+        if (value.type === "STRING" || value.type === "IDENT") {
+          this.advance();
+          attrs[name.value] = value.value;
+        } else {
+          this.fail(
+            `attribut malformé : valeur attendue pour "${name.value}".`,
+            value.loc,
+          );
+        }
       }
 
       if (this.check("COMMA")) {
