@@ -76,6 +76,11 @@ Pour du LaTeX brut réutilisable, mets la valeur ENTRE GUILLEMETS (elle est alor
 - Fraction : `{@mof: {num:x+1} {den:2}}`
 - Vecteur colonne : `{@mov: {c:1} {c:2} {c:3}}`
 - Matrice : `{@mom: {row:1,2} {row:3,4}}`
+- Délimiteurs (sur `@mov`/`@mom`/`@mot`) : attribut `delim` = `paren` (défaut `( )`), `bracket` `[ ]`, `brace` `{ }`, `bar` `|·|` (déterminant), `norm` `‖·‖`, `none` (aucun). Ex. `{@mom[delim=bracket]: {row:1,2}{row:3,4}}`.
+- Objet unifié `{@mot}` (tenseur) : vecteur/matrice/tenseur d'un seul objet.
+  - Vecteur colonne : `{@mot: {c:1}{c:2}}` — ligne : `{@mot: {row:1,2,3}}` — colonne depuis une ligne : `{@mot[orient=col]: {row:1,2,3}}`.
+  - Matrice : `{@mot: {row:1,2}{row:3,4}}`.
+  - Tenseur (rang 3) : tranches 2D `{slice[label="k=1"]: {row:…}{row:…}}` affichées côte à côte, étiquetées. Ex. `{@mot[delim=bracket]: {slice[label="k=1"]:{row:1,0}{row:0,1}} {slice[label="k=2"]:{row:0,1}{row:1,0}}}`.
 - Complexe : `{@moc[re=3, im=2]/}` → 3 + 2i
 - Ensemble : `{@mos: 1, 2, 3}` ; Intervalle : `{@moi[from=0, to=1, open="right"]/}`
 - Constantes auto-fermantes : `{@mc.pi/}` `{@mc.e/}` `{@mc.inf/}` `{@mc.phi/}` `{@mc.i/}`

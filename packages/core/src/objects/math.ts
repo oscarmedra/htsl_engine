@@ -52,17 +52,11 @@ export function latexOfObject(obj: ObjectNode): string {
     case "math.object.fraction":
       return `\\frac{${childLatex(obj, "num")}}{${childLatex(obj, "den")}}`;
     case "math.object.vector":
-      return env("pmatrix", lines(obj, "c"));
+      return env(matrixEnv(obj.attrs["delim"]), lines(obj, "c"));
     case "math.object.matrix":
-      return env(
-        "pmatrix",
-        lines(obj, "row").map((r) =>
-          r
-            .split(",")
-            .map((cell) => cell.trim())
-            .join(" & "),
-        ),
-      );
+      return env(matrixEnv(obj.attrs["delim"]), lines(obj, "row").map(matrixRow));
+    case "math.object.tensor":
+      return tensorLatex(obj);
     case "math.object.set":
       return `\\left\\{ ${latexOfChildren(obj.children).trim()} \\right\\}`;
     case "math.object.complex":
@@ -88,9 +82,83 @@ export function latexOfObject(obj: ObjectNode): string {
 }
 
 function lines(obj: ObjectNode, tag: string): string[] {
-  return obj.children
+  return linesOf(obj.children, tag);
+}
+
+/** Like `lines`, but over an arbitrary node list (e.g. a tensor slice's rows). */
+function linesOf(children: Node[], tag: string): string[] {
+  return children
     .filter((c): c is ElementNode => c.type === "element" && c.tag === tag)
     .map((c) => latexOfChildren(c.children).trim());
+}
+
+/** Map a `delim` attribute to a KaTeX matrix environment (delimiter style). */
+function matrixEnv(delim: string | undefined): string {
+  switch ((delim ?? "").trim().toLowerCase()) {
+    case "bracket":
+    case "crochet":
+      return "bmatrix"; // [ ]
+    case "brace":
+    case "accolade":
+      return "Bmatrix"; // { }
+    case "bar":
+    case "det":
+    case "determinant":
+    case "déterminant":
+      return "vmatrix"; // | |
+    case "norm":
+    case "norme":
+      return "Vmatrix"; // ‖ ‖
+    case "none":
+    case "plain":
+    case "aucun":
+      return "matrix"; // (no delimiters)
+    default:
+      return "pmatrix"; // ( )
+  }
+}
+
+/** A comma-separated row (`1, 2, 3`) → aligned LaTeX cells (`1 & 2 & 3`). */
+function matrixRow(row: string): string {
+  return row
+    .split(",")
+    .map((cell) => cell.trim())
+    .join(" & ");
+}
+
+/**
+ * Unified array object `@mot`: renders a vector, a matrix, or a rank-3 tensor.
+ *  - `{c: …}` children  → column vector.
+ *  - `{row: a,b,c}` …   → matrix (single row = row vector; `orient=col` transposes it).
+ *  - `{slice: {row…}…}` → tensor: 2D slices shown side by side, each labelled
+ *    (`{slice[label="k=1"]:…}`, else 1, 2, …).
+ * `delim` picks the delimiter style everywhere.
+ */
+function tensorLatex(obj: ObjectNode): string {
+  const envName = matrixEnv(obj.attrs["delim"]);
+
+  const slices = obj.children.filter(
+    (c): c is ElementNode => c.type === "element" && c.tag === "slice",
+  );
+  if (slices.length > 0) {
+    return slices
+      .map((slice, i) => {
+        const matrix = env(envName, linesOf(slice.children, "row").map(matrixRow));
+        const label = slice.attrs["label"] ?? String(i + 1);
+        return `\\underset{${label}}{${matrix}}`;
+      })
+      .join(" \\quad ");
+  }
+
+  const cols = lines(obj, "c");
+  if (cols.length > 0) return env(envName, cols); // column vector
+
+  const rows = lines(obj, "row");
+  if (rows.length === 1 && (obj.attrs["orient"] ?? "").trim() === "col") {
+    // A single row asked to be vertical → transpose into a column vector.
+    return env(envName, rows[0]!.split(",").map((cell) => cell.trim()));
+  }
+  return env(envName, rows.map(matrixRow));
 }
 
 function childLatex(obj: ObjectNode, tag: string): string {

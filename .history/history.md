@@ -715,3 +715,22 @@ blanche de balises. Ajout des **attributs booléens nus** : `{video[controls]:}`
 Vérifié en navigateur : image data-URI décodée (naturalWidth>0), figure/figcaption,
 `<video controls>` (attribut **nu**) + `<source>`, `<audio>`, `<iframe allowfullscreen>` ;
 0 erreur console.
+
+## Délimiteurs de matrices + objet tenseur @mot
+
+Deux ajouts à la couche math. (1) Attribut `delim` sur `@mov`/`@mom`/`@mot` :
+paren ( ) [défaut], bracket [ ], brace { }, bar |·| (déterminant), norm ‖·‖,
+none — via `matrixEnv()` (synonymes FR tolérés : crochet/accolade/norme/aucun).
+(2) Nouvel objet unifié `@mot` (math.object.tensor) : vecteur ({c:…}), vecteur
+ligne (une {row:…}), transposé (orient=col), matrice (plusieurs {row:…}) et
+**tenseur** rang 3 ({slice:{row…}…} → tranches 2D côte à côte, étiquetées via
+\underset, sinon numérotées). HTSL affiche, ne calcule pas.
+
+- math.ts : matrixEnv/matrixRow/linesOf/tensorLatex ; cases vector/matrix (delim)
+  + tensor.
+- registry.ts : DELIM (enum) ajouté à mov/mom ; math.object.tensor (mot) enregistré.
+- tests : tensor.test.ts (13) ; core 287, codemirror OK.
+- ai-prompt.txt : délimiteurs + @mot ; .docs/23 : page dédiée.
+
+Vérifié en navigateur : [ ], |·|, ‖·‖ et tenseur (2 tranches k=1/k=2) rendus par
+KaTeX sans erreur ; autocomplétion de @mot ; 0 erreur console.

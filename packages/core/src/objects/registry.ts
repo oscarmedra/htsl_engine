@@ -169,6 +169,14 @@ export function describeObject(pathOrAlias: string): ObjectMeta | null {
 
 const COLOR: AttrSchema = { name: "color", type: "color", required: false, description: "Couleur de l'objet." };
 const OPACITY: AttrSchema = { name: "opacity", type: "number", required: false, description: "Opacité (0–1)." };
+const DELIM: AttrSchema = {
+  name: "delim",
+  type: "enum",
+  required: false,
+  default: "paren",
+  values: ["paren", "bracket", "brace", "bar", "norm", "none"],
+  description: "Délimiteurs : paren ( ), bracket [ ], brace { }, bar |·| (déterminant), norm ‖·‖, none (aucun).",
+};
 const NAME: AttrSchema = { name: "name", type: "string", required: false, description: "Étiquette affichée." };
 
 function tuple(name: string, required: boolean, description: string): AttrSchema {
@@ -271,7 +279,7 @@ registerObject({
   category: "formules",
   aliases: ["mov"],
   description: "Vecteur colonne (un enfant {c:...} par composante).",
-  attrs: [],
+  attrs: [DELIM],
   snippet: "{@mov:{c:${1:1}}{c:${2:2}}{c:${3:3}}}",
   example: "{@mov:{c:1}{c:2}{c:3}}",
 });
@@ -281,9 +289,23 @@ registerObject({
   category: "formules",
   aliases: ["mom"],
   description: "Matrice (un enfant {row:a,b,…} par ligne, colonnes séparées par des virgules).",
-  attrs: [],
+  attrs: [DELIM],
   snippet: "{@mom:{row:${1:1,2}}{row:${2:3,4}}}",
   example: "{@mom:{row:1,2}{row:3,4}}",
+});
+registerObject({
+  path: "math.object.tensor",
+  contentModel: "html",
+  category: "formules",
+  aliases: ["mot"],
+  description:
+    "Tableau unifié : vecteur ({c:…}), matrice ({row:a,b,…}) ou tenseur ({slice:…} de {row:…}). Délimiteur réglable.",
+  attrs: [
+    DELIM,
+    { name: "orient", type: "enum", required: false, values: ["row", "col"], description: "Orientation d'un vecteur à une seule {row:} (col = transposé en colonne)." },
+  ],
+  snippet: "{@mot:\n  {slice[label=\"k=1\"]:{row:${1:1,0}}{row:${2:0,1}}}\n  {slice[label=\"k=2\"]:{row:${3:0,1}}{row:${4:1,0}}}\n}",
+  example: "{@mot:{slice[label=\"k=1\"]:{row:1,0}{row:0,1}}{slice[label=\"k=2\"]:{row:0,1}{row:1,0}}}",
 });
 registerObject({
   path: "math.object.complex",
