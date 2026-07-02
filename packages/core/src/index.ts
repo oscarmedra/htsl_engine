@@ -57,6 +57,7 @@ export type { ComponentInfo } from "./introspect.js";
 export type { ObjectMeta, AttrSchema, AttrType, RegistryEntry, ContentModel, Category, EntryKind } from "./objects/registry.js";
 export { mathCss } from "./objects/css.js";
 export { HTSLError } from "./errors.js";
+export { isAttrSafe } from "./sanitize.js";
 
 export type {
   Node,

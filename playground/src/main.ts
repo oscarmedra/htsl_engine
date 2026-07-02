@@ -140,7 +140,7 @@ function run(view: EditorView, force = false): void {
   try {
     // hashBlocks lets the frame morpher skip unchanged blocks; editableText
     // makes source-backed text runs editable directly in the preview.
-    const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true });
+    const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true, sanitize: true });
     latestHtml = html;
     const stats = frame.apply(html);
     showPerf(performance.now() - t0, stats.touched, stats.total);

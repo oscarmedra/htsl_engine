@@ -4,9 +4,12 @@
  * Security: all text content and attribute values are HTML-escaped by default
  * (`<`, `>`, `&`, `"`). This is non-negotiable (XSS prevention). When
  * `allowedTags` is provided, any element whose tag is not listed is serialized
- * and emitted as escaped text rather than as a live HTML element.
+ * and emitted as escaped text rather than as a live HTML element. When
+ * `sanitize` is on, unsafe attributes (`on*`, `style`, `javascript:`/`data:`/
+ * `vbscript:` URLs) are dropped — see `sanitize.ts`.
  */
 import { escapeHtml } from "./escape.js";
+import { isAttrSafe } from "./sanitize.js";
 import { expand } from "./components/expand.js";
 import { htslHash } from "./hash.js";
 import {
@@ -348,7 +351,7 @@ class Renderer {
       return escapeHtml(rawHtml(node));
     }
     const data = extra + this.rangeAttr(node) + this.componentAttr(node);
-    const open = openTag(node, data);
+    const open = openTag(node, data, this.options.sanitize ?? false);
     if (VOID_TAGS.has(node.tag)) return open;
     if (RAW_TEXT_TAGS.has(node.tag)) return this.rawText(node, open, data);
     const inner = node.children
@@ -388,7 +391,7 @@ class Renderer {
       return pad + escapeHtml(rawHtml(node));
     }
     const data = extra + this.rangeAttr(node) + this.componentAttr(node);
-    const open = openTag(node, data);
+    const open = openTag(node, data, this.options.sanitize ?? false);
     if (VOID_TAGS.has(node.tag)) return pad + open;
     if (RAW_TEXT_TAGS.has(node.tag)) return pad + this.rawText(node, open, data);
 
@@ -470,13 +473,14 @@ const BOOLEAN_ATTRS = new Set([
   "selected",
 ]);
 
-function openTag(node: ElementNode, extra = ""): string {
+function openTag(node: ElementNode, extra = "", sanitize = false): string {
   let s = `<${node.tag}${extra}`;
   if (node.id !== null) s += ` id="${escapeHtml(node.id)}"`;
   if (node.classes.length > 0) {
     s += ` class="${escapeHtml(node.classes.join(" "))}"`;
   }
   for (const [name, value] of Object.entries(node.attrs)) {
+    if (sanitize && !isAttrSafe(name, value)) continue;
     if (BOOLEAN_ATTRS.has(name)) {
       if (value !== "false") s += ` ${name}`;
       continue;

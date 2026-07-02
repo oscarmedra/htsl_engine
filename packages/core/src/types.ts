@@ -205,6 +205,15 @@ export interface RenderOptions {
    * to be parsed with `{ ranges: true }`. Off by default.
    */
   editableText?: boolean;
+  /**
+   * Strip unsafe attributes (`on*` event handlers, `style`, and
+   * `javascript:`/`data:`/`vbscript:` URLs in URL-bearing attributes like
+   * `href`/`src`) before emitting element tags. Off by default — a document
+   * you wrote yourself is trusted. Turn this on when rendering documents that
+   * may come from an untrusted source (e.g. shared via URL). See
+   * {@link isAttrSafe}. Complements `allowedTags`; does not replace it.
+   */
+  sanitize?: boolean;
 }
 
 export type CompileOptions = ParseOptions & RenderOptions;
