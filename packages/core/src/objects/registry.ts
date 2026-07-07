@@ -1138,7 +1138,23 @@ el("em", "Texte en italique.", "{em:${1:texte}}", "{p:de l'{em:italique} ici}");
 el("code", "Code en ligne.", "{code:${1:code}}", "{p:appelez {code:f(x)}}");
 el("a", "Lien hypertexte.", "{a[href=${1:\"https://exemple.fr\"}]:${2:lien}}", "{a[href=\"https://exemple.fr\"]:un lien}", [HREF]);
 el("ul", "Liste à puces.", "{ul:{li:${1:premier}}{li:${2:deuxième}}}", "{ul:{li:premier}{li:deuxième}}");
-el("ol", "Liste numérotée.", "{ol:{li:${1:premier}}{li:${2:deuxième}}}", "{ol:{li:un}{li:deux}}");
+el(
+  "ol",
+  "Liste ordonnée (attribut type : marqueurs num/alpha/Alpha/roman/Roman/paren).",
+  "{ol:{li:${1:premier}}{li:${2:deuxième}}}",
+  "{ol[type=alpha]:{li:un}{li:deux}}",
+  [
+    {
+      name: "type",
+      type: "enum",
+      required: false,
+      default: "num",
+      values: ["num", "alpha", "Alpha", "roman", "Roman", "paren"],
+      description:
+        "Style des marqueurs : num 1. 2. (défaut), alpha (a) (b), Alpha (A) (B), roman (i) (ii), Roman (I) (II), paren 1) 2).",
+    },
+  ],
+);
 el("li", "Élément de liste.", "{li:${1:item}}", "{ul:{li:item}}");
 el("blockquote", "Citation en bloc.", "{blockquote:${1:citation}}", "{blockquote:Une citation.}");
 el(

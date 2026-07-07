@@ -112,6 +112,40 @@ content    = { node } ;
 identifier = letter { letter | digit | "-" | "_" } ;
 ```
 
+### Listes ordonnées : marqueurs `{ol[type=…]}`
+
+`{ol}` accepte un attribut **`type`** purement présentationnel qui change le
+style des marqueurs (le CSS par défaut du moteur fournit les compteurs). Valeurs :
+
+| `type` | Marqueurs | Exemple d'usage |
+|--------|-----------|-----------------|
+| absent / `num` | `1.` `2.` `3.` (défaut) | listes courantes |
+| `alpha` | `(a)` `(b)` `(c)` | questions d'un exercice |
+| `Alpha` | `(A)` `(B)` `(C)` | variantes majuscules |
+| `roman` | `(i)` `(ii)` `(iii)` | assertions équivalentes |
+| `Roman` | `(I)` `(II)` `(III)` | grandes parties |
+| `paren` | `1)` `2)` `3)` | style compact |
+
+```htsl
+{!-- Exercice : sous-questions en (a) (b) (c) --}
+{ol[type=alpha]:
+  {li:Montrer que la suite est croissante.}
+  {li:En déduire qu'elle converge.}
+  {li:Calculer sa limite.}
+}
+
+{!-- Assertions équivalentes, numérotées (i) (ii) (iii) --}
+{ol[type=roman]:
+  {li:$f$ est continue en $a$.}
+  {li:$\lim_{x\to a} f(x) = f(a)$.}
+  {li:Pour toute suite $x_n \to a$, $f(x_n) \to f(a)$.}
+}
+```
+
+Une valeur `type` inconnue retombe silencieusement sur le défaut (`num`).
+L'attribut est consommé par le moteur : `{ol}` sans `type` produit exactement le
+même HTML qu'avant (`<ol>…</ol>`).
+
 ## Texte brut : `{script:…}` / `{style:…}`
 
 Le corps d'un `{script:…}` ou `{style:…}` est lu **verbatim** (c'est du vrai

@@ -734,3 +734,15 @@ ligne (une {row:…}), transposé (orient=col), matrice (plusieurs {row:…}) et
 
 Vérifié en navigateur : [ ], |·|, ‖·‖ et tenseur (2 tranches k=1/k=2) rendus par
 KaTeX sans erreur ; autocomplétion de @mot ; 0 erreur console.
+
+## Marqueurs de listes ordonnées {ol[type=…]}
+
+Attribut présentationnel `type` sur {ol} : num 1. (défaut, inchangé), alpha (a),
+Alpha (A), roman (i), Roman (I), paren 1). Le type est consommé par le renderer
+(openTag, OL_MARKER_CLASS) et mappé vers une classe .htsl-ol-* ; num/inconnu →
+défaut sans erreur ; fusion avec les classes de l'auteur. CSS par défaut (mathCss) :
+compteurs personnalisés (counter-reset/increment + li::before) pour les formats
+parenthésés que list-style-type seul ne fait pas. {ol} sans type = HTML identique
+(test). Registre : type (enum) documenté. Tests : ol-marker.test.ts (11) ;
+monorepo vert (typecheck 0, build 0, core 308 + codemirror 37). README + .docs/24.
+Branche feat/ol-marker-types (non poussée).

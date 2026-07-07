@@ -242,4 +242,34 @@ export const mathCss = `
 .htsl-param-label { font-family: ui-monospace, monospace; font-size: 0.95em; color: #1f2430; white-space: nowrap; }
 .htsl-param-value { font-weight: 700; color: #3b5bdb; }
 .htsl-param-range { flex: 1; min-width: 8rem; accent-color: #3b5bdb; cursor: pointer; }
+
+/* Ordered-list marker variants ({ol[type=…]}) — custom counters for the
+   parenthesised / ")" formats that list-style-type alone cannot produce. */
+.htsl-ol-alpha, .htsl-ol-alpha-upper,
+.htsl-ol-roman, .htsl-ol-roman-upper,
+.htsl-ol-paren {
+  list-style: none;
+  counter-reset: htsl-ol;
+  padding-left: 2.2em;
+}
+.htsl-ol-alpha > li, .htsl-ol-alpha-upper > li,
+.htsl-ol-roman > li, .htsl-ol-roman-upper > li,
+.htsl-ol-paren > li {
+  counter-increment: htsl-ol;
+}
+.htsl-ol-alpha > li::before,
+.htsl-ol-alpha-upper > li::before,
+.htsl-ol-roman > li::before,
+.htsl-ol-roman-upper > li::before,
+.htsl-ol-paren > li::before {
+  display: inline-block;
+  width: 2.2em;
+  margin-left: -2.2em;
+  text-align: left;
+}
+.htsl-ol-alpha > li::before { content: "(" counter(htsl-ol, lower-alpha) ") "; }
+.htsl-ol-alpha-upper > li::before { content: "(" counter(htsl-ol, upper-alpha) ") "; }
+.htsl-ol-roman > li::before { content: "(" counter(htsl-ol, lower-roman) ") "; }
+.htsl-ol-roman-upper > li::before { content: "(" counter(htsl-ol, upper-roman) ") "; }
+.htsl-ol-paren > li::before { content: counter(htsl-ol, decimal) ") "; }
 `.trim();

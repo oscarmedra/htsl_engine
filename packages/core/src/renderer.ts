@@ -473,13 +473,34 @@ const BOOLEAN_ATTRS = new Set([
   "selected",
 ]);
 
+/**
+ * `{ol[type=…]}` marker styles → CSS class (see `mathCss`). Purely presentational:
+ * the `type` attribute is consumed by the engine (never emitted as raw HTML) and
+ * mapped to a class. `num` / absent / any unknown value → default `1. 2. 3.` (no
+ * class), so `{ol}` without `type` renders exactly as before.
+ */
+const OL_MARKER_CLASS: Record<string, string> = {
+  alpha: "htsl-ol-alpha", // (a) (b) (c)
+  Alpha: "htsl-ol-alpha-upper", // (A) (B) (C)
+  roman: "htsl-ol-roman", // (i) (ii) (iii)
+  Roman: "htsl-ol-roman-upper", // (I) (II) (III)
+  paren: "htsl-ol-paren", // 1) 2) 3)
+};
+
 function openTag(node: ElementNode, extra = "", sanitize = false): string {
   let s = `<${node.tag}${extra}`;
+
+  // Ordered-list marker variants: fold `type` into a class, and never emit it raw.
+  const olType = node.tag === "ol" ? node.attrs["type"] : undefined;
+  const olClass = olType !== undefined ? OL_MARKER_CLASS[olType] : undefined;
+  const classes = olClass ? [...node.classes, olClass] : node.classes;
+
   if (node.id !== null) s += ` id="${escapeHtml(node.id)}"`;
-  if (node.classes.length > 0) {
-    s += ` class="${escapeHtml(node.classes.join(" "))}"`;
+  if (classes.length > 0) {
+    s += ` class="${escapeHtml(classes.join(" "))}"`;
   }
   for (const [name, value] of Object.entries(node.attrs)) {
+    if (olType !== undefined && node.tag === "ol" && name === "type") continue;
     if (sanitize && !isAttrSafe(name, value)) continue;
     if (BOOLEAN_ATTRS.has(name)) {
       if (value !== "false") s += ` ${name}`;
