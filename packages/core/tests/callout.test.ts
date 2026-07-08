@@ -82,6 +82,13 @@ describe("semantic callouts", () => {
     expect(compile("{@algorithme:x}")).toContain("htsl-callout htsl-callout-algorithm");
   });
 
+  it("trims source indentation so the body has no leading/trailing whitespace", () => {
+    const html = compile("{@proposition:\n  soit {@mti: H} un Hilbert.\n}");
+    const body = html.match(/htsl-callout-body">([\s\S]*?)<\/div>/)?.[1] ?? "";
+    expect(body.startsWith("soit")).toBe(true); // no leading "\n  "
+    expect(body.endsWith("</span>") || /\S$/.test(body)).toBe(true); // no trailing whitespace
+  });
+
   it("supports cross-references to the new numbered types", () => {
     const html = compile("{p:cf {@ref[to=fer]/}.}{@lemme[label=fer]: x}");
     expect(html).toContain('href="#htsl-lemma-fer">Lemme&nbsp;1</a>');

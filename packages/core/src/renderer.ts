@@ -191,10 +191,13 @@ class Renderer {
     if (title) head += ` — ${escapeHtml(title)}`;
     const label = node.attrs["label"];
     const idAttr = label ? ` id="${calloutId(tone, label)}"` : "";
+    // Trim surrounding whitespace: source indentation (e.g. a callout written
+    // over several lines) must not leak as a leading space before the text.
     const body = node.children
       .filter((c) => c.type !== "comment")
       .map((c) => this.compact(c))
-      .join("");
+      .join("")
+      .trim();
     return (
       `<div class="htsl-callout htsl-callout-${tone}"${idAttr}>` +
       `<div class="htsl-callout-head">${head}</div>` +

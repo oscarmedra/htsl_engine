@@ -758,3 +758,11 @@ observation. Assumption & Hypothesis → un seul « Hypothèse » (compteur part
 alias hypothesis/assumption/hypothese/hyp). Chaque type a sa couleur.
 Tests callout.test.ts → 13 ; core 313 + codemirror 37. Prompt IA + .docs/16 MAJ.
 Vérifié en navigateur (10 encadrés, couleurs distinctes, KaTeX, 0 erreur).
+
+## Encadrés : l'indentation du source ne crée plus d'espacement
+
+Écrire un encadré multiligne ({@proposition: ⏎ texte indenté ⏎ }) recopiait le
+\n + indentation dans le HTML → espace disgracieux avant le premier mot. Le corps
+des encadrés est désormais trimmé (renderer.callout, .trim()) : aller à la ligne
+après les deux-points rend pareil qu'écrire directement. Test dédié (callout.test
+→ 14) ; core 314. Vérifié en navigateur (avant/après capturés).
