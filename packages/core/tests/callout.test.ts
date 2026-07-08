@@ -49,4 +49,41 @@ describe("semantic callouts", () => {
     expect(heads(compile("{@def:x}"))).toEqual(["Définition 1"]);
     expect(heads(compile("{@preuve:x}"))).toEqual(["Démonstration"]);
   });
+
+  it("renders the extended set with the right French names", () => {
+    const cases: [string, string][] = [
+      ["{@proposition:x}", "Proposition 1"],
+      ["{@lemme:x}", "Lemme 1"],
+      ["{@corollaire:x}", "Corollaire 1"],
+      ["{@assertion:x}", "Assertion 1"], // Claim → Assertion
+      ["{@conjecture:x}", "Conjecture 1"],
+      ["{@axiome:x}", "Axiome 1"],
+      ["{@construction:x}", "Construction 1"],
+      ["{@algorithme:x}", "Algorithme 1"],
+    ];
+    for (const [src, expected] of cases) {
+      expect(heads(compile(src)), src).toEqual([expected]);
+    }
+  });
+
+  it("does not number notation / observation (commentary)", () => {
+    expect(heads(compile("{@notation:n}{@observation:o}"))).toEqual(["Notation", "Observation"]);
+  });
+
+  it("maps both Assumption and Hypothesis to a shared « Hypothèse » counter", () => {
+    expect(heads(compile("{@assumption:a}{@hypothesis:b}"))).toEqual([
+      "Hypothèse 1",
+      "Hypothèse 2",
+    ]);
+  });
+
+  it("applies the matching tone class for a new type", () => {
+    expect(compile("{@lemme:x}")).toContain("htsl-callout htsl-callout-lemma");
+    expect(compile("{@algorithme:x}")).toContain("htsl-callout htsl-callout-algorithm");
+  });
+
+  it("supports cross-references to the new numbered types", () => {
+    const html = compile("{p:cf {@ref[to=fer]/}.}{@lemme[label=fer]: x}");
+    expect(html).toContain('href="#htsl-lemma-fer">Lemme&nbsp;1</a>');
+  });
 });

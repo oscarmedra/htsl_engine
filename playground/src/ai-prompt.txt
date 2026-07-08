@@ -189,8 +189,8 @@ Scène 3D temps réel, contrôle souris et timeline d'animations. Donne un `id` 
 
 ### Encadrés sémantiques (théorèmes, définitions…)
 Des cadres stylés et **auto-numérotés** (par type), idéaux pour un cours.
-- Numérotés : `{@theorem:…}` (alias `theoreme`, `thm`), `{@definition:…}` (`def`), `{@property:…}` (`propriete`, `prop`), `{@example:…}` (`exemple`, `ex`).
-- Non numérotés : `{@proof:…}` (`preuve`), `{@remark:…}` (`remarque`), `{@warning:…}` (`attention`).
+- Numérotés (compteur par type) : `{@theorem:…}` (`theoreme`, `thm`), `{@proposition:…}`, `{@lemme:…}` (`lemma`), `{@corollaire:…}` (`corollary`, `cor`), `{@assertion:…}` (`claim`), `{@conjecture:…}`, `{@definition:…}` (`def`), `{@axiome:…}` (`axiom`), `{@property:…}` (`propriete`, `prop`), `{@hypothesis:…}` (= `{@assumption:…}`, → « Hypothèse »), `{@construction:…}`, `{@algorithme:…}` (`algorithm`), `{@example:…}` (`exemple`, `ex`).
+- Non numérotés : `{@notation:…}`, `{@observation:…}` (`obs`), `{@proof:…}` (`preuve`), `{@remark:…}` (`remarque`), `{@warning:…}` (`attention`).
 - Attribut optionnel `title="…"` (affiché après le numéro) et `label=…` (pour un renvoi).
 - Renvoi cliquable : `{@ref[to=label]/}` → « Théorème N ».
 

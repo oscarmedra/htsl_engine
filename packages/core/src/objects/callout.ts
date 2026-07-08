@@ -20,10 +20,26 @@ export interface CalloutType {
 }
 
 export const CALLOUT_TYPES: CalloutType[] = [
+  // Theorem-like statements (numbered).
   { path: "callout.theorem", name: "Théorème", numbered: true, tone: "theorem", aliases: ["theorem", "theoreme", "thm"] },
+  { path: "callout.proposition", name: "Proposition", numbered: true, tone: "proposition", aliases: ["proposition"] },
+  { path: "callout.lemma", name: "Lemme", numbered: true, tone: "lemma", aliases: ["lemma", "lemme", "lem"] },
+  { path: "callout.corollary", name: "Corollaire", numbered: true, tone: "corollary", aliases: ["corollary", "corollaire", "cor"] },
+  { path: "callout.claim", name: "Assertion", numbered: true, tone: "claim", aliases: ["claim", "assertion"] },
+  { path: "callout.conjecture", name: "Conjecture", numbered: true, tone: "conjecture", aliases: ["conjecture"] },
+  // Foundations / statements (numbered).
   { path: "callout.definition", name: "Définition", numbered: true, tone: "definition", aliases: ["definition", "def"] },
+  { path: "callout.axiom", name: "Axiome", numbered: true, tone: "axiom", aliases: ["axiom", "axiome"] },
   { path: "callout.property", name: "Propriété", numbered: true, tone: "property", aliases: ["property", "propriete", "prop"] },
+  // Assumption & Hypothesis share one "Hypothèse" environment (single counter).
+  { path: "callout.hypothesis", name: "Hypothèse", numbered: true, tone: "hypothesis", aliases: ["hypothesis", "assumption", "hypothese", "hyp"] },
+  // Constructions & procedures (numbered).
+  { path: "callout.construction", name: "Construction", numbered: true, tone: "construction", aliases: ["construction", "constr"] },
+  { path: "callout.algorithm", name: "Algorithme", numbered: true, tone: "algorithm", aliases: ["algorithm", "algorithme", "algo"] },
   { path: "callout.example", name: "Exemple", numbered: true, tone: "example", aliases: ["example", "exemple", "ex"] },
+  // Commentary (not numbered).
+  { path: "callout.notation", name: "Notation", numbered: false, tone: "notation", aliases: ["notation"] },
+  { path: "callout.observation", name: "Observation", numbered: false, tone: "observation", aliases: ["observation", "obs"] },
   { path: "callout.proof", name: "Démonstration", numbered: false, tone: "proof", aliases: ["proof", "preuve", "demo"] },
   { path: "callout.remark", name: "Remarque", numbered: false, tone: "remark", aliases: ["remark", "remarque", "rem"] },
   { path: "callout.warning", name: "Attention", numbered: false, tone: "warning", aliases: ["warning", "attention"] },

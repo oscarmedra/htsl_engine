@@ -49,7 +49,25 @@ de renvoi). Renvoi : `{@ref[to=label]/}` → « Théorème N » (lien vers l'enc
   — Pythagore, Définition 1, Exemple 1, Démonstration ∎, Attention) et renvoi
   « Théorème 1 » cliquable ; 0 erreur console ; typecheck OK.
 
-## Suite (feuille de route « pédagogie »)
+## Extension : jeu d'encadrés complet (2026)
 
-Lot 2 : `@reveal` + `@tabs`. Lot 3 : `@quiz` + `@flashcard`. Lot 4 : `@chart`.
-Lot 5 : `@variations` + `@signs`. Lot 6 : paramètre interactif.
+Le jeu initial (théorème, définition, propriété, exemple, preuve, remarque,
+attention) a été complété pour couvrir les environnements mathématiques usuels.
+L'architecture étant centralisée dans `CALLOUT_TYPES` (`objects/callout.ts`),
+chaque ajout = **une ligne** (le registre, la numérotation, `{@ref}` et
+l'autocomplétion en découlent) + **un ton CSS** dans `mathCss`.
+
+Ajoutés — **numérotés** (compteur par type) : `proposition`, `lemme` (`lemma`),
+`corollaire` (`corollary`, `cor`), `assertion` (**Claim → Assertion**),
+`conjecture`, `axiome` (`axiom`), `construction`, `algorithme` (`algorithm`).
+**Non numérotés** : `notation`, `observation` (`obs`).
+
+**Assumption & Hypothesis** → un **seul** environnement « Hypothèse » (alias
+`hypothesis`, `assumption`, `hypothese`, `hyp`) avec un **compteur partagé** —
+plutôt que deux « Hypothèse 1 » concurrents.
+
+Chaque nouveau type a son ton coloré (`htsl-callout-<tone>`) ; `algorithme` a un
+en-tête en police monospace. Tests : `callout.test.ts` porté à **13**
+(jeu étendu, notation/observation non numérotés, compteur partagé Hypothèse,
+classes de ton, renvoi vers les nouveaux types). Vérifié en navigateur (10
+encadrés, couleurs distinctes, KaTeX à l'intérieur, 0 erreur).

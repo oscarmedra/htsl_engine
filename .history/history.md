@@ -746,3 +746,15 @@ parenthésés que list-style-type seul ne fait pas. {ol} sans type = HTML identi
 (test). Registre : type (enum) documenté. Tests : ol-marker.test.ts (11) ;
 monorepo vert (typecheck 0, build 0, core 308 + codemirror 37). README + .docs/24.
 Branche feat/ol-marker-types (non poussée).
+
+## Encadrés sémantiques : jeu complet (12 nouveaux)
+
+Complète le jeu initial (théorème/définition/propriété/exemple/preuve/remarque/
+attention) pour couvrir les environnements math usuels. Architecture centralisée
+(CALLOUT_TYPES) → 1 ligne par type + 1 ton CSS. Ajoutés numérotés : proposition,
+lemme (lemma), corollaire (corollary), assertion (Claim→Assertion), conjecture,
+axiome, construction, algorithme (en-tête monospace). Non numérotés : notation,
+observation. Assumption & Hypothesis → un seul « Hypothèse » (compteur partagé,
+alias hypothesis/assumption/hypothese/hyp). Chaque type a sa couleur.
+Tests callout.test.ts → 13 ; core 313 + codemirror 37. Prompt IA + .docs/16 MAJ.
+Vérifié en navigateur (10 encadrés, couleurs distinctes, KaTeX, 0 erreur).

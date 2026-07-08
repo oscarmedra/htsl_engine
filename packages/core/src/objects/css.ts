@@ -136,6 +136,31 @@ export const mathCss = `
 .htsl-callout-remark .htsl-callout-head { background: #f8fafc; color: #475569; }
 .htsl-callout-warning { border-left-color: #d97706; }
 .htsl-callout-warning .htsl-callout-head { background: #fffbeb; color: #b45309; }
+/* Theorem-like family (blues). */
+.htsl-callout-proposition { border-left-color: #2563eb; }
+.htsl-callout-proposition .htsl-callout-head { background: #eff6ff; color: #1e40af; }
+.htsl-callout-lemma { border-left-color: #0284c7; }
+.htsl-callout-lemma .htsl-callout-head { background: #f0f9ff; color: #075985; }
+.htsl-callout-corollary { border-left-color: #4f46e5; }
+.htsl-callout-corollary .htsl-callout-head { background: #eef2ff; color: #3730a3; }
+.htsl-callout-conjecture { border-left-color: #c026d3; }
+.htsl-callout-conjecture .htsl-callout-head { background: #fdf4ff; color: #a21caf; }
+.htsl-callout-claim { border-left-color: #0891b2; }
+.htsl-callout-claim .htsl-callout-head { background: #ecfeff; color: #155e75; }
+/* Foundations (purples). */
+.htsl-callout-axiom { border-left-color: #9333ea; }
+.htsl-callout-axiom .htsl-callout-head { background: #faf5ff; color: #6b21a8; }
+.htsl-callout-hypothesis { border-left-color: #db2777; }
+.htsl-callout-hypothesis .htsl-callout-head { background: #fdf2f8; color: #9d174d; }
+.htsl-callout-notation { border-left-color: #a78bfa; }
+.htsl-callout-notation .htsl-callout-head { background: #f5f3ff; color: #6d28d9; }
+/* Constructions & procedures. */
+.htsl-callout-construction { border-left-color: #ca8a04; }
+.htsl-callout-construction .htsl-callout-head { background: #fefce8; color: #a16207; }
+.htsl-callout-algorithm { border-left-color: #475569; }
+.htsl-callout-algorithm .htsl-callout-head { background: #f1f5f9; color: #1e293b; font-family: ui-monospace, monospace; }
+.htsl-callout-observation { border-left-color: #059669; }
+.htsl-callout-observation .htsl-callout-head { background: #ecfdf5; color: #047857; }
 .htsl-ref { color: #3b5bdb; text-decoration: none; border-bottom: 1px dotted #93a4f4; }
 .htsl-ref:hover { border-bottom-style: solid; }
 .htsl-ref-broken { color: #c92a2a; border-bottom: none; }
