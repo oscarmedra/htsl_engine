@@ -766,3 +766,42 @@ Vérifié en navigateur (10 encadrés, couleurs distinctes, KaTeX, 0 erreur).
 des encadrés est désormais trimmé (renderer.callout, .trim()) : aller à la ligne
 après les deux-points rend pareil qu'écrire directement. Test dédié (callout.test
 → 14) ; core 314. Vérifié en navigateur (avant/après capturés).
+
+## Playground : disposition « Empilé » (rendu en haut, éditeur en bas)
+
+Nouvelle bascule « Empilé » (topbar) : #panels passe en flex-column, rendu pleine
+largeur en haut, éditeur en dessous (poignée data-gutter=1 → row-resize pilotant
+--stack-render 15-85 %). Pour projeter à un public sans la division gauche/droite ;
+Empilé + Éditeur masqué = mode présentation (rendu plein écran). État persisté
+(htsl:ui:stacked). index.html + style.css + main.ts. Vérifié en navigateur (0 erreur).
+
+## Playground : aide contextuelle en infobulle au survol (fin du panneau du bas)
+
+Le panneau d'aide fixe en bas de l'éditeur (documentation de l'objet sous le
+curseur) prenait de la place. Remplacé par une **infobulle CodeMirror au survol**
+du nom de composant (comme un vrai éditeur) : help.ts exporte htslHoverDoc
+(hoverTooltip) qui décrit l'objet/élément via registry.describe et l'affiche
+au-dessus du token. Retrait du div #help, de helpEl et des appels updateHelp.
+CSS .help repensé pour la popup (+ ombre/rayon via .cm-htsl-hover). Vérifié en
+navigateur (survol de {@plot → {@math.plot.fn} + table d'attributs ; panneau bas
+absent ; 0 erreur).
+
+## Playground : clic sur un composant → sélection du code dans l'éditeur (fin de la modale)
+
+Suppression de la modale flottante (block-editor.ts). Désormais un clic sur une
+instance de composant dans le rendu sélectionne et fait défiler son code
+{@nom[…]:…} dans l'éditeur principal (affiche l'éditeur s'il était masqué),
+l'édition se fait sur place. frame.ts : dblclick→click (sans rect). main.ts :
+onBlockClick = view.dispatch({selection, scrollIntoView}) + focus. Retrait de
+openBlockEditor/closeBlockEditor/onElementEdit + CSS .block-editor/.be-*.
+block-editor.ts supprimé. Vérifié en navigateur (sélection exacte, 0 modale, 0 erreur).
+
+## Playground : suppression du flash de contenu non stylé (FOUC) au chargement
+
+Au chargement/rafraîchissement, le HTML brut (police Times, cases au lieu des
+switches…) apparaissait une fraction de seconde avant l'application du CSS (importé
+par main.ts, script module différé). Correctif : CSS critique inline dans <head>
+(#app { visibility: hidden }, html { background:#fff }) ; main.ts révèle l'app
+(#app visibility:visible) juste après restorePanelPrefs()+relayout() (styles+layout
+prêts). Filet de sécurité : petit script inline qui révèle après 3 s si le module
+tarde. Vérifié en navigateur (app stylée d'emblée, 0 erreur).

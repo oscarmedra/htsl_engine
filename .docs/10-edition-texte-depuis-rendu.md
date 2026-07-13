@@ -99,3 +99,21 @@ peut désormais cliquer l'élément lui-même.
 Vérifié en navigateur : cliquer un `{h1:…}` → l'éditer en `{h1.vedette:Titre
 modifié}` met à jour classe + texte ; cliquer une instance de composant ouvre
 `{@carte[titre=Salut]: Corps.}` ; `Échap` annule sans réécrire.
+
+## Mise à jour : clic sur un composant → sélection dans l'éditeur (fin de la modale)
+
+La **modale flottante** (mini-éditeur CodeMirror au-dessus du composant) est
+**retirée**. Nouveau comportement, plus simple et sans surface flottante :
+
+- **Un clic** sur une instance de composant (`[data-htsl-component]`) dans le rendu
+  **révèle et sélectionne son code** `{@nom[…]: …}` dans l'**éditeur principal**
+  (`frame.ts` : `dblclick` → `click`, sans `rect` ; `main.ts` : `onBlockClick`
+  fait `view.dispatch({ selection, scrollIntoView })` + `view.focus()`, et affiche
+  l'éditeur s'il était masqué). L'édition se fait ensuite directement dans l'éditeur.
+- Fichier `block-editor.ts` **supprimé** ; import, `openBlockEditor`,
+  `closeBlockEditor`, `onElementEdit` et le CSS `.block-editor*`/`.be-*` retirés.
+- Survol : le halo bleu (`.htsl-hover`, injecté dans l'iframe) reste, indiquant
+  qu'un composant est cliquable.
+- Vérifié en navigateur : clic sur `{@carte…}` → l'éditeur sélectionne exactement
+  `{@carte[titre="Bonjour"]: …}` (plage 73-119) et défile jusqu'à elle ; aucune
+  modale ; 0 erreur console ; build playground OK.

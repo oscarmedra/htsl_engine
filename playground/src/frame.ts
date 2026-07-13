@@ -82,7 +82,7 @@ export class FrameRenderer {
     private readonly onTextEdit?: (start: number, end: number, text: string) => void,
     /** Click on a block → request the parent to open a full editor over it.
      *  `rect` is the element's bounding box in the iframe's own viewport. */
-    private readonly onBlockClick?: (start: number, end: number, rect: DOMRect) => void,
+    private readonly onBlockClick?: (start: number, end: number) => void,
   ) {
     this.iframe.addEventListener("load", () => {
       this.doc = this.iframe.contentDocument;
@@ -235,14 +235,14 @@ export class FrameRenderer {
       el?.classList.add("htsl-hover");
     });
 
-    // Double-click a component instance → edit its DEFINITION ({!define …}).
-    doc.addEventListener("dblclick", (ev) => {
+    // Click a component instance → reveal & select its source in the main editor.
+    doc.addEventListener("click", (ev) => {
       const el = this.componentInstance(ev.target as Element | null);
       if (!el || !this.onBlockClick) return;
       const [s, e] = (el.getAttribute("data-htsl-range") ?? "").split("-").map(Number);
       if (s === undefined || e === undefined) return;
       this.clearHover();
-      this.onBlockClick(s, e, el.getBoundingClientRect());
+      this.onBlockClick(s, e);
     });
   }
 

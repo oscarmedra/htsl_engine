@@ -100,3 +100,26 @@ toolbar passent à la ligne (`flex-wrap`) au lieu de déborder. Le passage en
 l'inline éventuel posé par le drag). Vérifié en navigateur : à 375×812 et 820×1100,
 rendu au-dessus de l'éditeur ; éditeur masqué → le rendu remplit la hauteur ;
 desktop inchangé (grille côte à côte) ; 0 erreur console.
+
+## Disposition empilée (« Empilé ») — présentation à un public
+
+En plus de la division gauche/droite, une bascule **« Empilé »** (topbar) passe le
+playground en **colonne** : **rendu en pleine largeur en haut, éditeur en dessous**.
+Utile pour projeter à des étudiants sans la coupure verticale de l'écran ; le
+présentateur garde un éditeur pleinement utilisable en bas.
+
+- CSS : `#panels.stacked` → `display:flex; flex-direction:column` ; `order` place
+  rendu (1) / poignée (2) / éditeur (3) / AST (4). La poignée `data-gutter="1"`
+  devient un **redimensionnement vertical** (`row-resize`) qui pilote la hauteur du
+  rendu via `--stack-render` (drag géré dans `main.ts`, borné 15–85 %).
+- **Centrage à largeur max** : sur grand écran, le rendu **et** l'éditeur du bas
+  sont bornés à `max-width: 1100px` et centrés (`align-items:center` + cap sur
+  `.panel-head`/`.render-frame`/`.panel-body`), comme la vue présentation — rien
+  ne s'étire bord à bord.
+- **Mode présentation** : « Empilé » + « Éditeur » masqué → le rendu remplit toute
+  la hauteur (la poignée est masquée).
+- L'état est **persisté** dans `localStorage` (`htsl:ui:stacked`, défaut : décoché)
+  comme les cases Éditeur/AST ; restauré au boot avant `relayout()`.
+- Vérifié en navigateur : rendu en haut pleine largeur, éditeur en bas ;
+  redimensionnement vertical (58 % → 70 %) ; mode présentation remplit à 0 px près ;
+  retour « côte à côte » = grille éditeur-à-gauche ; persistance OK ; 0 erreur.

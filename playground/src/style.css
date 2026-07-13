@@ -44,15 +44,17 @@ body {
 .toolbar button.primary:hover { filter: brightness(1.08); }
 
 /* Contextual help (below the editor) */
+/* Contextual doc — now a hover tooltip (`.cm-htsl-hover`) instead of a bottom panel. */
 .help {
-  border-top: 1px solid var(--border);
-  background: #fbfbfc;
+  background: var(--panel);
   padding: 0.5rem 0.7rem;
   font-size: 0.78rem;
   color: var(--ink);
-  max-height: 11rem;
+  max-width: 30rem;
+  max-height: 16rem;
   overflow: auto;
 }
+.cm-tooltip:has(> .cm-htsl-hover) { border-radius: 8px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
 .help .help-name { font-family: var(--mono); font-weight: 600; color: var(--accent); }
 .help .help-desc { color: var(--muted); margin: 0.15rem 0 0.35rem; }
 .help table { border-collapse: collapse; width: 100%; }
@@ -92,35 +94,8 @@ body {
 .pal-hint { color: var(--muted); font-size: 0.74rem; font-style: italic; padding: 0.2rem 0.5rem 0.4rem; }
 .pal-hint { font-family: var(--mono); }
 
-/* Floating block editor: a full HTSL CodeMirror over a clicked element.
-   Opaque (normal) panel so the code is crisp and easy to read. */
-.block-editor {
-  position: fixed; z-index: 200;
-  background: var(--panel);
-  border: 1px solid var(--accent); border-radius: 8px;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.24);
-  overflow: hidden;
-}
-/* The autocompletion popup must float above the editor and never be clipped. */
+/* The autocompletion popup must float above everything and never be clipped. */
 .cm-tooltip.cm-tooltip-autocomplete { z-index: 600; }
-.block-editor .cm-editor { font-size: 13px; background: var(--panel); }
-.block-editor .cm-editor.cm-focused { outline: none; }
-.block-editor .cm-gutters { border-right: 1px solid var(--border); }
-.block-editor-foot {
-  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
-  background: #f6f7f9; border-top: 1px solid var(--border);
-  border-radius: 0 0 6px 6px; padding: 0.3rem 0.5rem;
-}
-.block-editor-hint { font-size: 0.68rem; color: var(--muted); font-family: var(--mono); }
-.block-editor-actions { display: flex; gap: 0.4rem; }
-.be-btn {
-  font-size: 0.78rem; padding: 0.25rem 0.7rem; border-radius: 7px;
-  border: 1px solid var(--border); background: #fff; color: var(--ink); cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, filter 0.12s;
-}
-.be-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
-.be-commit { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
-.be-commit:hover { filter: brightness(1.08); background: var(--accent); }
 /* Toggle switches (Éditeur / AST). The native checkbox keeps its id + change
    events; only its appearance is replaced by a sliding switch. */
 .toggle {
@@ -182,6 +157,48 @@ body {
 #panel-ast { border-left: 1px solid var(--border); }
 .no-ast #panel-ast, .no-ast .gutter[data-gutter="2"] { display: none; }
 .no-editor #panel-editor, .no-editor .gutter[data-gutter="1"] { display: none; }
+
+/* Stacked ("Empilé") layout — render on top (full width), editor below, so the
+   screen is not split left/right when projecting to an audience. The teacher
+   keeps a usable editor at the bottom (resizable via the row handle). */
+#panels.stacked {
+  display: flex; flex-direction: column;
+  grid-template-columns: none !important; /* ignore any drag-set columns */
+}
+#panels.stacked > .panel, #panels.stacked > .gutter { grid-column: auto; }
+#panels.stacked #panel-render {
+  order: 1; flex: 0 0 var(--stack-render, 58%); min-height: 90px;
+  border-left: none; border-bottom: 1px solid var(--border); align-items: stretch;
+}
+/* On wide screens keep the document centered at the same max width as the
+   presentation view — applied to BOTH the render and the editor below, so
+   nothing stretches edge-to-edge. */
+#panels.stacked #panel-render,
+#panels.stacked #panel-editor { align-items: center; }
+#panels.stacked #panel-render .panel-head,
+#panels.stacked #panel-render .render-frame,
+#panels.stacked #panel-editor .panel-head,
+#panels.stacked #panel-editor .panel-body { width: 100%; max-width: 1100px; }
+/* Card border to clearly delimit the render iframe and the editor on the backdrop. */
+#panels.stacked #panel-render .render-frame,
+#panels.stacked #panel-editor .panel-body {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+#panels.stacked #panel-render .render-frame { overflow: hidden; }
+#panels.stacked #panel-render, #panels.stacked #panel-editor { padding-bottom: 0.6rem; }
+#panels.stacked .gutter[data-gutter="1"] {
+  order: 2; display: block; width: 100%; height: 6px; cursor: row-resize;
+}
+#panels.stacked #panel-editor { order: 3; flex: 1 1 0; min-height: 90px; border-left: none; }
+#panels.stacked .gutter[data-gutter="2"] { display: none; }
+#panels.stacked #panel-ast {
+  order: 4; flex: 1 1 0; min-height: 90px; border-left: none; border-top: 1px solid var(--border);
+}
+/* Editor hidden while stacked (presentation mode) → render fills the height. */
+#panels.stacked.no-editor #panel-render { flex: 1 1 auto; border-bottom: none; }
+#panels.stacked.no-editor .gutter[data-gutter="1"] { display: none; }
 
 /* Editor + AST both hidden: the isolated render is the whole view, so cap its
    width and center it on large screens (a document on a backdrop). */

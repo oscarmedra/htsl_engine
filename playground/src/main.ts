@@ -27,8 +27,7 @@ import {
 } from "./persistence";
 import { FrameRenderer } from "./frame";
 import { setupPalette } from "./palette";
-import { updateHelp } from "./help";
-import { openBlockEditor } from "./block-editor";
+import { htslHoverDoc } from "./help";
 
 /* -------------------------------------------------------------------------- */
 /* DOM                                                                        */
@@ -42,8 +41,8 @@ const bannerEl = $<HTMLDivElement>("banner");
 const panelsEl = $<HTMLElement>("panels");
 const toggleAst = $<HTMLInputElement>("toggle-ast");
 const toggleEditor = $<HTMLInputElement>("toggle-editor");
+const toggleStacked = $<HTMLInputElement>("toggle-stacked");
 const perfEl = document.getElementById("perf");
-const helpEl = $<HTMLDivElement>("help");
 const renderLoader = document.getElementById("render-loader");
 
 /* -------------------------------------------------------------------------- */
@@ -61,38 +60,21 @@ function onTextEdit(start: number, end: number, text: string): void {
   run(view, true); // re-render immediately so offsets stay fresh
 }
 
-/** Write a whole-element edit (raw HTSL) from the preview back into the source. */
-function onElementEdit(start: number, end: number, rawSource: string): void {
-  if (view.state.sliceDoc(start, end) === rawSource) return; // unchanged
-  view.dispatch({ changes: { from: start, to: end, insert: rawSource } });
-  run(view, true);
-}
-
-/** Only one floating block editor at a time. */
-let closeBlockEditor: (() => void) | null = null;
-
 /**
- * A block was clicked in the preview: open a full HTSL editor (highlighting +
- * autocompletion) floating over it, so authoring happens straight from the
- * render. `rect` is in the iframe's own viewport; add the iframe offset.
+ * A component was clicked in the preview: reveal its source in the main editor —
+ * make sure the editor is visible, select the component's `{@…}` range and
+ * scroll to it, then focus. Editing then happens directly in the main editor.
  */
-function onBlockClick(start: number, end: number, rect: DOMRect): void {
-  closeBlockEditor?.(); // commit/cancel any previous one
-  const frameRect = renderFrame.getBoundingClientRect();
-  closeBlockEditor = openBlockEditor({
-    doc: view.state.sliceDoc(start, end),
-    rect: {
-      left: frameRect.left + rect.left,
-      top: frameRect.top + rect.top,
-      width: rect.width,
-    },
-    onCommit: (text) => {
-      closeBlockEditor = null;
-      onElementEdit(start, end, text);
-    },
-    onCancel: () => {
-      closeBlockEditor = null;
-    },
+function onBlockClick(start: number, end: number): void {
+  if (!toggleEditor.checked) {
+    toggleEditor.checked = true;
+    saveFlag("editor", true);
+    relayout();
+  }
+  view.focus();
+  view.dispatch({
+    selection: { anchor: start, head: end },
+    scrollIntoView: true,
   });
 }
 
@@ -198,8 +180,8 @@ const extensions: Extension[] = [
   htslLanguage(),
   htslLinter(parse),
   autocompletion({ override: [htslCompletion(registry)], activateOnTyping: true }),
+  htslHoverDoc,
   EditorView.updateListener.of((u) => {
-    if (u.selectionSet || u.docChanged) updateHelp(view, helpEl);
     // Auto-open the completion menu while typing a trigger. Recent versions of
     // @codemirror/autocomplete no longer auto-activate on non-word triggers like
     // "{@", so we start it explicitly (same mechanism as the slash command).
@@ -281,6 +263,7 @@ $("btn-share").addEventListener("click", async () => {
 function relayout(): void {
   panelsEl.classList.toggle("no-ast", !toggleAst.checked);
   panelsEl.classList.toggle("no-editor", !toggleEditor.checked);
+  panelsEl.classList.toggle("stacked", toggleStacked.checked);
   panelsEl.style.gridTemplateColumns = ""; // let the CSS classes govern
 }
 // Persist each panel's visibility so a refresh keeps the layout you chose.
@@ -292,11 +275,16 @@ toggleEditor.addEventListener("change", () => {
   saveFlag("editor", toggleEditor.checked);
   relayout();
 });
+toggleStacked.addEventListener("change", () => {
+  saveFlag("stacked", toggleStacked.checked);
+  relayout();
+});
 
 /** Restore the persisted panel visibility (defaults: editor + AST hidden). */
 function restorePanelPrefs(): void {
   toggleEditor.checked = loadFlag("editor") ?? false;
   toggleAst.checked = loadFlag("ast") ?? false;
+  toggleStacked.checked = loadFlag("stacked") ?? false;
 }
 
 function flash(btn: HTMLElement, text: string): void {
@@ -311,6 +299,7 @@ function flash(btn: HTMLElement, text: string): void {
 
 let editorW = 0.4;
 let renderW = 0.36;
+let stackRender = 0.58; // render height fraction in stacked layout
 
 function applyColumns(): void {
   // Custom drag widths only apply when every panel is visible.
@@ -318,10 +307,34 @@ function applyColumns(): void {
   panelsEl.style.gridTemplateColumns = `${editorW}fr 6px ${renderW}fr 6px ${Math.max(0.15, 1 - editorW - renderW)}fr`;
 }
 
+function applyStackHeight(): void {
+  panelsEl.style.setProperty("--stack-render", `${(stackRender * 100).toFixed(1)}%`);
+}
+
 document.querySelectorAll<HTMLElement>(".gutter").forEach((gutter) => {
   gutter.addEventListener("mousedown", (e) => {
     e.preventDefault();
     const which = gutter.dataset.gutter;
+
+    // Stacked layout: gutter 1 becomes a vertical (row) resize of the render height.
+    if (panelsEl.classList.contains("stacked")) {
+      if (which !== "1") return;
+      const startY = e.clientY;
+      const total = panelsEl.clientHeight;
+      const start = stackRender;
+      const onMove = (ev: MouseEvent): void => {
+        stackRender = Math.min(0.85, Math.max(0.15, start + (ev.clientY - startY) / total));
+        applyStackHeight();
+      };
+      const onUp = (): void => {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      };
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+      return;
+    }
+
     const startX = e.clientX;
     const total = panelsEl.clientWidth;
     const startEditor = editorW;
@@ -359,8 +372,11 @@ $("btn-insert").addEventListener("click", () => palette.toggle());
 restorePanelPrefs();
 relayout();
 
+// Styles + layout are applied now — reveal the app (hidden until here to avoid
+// the flash of unstyled content on load/refresh).
+$("app").style.visibility = "visible";
+
 run(view);
-updateHelp(view, helpEl);
 
 // Restore a compressed shared link (#z=…) once the editor is ready.
 void hydrateFromHash();
