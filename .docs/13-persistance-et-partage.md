@@ -123,3 +123,17 @@ présentateur garde un éditeur pleinement utilisable en bas.
 - Vérifié en navigateur : rendu en haut pleine largeur, éditeur en bas ;
   redimensionnement vertical (58 % → 70 %) ; mode présentation remplit à 0 px près ;
   retour « côte à côte » = grille éditeur-à-gauche ; persistance OK ; 0 erreur.
+
+## Mode lecture : l'éditeur du bas se replie au défilement (empilé)
+
+En disposition **empilée** uniquement, faire défiler le rendu **replie
+automatiquement** l'éditeur du bas (classe `editor-collapsed` → rendu plein
+écran), pour lire/présenter sans distraction. Il **réapparaît** dès qu'on **clique
+un composant** (qui sélectionne son code) ou qu'on touche la case « Éditeur ».
+
+- `frame.ts` : callback `onScroll` (écoute `scroll` de la `contentWindow`).
+- `main.ts` : `onRenderScroll` ajoute `editor-collapsed` si `stacked` **et**
+  éditeur visible ; `onBlockClick` et `relayout()` la retirent.
+- CSS `#panels.stacked.editor-collapsed` masque éditeur + poignée, le rendu remplit.
+- Vérifié en navigateur : scroll → éditeur masqué ; clic composant → éditeur revient
+  (code sélectionné) ; en côte à côte, le scroll ne fait rien ; 0 erreur.

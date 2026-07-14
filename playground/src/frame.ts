@@ -80,13 +80,19 @@ export class FrameRenderer {
     private readonly iframe: HTMLIFrameElement,
     mathCss: string,
     private readonly onTextEdit?: (start: number, end: number, text: string) => void,
-    /** Click on a block → request the parent to open a full editor over it.
-     *  `rect` is the element's bounding box in the iframe's own viewport. */
+    /** Click a component instance → reveal & select its source in the editor. */
     private readonly onBlockClick?: (start: number, end: number) => void,
+    /** The rendered content was scrolled (used to auto-collapse the editor). */
+    private readonly onScroll?: () => void,
   ) {
     this.iframe.addEventListener("load", () => {
       this.doc = this.iframe.contentDocument;
       this.root = this.doc?.getElementById("htsl-root") ?? null;
+      if (this.onScroll) {
+        this.iframe.contentWindow?.addEventListener("scroll", () => this.onScroll?.(), {
+          passive: true,
+        });
+      }
       // Delegated: when an editable text run loses focus, write it back.
       this.doc?.addEventListener("focusout", (ev) => {
         // Cross-realm: `instanceof Element` fails across the iframe boundary, so

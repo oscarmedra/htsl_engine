@@ -200,6 +200,12 @@ body {
 #panels.stacked.no-editor #panel-render { flex: 1 1 auto; border-bottom: none; }
 #panels.stacked.no-editor .gutter[data-gutter="1"] { display: none; }
 
+/* Reading mode: scrolling the render auto-collapses the bottom editor (stacked
+   only). It reappears on a component click or when the editor toggle is used. */
+#panels.stacked.editor-collapsed #panel-editor,
+#panels.stacked.editor-collapsed .gutter[data-gutter="1"] { display: none; }
+#panels.stacked.editor-collapsed #panel-render { flex: 1 1 auto; border-bottom: none; }
+
 /* Editor + AST both hidden: the isolated render is the whole view, so cap its
    width and center it on large screens (a document on a backdrop). */
 .no-editor.no-ast #panel-render { border-left: none; align-items: center; }

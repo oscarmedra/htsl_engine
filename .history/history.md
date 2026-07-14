@@ -805,3 +805,12 @@ par main.ts, script module différé). Correctif : CSS critique inline dans <hea
 (#app visibility:visible) juste après restorePanelPrefs()+relayout() (styles+layout
 prêts). Filet de sécurité : petit script inline qui révèle après 3 s si le module
 tarde. Vérifié en navigateur (app stylée d'emblée, 0 erreur).
+
+## Playground : mode lecture — éditeur du bas replié au défilement (empilé)
+
+En disposition empilée, faire défiler le rendu replie auto l'éditeur du bas
+(classe editor-collapsed, rendu plein écran) ; il revient au clic sur un composant
+ou via la case Éditeur. frame.ts : callback onScroll (scroll de la contentWindow).
+main.ts : onRenderScroll (garde stacked + editor visible), retrait dans onBlockClick
+et relayout. CSS #panels.stacked.editor-collapsed. Vérifié (scroll→masqué,
+clic→revient+sélection, côte à côte inchangé, 0 erreur).

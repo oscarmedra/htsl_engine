@@ -66,6 +66,7 @@ function onTextEdit(start: number, end: number, text: string): void {
  * scroll to it, then focus. Editing then happens directly in the main editor.
  */
 function onBlockClick(start: number, end: number): void {
+  panelsEl.classList.remove("editor-collapsed"); // scrolling may have auto-hidden it
   if (!toggleEditor.checked) {
     toggleEditor.checked = true;
     saveFlag("editor", true);
@@ -78,7 +79,17 @@ function onBlockClick(start: number, end: number): void {
   });
 }
 
-const frame = new FrameRenderer(renderFrame, mathCss, onTextEdit, onBlockClick);
+/**
+ * Reading mode (stacked layout only): scrolling the rendered content collapses
+ * the bottom editor so it gets out of the way. It comes back when a component is
+ * clicked (onBlockClick above) or the editor toggle is used.
+ */
+function onRenderScroll(): void {
+  if (!panelsEl.classList.contains("stacked") || !toggleEditor.checked) return;
+  panelsEl.classList.add("editor-collapsed");
+}
+
+const frame = new FrameRenderer(renderFrame, mathCss, onTextEdit, onBlockClick, onRenderScroll);
 
 /** Dev-only metric: update time + how few DOM nodes were actually touched. */
 function showPerf(ms: number, touched: number, total: number): void {
@@ -264,6 +275,7 @@ function relayout(): void {
   panelsEl.classList.toggle("no-ast", !toggleAst.checked);
   panelsEl.classList.toggle("no-editor", !toggleEditor.checked);
   panelsEl.classList.toggle("stacked", toggleStacked.checked);
+  panelsEl.classList.remove("editor-collapsed"); // reset the reading-mode auto-hide
   panelsEl.style.gridTemplateColumns = ""; // let the CSS classes govern
 }
 // Persist each panel's visibility so a refresh keeps the layout you chose.
