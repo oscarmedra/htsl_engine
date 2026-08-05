@@ -22,7 +22,7 @@ import { isPlotPath, renderPlot } from "./objects/plot.js";
 import { isChartPath, renderChart } from "./objects/chart.js";
 import { isVariationsPath, renderVariations } from "./objects/variations.js";
 import { isParamPath, renderParam, buildParamContext, paramValues, type ParamContext } from "./objects/param.js";
-import { isSlidePath } from "./objects/slides.js";
+import { isSlidePath, deckTransition, parseDurationMs } from "./objects/slides.js";
 import {
   buildCalloutContext,
   calloutId,
@@ -153,14 +153,24 @@ class Renderer {
     );
     const stage = slides.map((s) => this.slideSection(s)).join("");
     const n = slides.length;
+    const transition = deckTransition(node.attrs["transition"]);
+    const autoplayMs = parseDurationMs(node.attrs["autoplay"]);
+    const loop = node.attrs["loop"] !== undefined && node.attrs["loop"] !== "false";
+    const autoAttrs =
+      autoplayMs > 0 ? ` data-htsl-autoplay="${autoplayMs}"${loop ? " data-htsl-loop" : ""}` : "";
+    // Play/pause control only when auto-advance is on.
+    const playBtn = autoplayMs
+      ? `<button type="button" class="htsl-deck-btn htsl-deck-play" aria-label="Lecture / pause">&#9654;</button>`
+      : "";
     return (
-      `<div class="htsl-deck" data-htsl-slides data-htsl-index="0" tabindex="0"${hashAttr}>` +
+      `<div class="htsl-deck" data-htsl-slides data-htsl-index="0" data-htsl-transition="${transition}"${autoAttrs} tabindex="0"${hashAttr}>` +
       `<div class="htsl-deck-progress"><span class="htsl-deck-fill"></span></div>` +
       `<div class="htsl-deck-stage">${stage}</div>` +
       `<div class="htsl-deck-nav">` +
       `<button type="button" class="htsl-deck-btn htsl-deck-prev" aria-label="Slide précédent">&#8249;</button>` +
       `<span class="htsl-deck-counter">${n ? 1 : 0} / ${n}</span>` +
       `<button type="button" class="htsl-deck-btn htsl-deck-next" aria-label="Slide suivant">&#8250;</button>` +
+      playBtn +
       `<button type="button" class="htsl-deck-btn htsl-deck-full" aria-label="Plein écran">&#9974;</button>` +
       `</div>` +
       `</div>`

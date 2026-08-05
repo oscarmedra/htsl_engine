@@ -65,3 +65,24 @@ Seuls les enfants `{@slider.slide:…}` deviennent des slides ; les autres sont
 
 Transitions au choix (glissement), mode présentateur (notes), miniatures,
 conservation de l'index courant à travers une ré-édition.
+
+## Transitions & défilement automatique (2026)
+
+Deux attributs optionnels sur `{@slider}` :
+
+- **`transition`** = `none` (défaut) | `fade` | `slide` | `zoom` : anime l'entrée
+  du slide actif (keyframes `htsl-fade`/`htsl-slidein`/`htsl-zoomin` dans `mathCss`).
+  Approche par **animation d'entrée** (display toggle + keyframe) — robuste, contrairement
+  à un cross-fade opacité qui se révélait fragile avec le morphing du playground.
+  Respecte `prefers-reduced-motion` (animation désactivée).
+- **`autoplay`** = durée par slide avec suffixe `s`/`m`/`ms` (défaut : secondes) :
+  `parseDurationMs()` → ms → `data-htsl-autoplay`. Le runtime (`slides-client.ts`)
+  avance seul (`setInterval`), affiche un **bouton ▶/⏸**, et transforme la barre de
+  progression en **compte à rebours** par slide. `loop=true` (`data-htsl-loop`)
+  reboucle ; sinon s'arrête au dernier. **Toute navigation manuelle** (flèches,
+  clic prev/next) **met en pause**. Auto-démarre au chargement sauf reduced-motion.
+
+Registre : `transition` (enum), `autoplay` (string), `loop` (boolean) documentés.
+Tests `slides.test.ts` (10) : transition par défaut/inconnue, parsing des durées
+(ms/s/m/nu), bouton play conditionnel, flag loop. Vérifié en navigateur : fade
+animé, autoplay 1→3 puis boucle, ▶/⏸, pause sur nav manuelle ; 0 erreur.

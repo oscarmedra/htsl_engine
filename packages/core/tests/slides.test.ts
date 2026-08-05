@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { compile, isSlidePath } from "../src/index.js";
+import { parseDurationMs, deckTransition } from "../src/objects/slides.js";
 
 describe("slider deck ({@slider})", () => {
   it("recognises slider paths (incl. the `slider` alias)", () => {
@@ -38,5 +39,47 @@ describe("slider deck ({@slider})", () => {
     const html = compile("{@slider: {@slider.slide:{script:alert(1)}}}");
     expect(html).not.toContain("<script>");
     expect(html).toContain('type="text/plain"'); // inert; navigation is the runtime's job
+  });
+});
+
+describe("slider — transitions & auto-advance", () => {
+  it("defaults to transition=none and no autoplay/play button", () => {
+    const html = compile("{@slider: {@slider.slide:A}}");
+    expect(html).toContain('data-htsl-transition="none"');
+    expect(html).not.toContain("data-htsl-autoplay");
+    expect(html).not.toContain("htsl-deck-play");
+  });
+
+  it("emits the chosen transition; unknown values fall back to none", () => {
+    expect(compile("{@slider[transition=fade]: {@slider.slide:A}}")).toContain(
+      'data-htsl-transition="fade"',
+    );
+    expect(compile("{@slider[transition=wobble]: {@slider.slide:A}}")).toContain(
+      'data-htsl-transition="none"',
+    );
+  });
+
+  it("parses autoplay durations to ms and adds a play button + loop flag", () => {
+    const html = compile('{@slider[autoplay="8s", loop=true]: {@slider.slide:A}}');
+    expect(html).toContain('data-htsl-autoplay="8000"');
+    expect(html).toContain("data-htsl-loop");
+    expect(html).toContain("htsl-deck-play");
+  });
+
+  it("supports ms / s / m suffixes and bare seconds", () => {
+    expect(parseDurationMs("500ms")).toBe(500);
+    expect(parseDurationMs("8s")).toBe(8000);
+    expect(parseDurationMs("8")).toBe(8000); // bare number = seconds
+    expect(parseDurationMs("2m")).toBe(120000);
+    expect(parseDurationMs("0")).toBe(0);
+    expect(parseDurationMs("nope")).toBe(0);
+    expect(parseDurationMs(undefined)).toBe(0);
+  });
+
+  it("validates the transition name", () => {
+    expect(deckTransition("zoom")).toBe("zoom");
+    expect(deckTransition("SLIDE")).toBe("slide");
+    expect(deckTransition("")).toBe("none");
+    expect(deckTransition("nope")).toBe("none");
   });
 });

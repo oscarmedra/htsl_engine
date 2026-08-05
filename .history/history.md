@@ -814,3 +814,13 @@ ou via la case Éditeur. frame.ts : callback onScroll (scroll de la contentWindo
 main.ts : onRenderScroll (garde stacked + editor visible), retrait dans onBlockClick
 et relayout. CSS #panels.stacked.editor-collapsed. Vérifié (scroll→masqué,
 clic→revient+sélection, côte à côte inchangé, 0 erreur).
+
+## Slider : transitions (fade/slide/zoom) + défilement automatique
+
+Attribut transition (none/fade/slide/zoom → animation d'entrée keyframe, respecte
+reduced-motion) et autoplay ("8s"/"2m"/"500ms" via parseDurationMs → data-htsl-autoplay)
++ loop. Runtime slides-client.ts : setInterval d'avance, bouton ▶/⏸, barre de
+progression = compte à rebours, pause sur nav manuelle, auto-start (sauf reduced-motion).
+renderer émet data-htsl-transition/autoplay/loop + bouton play conditionnel. CSS mathCss.
+Registre + prompt IA + .docs/15. Core 319, codemirror 37, monorepo vert. Vérifié navigateur.
+Aussi : annulation du repli auto de l'éditeur au scroll (retour au choix via la case Éditeur).

@@ -76,11 +76,21 @@ export const mathCss = `
 .htsl-deck-progress { height: 4px; background: #eef2ff; }
 .htsl-deck-fill { display: block; height: 100%; width: 0; background: #3b5bdb; transition: width 0.25s ease; }
 .htsl-deck-stage { padding: 1.6rem 1.8rem; }
-.htsl-deck-stage > section { display: none; animation: htsl-slide-in 0.28s ease; }
-/* Graceful without the runtime: show the first slide. With it: only the active one. */
+/* Only the active slide is shown; it plays an entrance animation chosen by the
+   transition attribute (fade / slide / zoom). Keyframe animations run reliably
+   whatever the previous display state — no cross-fade fragility. */
+.htsl-deck-stage > section { display: none; }
 .htsl-deck:not(.htsl-deck--ready) .htsl-deck-stage > section:first-child { display: block; }
 .htsl-deck.htsl-deck--ready .htsl-deck-stage > section.is-active { display: block; }
-@keyframes htsl-slide-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.htsl-deck[data-htsl-transition="fade"].htsl-deck--ready .htsl-deck-stage > section.is-active { animation: htsl-fade 0.35s ease; }
+.htsl-deck[data-htsl-transition="slide"].htsl-deck--ready .htsl-deck-stage > section.is-active { animation: htsl-slidein 0.35s ease; }
+.htsl-deck[data-htsl-transition="zoom"].htsl-deck--ready .htsl-deck-stage > section.is-active { animation: htsl-zoomin 0.32s ease; }
+@keyframes htsl-fade { from { opacity: 0; } }
+@keyframes htsl-slidein { from { opacity: 0; transform: translateX(30px); } }
+@keyframes htsl-zoomin { from { opacity: 0; transform: scale(0.96); } }
+@media (prefers-reduced-motion: reduce) {
+  .htsl-deck--ready .htsl-deck-stage > section.is-active { animation: none !important; }
+}
 .htsl-deck-nav {
   display: flex; align-items: center; justify-content: center; gap: 0.9rem;
   padding: 0.6rem; border-top: 1px solid #eef0f3; background: #fbfbfc;
@@ -100,7 +110,9 @@ export const mathCss = `
 .htsl-deck:fullscreen .htsl-deck-stage { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 @media print {
   .htsl-deck-nav, .htsl-deck-progress { display: none; }
-  .htsl-deck-stage > section { display: block !important; break-after: page; padding: 0.5em 0; }
+  .htsl-deck-stage > section {
+    display: block !important; animation: none !important; break-after: page; padding: 0.5em 0;
+  }
 }
 
 /* Semantic callouts ({@theorem}, {@definition}, {@proof}…). */

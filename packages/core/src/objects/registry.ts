@@ -409,11 +409,34 @@ registerObject({
   category: "structure",
   aliases: ["slider"],
   description:
-    "Présentation : conteneur de slides {@slider.slide:…}, navigable par boutons/flèches (runtime). Les enfants qui ne sont pas des slides sont ignorés.",
-  attrs: [],
+    "Présentation : conteneur de slides {@slider.slide:…}, navigable par boutons/flèches (runtime). Transitions et défilement auto optionnels. Les enfants qui ne sont pas des slides sont ignorés.",
+  attrs: [
+    {
+      name: "transition",
+      type: "enum",
+      required: false,
+      default: "none",
+      values: ["none", "fade", "slide", "zoom"],
+      description: "Effet de changement de slide : none, fade (fondu), slide (glissement), zoom.",
+    },
+    {
+      name: "autoplay",
+      type: "string",
+      required: false,
+      description: "Défilement automatique : durée par slide (ex. « 8s », « 2m », « 500ms »). Ajoute un bouton ▶/⏸.",
+    },
+    {
+      name: "loop",
+      type: "boolean",
+      required: false,
+      default: "false",
+      description: "Avec autoplay : revenir au premier slide après le dernier (sinon s'arrête).",
+    },
+  ],
   snippet:
-    "{@slider:\n  {@slider.slide: ${1:Premier slide}}\n  {@slider.slide: ${2:Deuxième slide}}\n}",
-  example: "{@slider:\n  {@slider.slide: {h1:Titre}}\n  {@slider.slide: {h2:Suite} {@mtb: E=mc^2}}\n}",
+    "{@slider[transition=fade]:\n  {@slider.slide: ${1:Premier slide}}\n  {@slider.slide: ${2:Deuxième slide}}\n}",
+  example:
+    "{@slider[transition=fade, autoplay=\"6s\", loop=true]:\n  {@slider.slide: {h1:Titre}}\n  {@slider.slide: {h2:Suite} {@mtb: E=mc^2}}\n}",
 });
 registerObject({
   path: "slider.slide",

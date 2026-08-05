@@ -242,6 +242,8 @@ Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteu
 
 - Un slide peut contenir n'importe quel HTSL (titres, texte, formules, scènes 2D/3D, graphes).
 - À l'export PDF, chaque slide devient une page.
+- **Transitions** : attribut `transition` = `none` (défaut), `fade`, `slide`, `zoom` — ex. `{@slider[transition=fade]:…}` (animation d'entrée de chaque slide).
+- **Défilement auto** : attribut `autoplay` = durée par slide (`"8s"`, `"2m"`, `"500ms"`) → avance seul et ajoute un bouton ▶/⏸ ; `loop=true` revient au début après le dernier. Une interaction (flèches, clic) met en pause ; respecte `prefers-reduced-motion`. Ex. `{@slider[transition=slide, autoplay="6s", loop=true]:…}`.
 
 ### Style (Tailwind CSS)
 Charge Tailwind en tête de document : `{script[src="https://cdn.tailwindcss.com"]/}`
