@@ -4,7 +4,22 @@ export interface Example {
   id: string;
   label: string;
   src: string;
+  /** Gallery category (see TEMPLATE_CATEGORIES for the display order). */
+  category?: string;
+  /** One-line description shown under the title in the template gallery. */
+  description?: string;
 }
+
+/** Category display order for the template gallery. */
+export const TEMPLATE_CATEGORIES = [
+  "Découverte",
+  "Mathématiques",
+  "Présentation",
+  "Pédagogie interactive",
+  "Mise en page (CSS)",
+  "Géométrie & 3D",
+  "Avancé",
+] as const;
 
 /** A large document (30 cards with formulas + 2 scenes) to demonstrate that
  *  editing one word touches a single block and never re-plots the scenes. */
@@ -40,12 +55,16 @@ function perfDoc(): string {
 export const examples: Example[] = [
   {
     id: "grand-tour",
-    label: "Le grand tour de HTSL (démonstration complète)",
+    label: "Le grand tour de HTSL",
+    category: "Découverte",
+    description: "Toutes les capacités du moteur réunies dans un seul document.",
     src: grandTour,
   },
   {
     id: "formules",
-    label: "Galerie de formules (composant card)",
+    label: "Galerie de formules",
+    category: "Mathématiques",
+    description: "Un composant réutilisable qui met en carte plusieurs formules.",
     src: String.raw`{!-- Chargez le framework CSS depuis votre document (iframe isolée) --}
 {script[src="https://cdn.tailwindcss.com"]/}
 
@@ -75,6 +94,8 @@ export const examples: Example[] = [
   {
     id: "tailwind",
     label: "Mise en page Tailwind",
+    category: "Mise en page (CSS)",
+    description: "Composer une page avec Tailwind CSS chargé dans le document.",
     src: String.raw`{!-- On charge Tailwind ici même, dans le document --}
 {script[src="https://cdn.tailwindcss.com"]/}
 
@@ -111,7 +132,9 @@ export const examples: Example[] = [
   },
   {
     id: "bootstrap",
-    label: "Bootstrap (n'importe quel framework)",
+    label: "Bootstrap",
+    category: "Mise en page (CSS)",
+    description: "N'importe quel framework CSS (ici Bootstrap) via {link}.",
     src: String.raw`{!-- N'importe quel framework CSS : ici Bootstrap, chargé via {link} --}
 {link[rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"]/}
 
@@ -147,6 +170,8 @@ export const examples: Example[] = [
   {
     id: "scene3d",
     label: "Scène 3D avec repère",
+    category: "Géométrie & 3D",
+    description: "Une scène 3D interactive (repère, plan, sphère, vecteurs).",
     src: String.raw`{h1:Scène 3D}
 {@mg3.scene[width=560, height=440]:
   {@mg3.space[xrange="(-5,5)", yrange="(-5,5)", zrange="(-5,5)", grid=true, ticks=2, equal=true]/}
@@ -161,6 +186,8 @@ export const examples: Example[] = [
   {
     id: "complexe",
     label: "Plan complexe",
+    category: "Géométrie & 3D",
+    description: "Le plan complexe avec cercle unité et points (affixes).",
     src: String.raw`{h1:Plan complexe}
 {@mg2.scene[width=520, height=460]:
   {@mg2.frame[type=complex, range=4, unitcircle=true, ticks=1]/}
@@ -173,7 +200,9 @@ export const examples: Example[] = [
   },
   {
     id: "document",
-    label: "Document mixte (équations + références)",
+    label: "Document scientifique",
+    category: "Mathématiques",
+    description: "Équations numérotées et références croisées cliquables.",
     src: String.raw`{!set theme: indigo}
 {h1:Document scientifique}
 
@@ -195,6 +224,98 @@ export const examples: Example[] = [
   {
     id: "perf",
     label: "Performance (30 cartes + 2 scènes)",
+    category: "Avancé",
+    description: "Démonstration : éditer un mot ne re-rend qu'un seul bloc.",
     src: perfDoc(),
+  },
+  {
+    id: "presentation",
+    label: "Présentation animée",
+    category: "Présentation",
+    description: "Diaporama avec transitions et défilement automatique (▶/⏸).",
+    src: String.raw`{@slider[transition=fade, autoplay="8s", loop=true]:
+  {@slider.slide:
+    {h1:Ma présentation}
+    {p:Naviguez avec ⟵ / ⟶, le plein écran, ou la lecture automatique (▶ / ⏸).}
+  }
+  {@slider.slide:
+    {h2:Une équation}
+    {@mtb: e^{i\pi} + 1 = 0}
+  }
+  {@slider.slide:
+    {h2:Un graphe}
+    {@plot[fn="sin(x)/x", xrange="(-15,15)", title="Sinus cardinal"]/}
+  }
+}
+`,
+  },
+  {
+    id: "cours",
+    label: "Cours : théorèmes & preuves",
+    category: "Mathématiques",
+    description: "Encadrés sémantiques numérotés (définition, théorème, preuve).",
+    src: String.raw`{h1:Continuité}
+
+{@definition[title="Continuité en un point", label=cont]:
+  {p:$f$ est continue en $a$ si $\displaystyle\lim_{x\to a} f(x) = f(a)$.}
+}
+
+{@theorem[title="Valeurs intermédiaires", label=tvi]:
+  {p:Si $f$ est continue sur $[a,b]$ et $y$ est compris entre $f(a)$ et $f(b)$,
+  alors il existe $c \in [a,b]$ tel que $f(c) = y$.}
+}
+
+{@proof:
+  {p:On utilise la {@ref[to=cont]/} et la propriété de la borne supérieure.}
+}
+
+{@example:
+  {p:$x^3 - x - 1$ admet une racine dans $[1,2]$ d'après le {@ref[to=tvi]/}.}
+}
+
+{@remark: {p:La réciproque du théorème est fausse en général.}}
+`,
+  },
+  {
+    id: "quiz",
+    label: "Quiz & cartes de révision",
+    category: "Pédagogie interactive",
+    description: "Un QCM auto-corrigé et des cartes à retourner.",
+    src: String.raw`{h1:Auto-évaluation}
+
+{@quiz:
+  {q:Quelle est la dérivée de $\sin(x)$ ?}
+  {opt: $-\sin(x)$}
+  {opt[correct=true]: $\cos(x)$}
+  {opt: $\tan(x)$}
+  {explain: On a $(\sin)' = \cos$.}
+}
+
+{h2:Cartes de révision}
+{@flashcard:
+  {front: $\displaystyle\int_0^1 x^2\,dx$}
+  {back: $= \dfrac{1}{3}$}
+}
+{@flashcard:
+  {front: $e^{i\pi}$}
+  {back: $= -1$}
+}
+`,
+  },
+  {
+    id: "graphes",
+    label: "Graphes de fonctions",
+    category: "Mathématiques",
+    description: "Tracé d'une ou plusieurs courbes $y = f(x)$.",
+    src: String.raw`{h1:Graphes de fonctions}
+
+{@plot[fn="x^2 - 2", xrange="(-3,3)", title="Une parabole"]/}
+
+{h2:Plusieurs courbes}
+{@plot[xrange="(-6,6)", title="sin et cos"]:
+  {@plot.curve[fn="sin(x)", color=crimson]/}
+  {@plot.curve[fn="cos(x)", color=royalblue]/}
+}
+`,
   },
 ];

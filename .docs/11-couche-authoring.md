@@ -73,3 +73,23 @@ scène 3D** uniquement à la souris (clics palette) : le document obtenu rend un
 
 Syntaxe du langage **inchangée** (les balises HTML restent de simples
 `{tag:...}`, jamais des `@`-objets). Tests : core **179**, codemirror **25**.
+
+## Remplacement de la palette d'insertion par une galerie de modèles (2026)
+
+Retour utilisateur : la palette d'insertion d'objets servait peu. Elle est
+remplacée par une **galerie de modèles** (`templates.ts`) : le bouton
+« 📄 Modèles » ouvre le même tiroir, mais liste les documents prêts à l'emploi de
+`examples.ts` sous forme de **cartes cliquables groupées par catégorie**. Un clic
+**charge** le modèle dans l'éditeur (édition unique et **annulable** via Ctrl/Cmd+Z),
+ferme le tiroir et re-rend. Recherche par titre/description conservée.
+
+- `examples.ts` : chaque modèle porte `category` + `description` ; ordre des
+  catégories via `TEMPLATE_CATEGORIES`. 4 modèles ajoutés : **Présentation animée**
+  (slider transitions/autoplay), **Cours : théorèmes & preuves** (encadrés),
+  **Quiz & cartes** (@quiz/@flashcard), **Graphes de fonctions** (@plot). 12 au total,
+  7 catégories.
+- `palette.ts` **supprimé** ; `main.ts` utilise `setupTemplates(view, onLoad)`.
+- L'insertion d'objet inline reste disponible via la complétion « / » — rien de
+  perdu pour les utilisateurs avancés.
+- Vérifié en navigateur : 12 cartes / 7 catégories, clic → chargement + rendu
+  (ex. Cours → 5 encadrés), recherche « quiz » filtre correctement ; 0 erreur.

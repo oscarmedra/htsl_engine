@@ -824,3 +824,13 @@ progression = compte à rebours, pause sur nav manuelle, auto-start (sauf reduce
 renderer émet data-htsl-transition/autoplay/loop + bouton play conditionnel. CSS mathCss.
 Registre + prompt IA + .docs/15. Core 319, codemirror 37, monorepo vert. Vérifié navigateur.
 Aussi : annulation du repli auto de l'éditeur au scroll (retour au choix via la case Éditeur).
+
+## Playground : galerie de modèles à la place de la palette d'insertion
+
+La palette d'insertion d'objets (peu utile) est remplacée par une galerie de
+modèles cliquables groupés par catégorie (bouton « 📄 Modèles »). Un clic charge
+le modèle dans l'éditeur (annulable). examples.ts : +category/description +
+TEMPLATE_CATEGORIES + 4 nouveaux modèles (présentation animée, cours/théorèmes,
+quiz/cartes, graphes). templates.ts (nouveau), palette.ts supprimé. L'insertion
+inline reste via « / ». Vérifié navigateur (12 modèles/7 catégories, chargement,
+recherche ; 0 erreur). Build OK.

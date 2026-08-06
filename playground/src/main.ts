@@ -26,7 +26,7 @@ import {
   decodeCompressedHash,
 } from "./persistence";
 import { FrameRenderer } from "./frame";
-import { setupPalette } from "./palette";
+import { setupTemplates } from "./templates";
 import { htslHoverDoc } from "./help";
 
 /* -------------------------------------------------------------------------- */
@@ -361,9 +361,14 @@ document.querySelectorAll<HTMLElement>(".gutter").forEach((gutter) => {
 /* Boot                                                                        */
 /* -------------------------------------------------------------------------- */
 
-// Insertion palette (➕ button or slash command in the editor).
-const palette = setupPalette(view);
-$("btn-insert").addEventListener("click", () => palette.toggle());
+// Template gallery (📄 Modèles button). Loading a template replaces the document
+// in a single, undoable edit (Ctrl/Cmd+Z restores the previous content).
+const templates = setupTemplates(view, (src) => {
+  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: src } });
+  view.focus();
+  run(view, true);
+});
+$("btn-insert").addEventListener("click", () => templates.toggle());
 
 // Exposed for debugging / scripting from the console.
 (window as unknown as { htslView: EditorView }).htslView = view;
