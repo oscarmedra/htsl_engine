@@ -16,7 +16,7 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
-import { Tag } from "@lezer/highlight";
+import { Tag, tags as t } from "@lezer/highlight";
 import { contentModelOf } from "@noah-medra/htsl-core";
 
 const IDENT = /[A-Za-z0-9_-]/;
@@ -448,6 +448,13 @@ const highlight = HighlightStyle.define([
   { tag: T.escape, color: "#f08c00" },
   { tag: T.keyword, color: "#1971c2", fontWeight: "600" },
   { tag: T.number, color: "#e8590c" },
+  // `tag`/`string`/`comment`/`keyword` are legacy StreamLanguage token names that
+  // CodeMirror maps to STANDARD lezer tags (not our custom ones) — so style those
+  // too, otherwise basic HTML tags (div, p, h1…) render uncoloured.
+  { tag: t.tagName, color: "#1c7ed6", fontWeight: "600" },
+  { tag: t.string, color: "#c2255c" },
+  { tag: t.comment, color: "#adb5bd", fontStyle: "italic" },
+  { tag: t.keyword, color: "#1971c2", fontWeight: "600" },
 ]);
 
 /* -------------------------------------------------------------------------- */

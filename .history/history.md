@@ -834,3 +834,12 @@ TEMPLATE_CATEGORIES + 4 nouveaux modèles (présentation animée, cours/théorè
 quiz/cartes, graphes). templates.ts (nouveau), palette.ts supprimé. L'insertion
 inline reste via « / ». Vérifié navigateur (12 modèles/7 catégories, chargement,
 recherche ; 0 erreur). Build OK.
+
+## Éditeur : coloration des balises HTML de base (div, p, h1…)
+
+Bug : les balises simples n'étaient pas colorées (les @objets si). Cause : le nom
+de jeton "tag" (et string/comment/keyword) est legacy CodeMirror → mappé vers les
+tags lezer standards, pas nos Tag.define() custom → HighlightStyle ne s'appliquait
+pas. Fix : styliser aussi t.tagName/t.string/t.comment/t.keyword (language.ts).
+Vérifié navigateur (div/p/h1/a bleus & gras, href violet, chaînes, commentaires).
+codemirror 37 vert. (Paquet codemirror → nécessitera republish npm pour les consommateurs.)

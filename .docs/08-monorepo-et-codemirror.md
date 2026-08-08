@@ -55,3 +55,15 @@ KaTeX/Plotly injectés, exemples, boutons, build statique.
 fonctionnalité du langage modifiée. Le playground prouve l'intégrabilité réelle
 de `@noah-medra/htsl-codemirror` (coloration, complétion et soulignement d'erreurs vérifiés
 en navigateur).
+
+## Correctif : les balises HTML de base n'étaient pas colorées
+
+Les balises simples (`div`, `p`, `h1`…) apparaissaient **sans couleur** dans
+l'éditeur, alors que les `{@objets}` l'étaient. Cause : `tag` (comme `string`,
+`comment`, `keyword`) est un **nom de jeton legacy de CodeMirror**, que
+`StreamLanguage` mappe vers les tags lezer **standards** (`tags.tagName`…), pas
+vers nos `Tag.define()` personnalisés — donc notre `HighlightStyle` (qui vise les
+tags custom) ne s'appliquait jamais. Correctif : styliser **aussi** les tags
+standards `t.tagName` / `t.string` / `t.comment` / `t.keyword` dans le
+`HighlightStyle` (`language.ts`). Vérifié en navigateur : `div`/`p`/`h1`/`a`
+bleus & gras, `href` violet, chaînes roses, commentaires gris italique ; codemirror 37.
