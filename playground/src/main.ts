@@ -154,14 +154,24 @@ function run(view: EditorView, force = false): void {
 /* Editor                                                                     */
 /* -------------------------------------------------------------------------- */
 
-let debounce: number | undefined;
+let renderQueued = false;
+let saveTimer: number | undefined;
 const updateListener = EditorView.updateListener.of((u) => {
   if (!u.docChanged) return;
-  window.clearTimeout(debounce);
-  debounce = window.setTimeout(() => {
-    run(view);
-    saveLocal(view.state.doc.toString()); // auto-save: refresh never loses work
-  }, 150);
+  // Live preview: coalesce to at most one render per animation frame so the
+  // rendered text tracks the keystrokes in real time (compile+render is ~3 ms,
+  // well under a frame) without re-rendering several times within one frame.
+  if (!renderQueued) {
+    renderQueued = true;
+    requestAnimationFrame(() => {
+      renderQueued = false;
+      run(view);
+    });
+  }
+  // Auto-save is throttled separately — a localStorage write on every frame is
+  // wasteful, and losing the last few hundred ms on a hard refresh is harmless.
+  window.clearTimeout(saveTimer);
+  saveTimer = window.setTimeout(() => saveLocal(view.state.doc.toString()), 400);
   // Editing supersedes a shared link → drop the hash so a refresh uses the
   // local copy (the Share button regenerates a fresh link on demand).
   if (location.hash) window.history.replaceState(null, "", location.pathname + location.search);

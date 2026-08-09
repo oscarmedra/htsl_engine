@@ -843,3 +843,12 @@ tags lezer standards, pas nos Tag.define() custom → HighlightStyle ne s'appliq
 pas. Fix : styliser aussi t.tagName/t.string/t.comment/t.keyword (language.ts).
 Vérifié navigateur (div/p/h1/a bleus & gras, href violet, chaînes, commentaires).
 codemirror 37 vert. (Paquet codemirror → nécessitera republish npm pour les consommateurs.)
+
+## Playground : rendu en temps réel (débounce 150 ms → coalescé par frame)
+
+Le rendu attendait 150 ms après la frappe (délai perceptible). Remplacé par un
+rendu coalescé via requestAnimationFrame (au plus un rendu par frame) → le texte
+suit la frappe en temps réel. compile+render du grand tour mesuré à ~3,5 ms (<<
+16 ms/frame). La sauvegarde localStorage est désormais throttlée séparément
+(400 ms) au lieu d'écrire à chaque frame. rAF se met en pause quand l'onglet est
+caché (efficace) et rattrape l'état courant au retour. main.ts uniquement.
