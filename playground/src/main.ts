@@ -99,6 +99,16 @@ function collectErrorNodes(nodes: Node[], out: { line: number; col: number; mess
 /* Render pipeline                                                            */
 /* -------------------------------------------------------------------------- */
 
+// In the playground we want an invalid or **incomplete** formula (e.g. `w^`,
+// typed mid-edit) to be treated as an error so `run()` keeps the last good
+// render — instead of KaTeX's raw/red fallback replacing a good preview. Forcing
+// `throwOnError` makes `render()` throw, which `run()` already catches. The core
+// keeps its graceful default (throwOnError:false) for published documents.
+const strictKatex = {
+  renderToString: (tex: string, options?: { displayMode?: boolean; throwOnError?: boolean }) =>
+    katex.renderToString(tex, { ...options, throwOnError: true }),
+};
+
 function run(view: EditorView, force = false): void {
   const src = view.state.doc.toString();
   // Guard: never recompile unless the source text actually changed.
@@ -127,16 +137,21 @@ function run(view: EditorView, force = false): void {
     try {
       // hashBlocks lets the frame morpher skip unchanged blocks; editableText
       // makes source-backed text runs editable directly in the preview.
-      const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true, sanitize: true });
+      const html = render(ast, { katex: strictKatex, source: src, hashBlocks: true, editableText: true, sanitize: true });
       latestHtml = html;
       const stats = frame.apply(html);
       showPerf(performance.now() - t0, stats.touched, stats.total);
     } catch (e) {
-      // Compile-time issue (unknown ref/var, missing param…) → keep last good render.
+      // Compile-time issue (unknown ref/var…) or invalid/incomplete LaTeX → keep
+      // the last good render and surface the reason.
       if (e instanceof HTSLError) {
         errors.push({ line: e.line, col: e.col, message: e.message.split("\n")[0] ?? e.message });
       } else {
-        errors.push({ line: 1, col: 1, message: String((e as Error).message) });
+        const raw = String((e as Error).message);
+        const message = /katex/i.test(raw)
+          ? `Formule LaTeX invalide ou incomplète — ${raw.replace(/^KaTeX parse error:\s*/i, "").split("\n")[0]}`
+          : raw;
+        errors.push({ line: 1, col: 1, message });
       }
     }
   }

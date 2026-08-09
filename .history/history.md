@@ -863,3 +863,14 @@ rendu et on affiche l'erreur dans le bandeau (+ « le rendu affiche la dernière
 version valide »). Le rendu se met à jour dès que la source redevient valide.
 Vérif moteur : le cas `\` final produit bien 1 nœud d'erreur → application sautée.
 (Vérif navigateur en direct empêchée par la mise en veille : panneau caché → rAF gelé.)
+
+## Playground : une formule LaTeX incomplète garde le dernier bon rendu
+
+Cas signalé : un LaTeX incomplet (ex. `w^`) est syntaxiquement valide en HTSL (0
+erreur de parsing) mais KaTeX échoue — avec throwOnError:false (défaut du cœur),
+render() réussissait et affichait le brut/rouge, remplaçant le bon rendu. Fix
+playground-only : main.ts enveloppe katex pour forcer throwOnError:true (strictKatex)
+→ une formule invalide/incomplète fait throw render(), que run() attrape déjà →
+dernier bon rendu conservé + bandeau (« Formule LaTeX invalide ou incomplète — … »).
+Le cœur garde throwOnError:false pour les documents publiés (dégradation gracieuse).
+Vérifié moteur : @mta avec `w^` → throw en strict, OK en gracieux, `w^2` OK en strict.
