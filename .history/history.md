@@ -852,3 +852,14 @@ suit la frappe en temps réel. compile+render du grand tour mesuré à ~3,5 ms (
 16 ms/frame). La sauvegarde localStorage est désormais throttlée séparément
 (400 ms) au lieu d'écrire à chaque frame. rAF se met en pause quand l'onglet est
 caché (efficace) et rattrape l'état courant au retour. main.ts uniquement.
+
+## Playground : garder le dernier rendu valide en cas d'erreur de syntaxe
+
+Une erreur en cours d'édition (un `\` final, un bloc non fermé, un tag à moitié
+tapé) vidait/dégradait le rendu : le parseur tolérant « récupère » et render() ne
+lève pas, donc l'ancien code appliquait un rendu cassé. Fix (main.ts run()) : ne
+(ré)appliquer le rendu que si errors.length === 0 ; sinon on garde le dernier bon
+rendu et on affiche l'erreur dans le bandeau (+ « le rendu affiche la dernière
+version valide »). Le rendu se met à jour dès que la source redevient valide.
+Vérif moteur : le cas `\` final produit bien 1 nœud d'erreur → application sautée.
+(Vérif navigateur en direct empêchée par la mise en veille : panneau caché → rAF gelé.)

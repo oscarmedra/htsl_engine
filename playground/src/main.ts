@@ -118,21 +118,27 @@ function run(view: EditorView, force = false): void {
   }
   collectErrorNodes(ast, errors);
 
-  // Render. Compile-time issues (unknown ref/var, missing param…) throw HTSLError.
-  try {
-    // hashBlocks lets the frame morpher skip unchanged blocks; editableText
-    // makes source-backed text runs editable directly in the preview.
-    const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true, sanitize: true });
-    latestHtml = html;
-    const stats = frame.apply(html);
-    showPerf(performance.now() - t0, stats.touched, stats.total);
-  } catch (e) {
-    if (e instanceof HTSLError) {
-      errors.push({ line: e.line, col: e.col, message: e.message.split("\n")[0] ?? e.message });
-    } else {
-      errors.push({ line: 1, col: 1, message: String((e as Error).message) });
+  // Only (re)render when the source is error-free. On ANY parse error (a stray
+  // backslash, an unclosed block, a half-typed tag…) the tolerant parser still
+  // produces a degraded AST that would render as a blank/broken block — so we
+  // skip it, keep the last good render, and just surface the error in the banner.
+  // The preview updates again as soon as the source is valid.
+  if (errors.length === 0) {
+    try {
+      // hashBlocks lets the frame morpher skip unchanged blocks; editableText
+      // makes source-backed text runs editable directly in the preview.
+      const html = render(ast, { katex, source: src, hashBlocks: true, editableText: true, sanitize: true });
+      latestHtml = html;
+      const stats = frame.apply(html);
+      showPerf(performance.now() - t0, stats.touched, stats.total);
+    } catch (e) {
+      // Compile-time issue (unknown ref/var, missing param…) → keep last good render.
+      if (e instanceof HTSLError) {
+        errors.push({ line: e.line, col: e.col, message: e.message.split("\n")[0] ?? e.message });
+      } else {
+        errors.push({ line: 1, col: 1, message: String((e as Error).message) });
+      }
     }
-    // Keep the last good render so the page never goes blank.
   }
 
   // AST panel
@@ -146,7 +152,7 @@ function run(view: EditorView, force = false): void {
     bannerEl.hidden = false;
     const first = errors[0]!;
     bannerEl.textContent =
-      `${errors.length} erreur${errors.length > 1 ? "s" : ""} — ligne ${first.line}, col ${first.col} : ${first.message}`;
+      `${errors.length} erreur${errors.length > 1 ? "s" : ""} — ligne ${first.line}, col ${first.col} : ${first.message} · le rendu affiche la dernière version valide.`;
   }
 }
 
