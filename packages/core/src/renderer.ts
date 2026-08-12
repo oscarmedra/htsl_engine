@@ -290,15 +290,16 @@ class Renderer {
     return `<div class="htsl-stepper">${body}</div>`;
   }
 
-  /** One step. `n` is its 1-based number (0 = standalone {@step} outside a stepper). */
+  /** One step: a bordered box with a small "Étape N" label tab on its top edge.
+   *  `n` is its 1-based number (0 = standalone {@step} outside a stepper). */
   private step(node: ObjectNode, n: number): string {
     const title = node.attrs["title"];
-    const titleHtml = title ? `<div class="htsl-step-title">${escapeHtml(title)}</div>` : "";
-    const num = n > 0 ? String(n) : "•";
+    const base = n > 0 ? `Étape ${n}` : "Étape";
+    const label = title ? `${base} — ${escapeHtml(title)}` : base;
     return (
       `<div class="htsl-step">` +
-      `<div class="htsl-step-num">${num}</div>` +
-      `<div class="htsl-step-main">${titleHtml}<div class="htsl-step-body">${this.childrenHtml(node)}</div></div>` +
+      `<span class="htsl-step-label">${label}</span>` +
+      `<div class="htsl-step-body">${this.childrenHtml(node)}</div>` +
       `</div>`
     );
   }

@@ -181,7 +181,6 @@ export const mathCss = `
 .htsl-panel {
   margin: 1em 0; padding: 0.8em 1em; border-radius: 10px;
   border: 1px solid var(--pc-border, #e2e8f0);
-  border-left: 4px solid var(--pc-accent, #64748b);
   background: var(--pc-bg, #f8fafc);
 }
 .htsl-panel-title { font-weight: 700; margin-bottom: 0.3em; color: var(--pc-accent, #334155); }
@@ -196,22 +195,24 @@ export const mathCss = `
 .htsl-panel--violet { --pc-accent: #7c3aed; --pc-bg: #f5f3ff; --pc-border: #ddd6fe; }
 .htsl-panel--teal   { --pc-accent: #0d9488; --pc-bg: #f0fdfa; --pc-border: #99f6e4; }
 
-/* Numbered steps ({@stepper: {@step:…}}) — badge + vertical timeline. */
+/* Numbered steps ({@stepper: {@step:…}}) — each step is a bordered box with a
+   small "Étape N" label tab sitting on its top edge (like a fieldset legend). */
 .htsl-stepper { margin: 1em 0; }
-.htsl-step { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem; position: relative; padding-bottom: 1rem; }
-.htsl-step:last-child { padding-bottom: 0; }
-/* Connector line from each badge down to the next. */
-.htsl-step:not(:last-child)::before {
-  content: ""; position: absolute; left: 0.9rem; top: 1.9rem; bottom: -0.15rem;
-  width: 2px; margin-left: -1px; background: #e3e6ea;
+.htsl-step {
+  position: relative;
+  margin: 1.4rem 0;
+  padding: 1.1rem 1rem 0.9rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
 }
-.htsl-step-num {
-  width: 1.8rem; height: 1.8rem; border-radius: 50%; flex-shrink: 0;
-  background: #3b5bdb; color: #fff; font-weight: 700; font-size: 0.88rem;
-  display: flex; align-items: center; justify-content: center; position: relative; z-index: 1;
+.htsl-step-label {
+  position: absolute; top: -0.72rem; left: 0.9rem;
+  padding: 0.12rem 0.6rem;
+  background: #fff;
+  border: 1.5px solid #cbd5e1; border-radius: 7px;
+  font-size: 0.8rem; font-weight: 600; color: #475569;
 }
-.htsl-step-main { min-width: 0; padding-top: 0.15rem; }
-.htsl-step-title { font-weight: 600; color: #1f2430; margin-bottom: 0.25rem; }
 .htsl-step-body > :first-child { margin-top: 0; }
 .htsl-step-body > :last-child { margin-bottom: 0; }
 

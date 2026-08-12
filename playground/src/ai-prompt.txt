@@ -231,7 +231,7 @@ Un encadré peut contenir n'importe quel HTSL (formules, listes, scènes…).
 
 ### Encadré neutre & étapes numérotées
 - **`{@panel[color=indigo, title="…"]: …}`** (alias `{@overview}`, `{@box}`) : encadré **sans étiquette ni numéro** (contrairement aux encadrés sémantiques). `color` ∈ slate (défaut, neutre), indigo, blue, green, red, amber, violet, teal ; `title` optionnel (affiché seulement si fourni). Pour mettre en valeur un contenu sans lui donner de sens « théorème/définition ».
-- **`{@stepper: {@step[title="…"]: …} …}`** : suite d'**étapes numérotées automatiquement** (badge 1, 2, 3… + trait vertical), idéale pour une méthode/procédure de résolution. Chaque `{@step}` (alias `{@etape}`) peut contenir n'importe quel HTSL ; `title` optionnel.
+- **`{@stepper: {@step[title="…"]: …} …}`** : suite d'**étapes numérotées automatiquement**, chaque étape est une **boîte encadrée** avec une petite **étiquette « Étape N »** posée sur la bordure (le `title`, optionnel, s'ajoute : « Étape N — Titre »). Idéale pour une méthode/procédure de résolution. Chaque `{@step}` (alias `{@etape}`) peut contenir n'importe quel HTSL.
 
 ```
 {@stepper:

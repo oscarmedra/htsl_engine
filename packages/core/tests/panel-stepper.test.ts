@@ -27,32 +27,31 @@ describe("{@panel} — neutral box", () => {
 });
 
 describe("{@stepper} — numbered steps", () => {
-  it("numbers each {@step} automatically (1, 2, 3…)", () => {
+  it("labels each {@step} automatically (Étape 1, 2, 3…)", () => {
     const html = compile("{@stepper:{@step:{p:a}}{@step:{p:b}}{@step:{p:c}}}");
-    const nums = [...html.matchAll(/htsl-step-num">([^<]*)</g)].map((m) => m[1]);
-    expect(nums).toEqual(["1", "2", "3"]);
+    const labels = [...html.matchAll(/htsl-step-label">([^<]*)</g)].map((m) => m[1]);
+    expect(labels).toEqual(["Étape 1", "Étape 2", "Étape 3"]);
     expect(html).toContain('class="htsl-stepper"');
   });
 
-  it("shows an optional step title after the number", () => {
+  it("appends an optional title inside the label tag", () => {
     const html = compile('{@stepper:{@step[title="Poser"]: {p:x}}}');
-    expect(html).toContain('<div class="htsl-step-title">Poser</div>');
-    expect(html).toContain('<div class="htsl-step-num">1</div>');
+    expect(html).toContain('<span class="htsl-step-label">Étape 1 — Poser</span>');
   });
 
   it("ignores non-step children when numbering", () => {
     const html = compile("{@stepper:{@step:{p:a}}{p:ignoré}{@step:{p:b}}}");
-    const nums = [...html.matchAll(/htsl-step-num">([^<]*)</g)].map((m) => m[1]);
-    expect(nums).toEqual(["1", "2"]);
+    const labels = [...html.matchAll(/htsl-step-label">([^<]*)</g)].map((m) => m[1]);
+    expect(labels).toEqual(["Étape 1", "Étape 2"]);
   });
 
-  it("renders a standalone {@step} with a bullet (no number outside a stepper)", () => {
-    expect(compile("{@step: {p:x}}")).toContain('<div class="htsl-step-num">•</div>');
+  it("renders a standalone {@step} with an un-numbered label outside a stepper", () => {
+    expect(compile("{@step: {p:x}}")).toContain('<span class="htsl-step-label">Étape</span>');
   });
 
   it("supports the alias {@etape} for a step and {@etapes} for the container", () => {
     const html = compile("{@etapes:{@etape:{p:a}}}");
     expect(html).toContain("htsl-stepper");
-    expect(html).toContain('htsl-step-num">1<');
+    expect(html).toContain('htsl-step-label">Étape 1<');
   });
 });

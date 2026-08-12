@@ -33,8 +33,8 @@ liaison + titre optionnel + corps. Pour une méthode / procédure de résolution
 ```
 
 - La numérotation est **locale au stepper** (pas de compteur de document) :
-  `stepper()` itère ses enfants `stepper.step` et les numérote 1..N.
-- Un `{@step}` **hors** stepper rend une puce « • » (pas de numéro).
+  `stepper()` itère ses enfants `stepper.step` et les numérote 1..N (étiquette « Étape N », + « — Titre » si `title`).
+- Un `{@step}` **hors** stepper rend l'étiquette « Étape » (sans numéro).
 - Les enfants qui ne sont pas des `{@step}` sont ignorés pour la numérotation.
 
 ## Implémentation

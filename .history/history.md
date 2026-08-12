@@ -883,3 +883,8 @@ etapes/etape) : conteneur parent qui numérote auto ses steps (badge + timeline
 verticale), title optionnel par step. renderer (panel/stepper/step + panelColor),
 registry (3 objets), css (.htsl-panel*/.htsl-stepper/.htsl-step*). Rendu pur, 0 JS.
 Tests panel-stepper.test.ts (9) ; core 328, codemirror 37. Prompt IA + .docs/25.
+
+## Retouche panel/stepper (retour utilisateur)
+
+- {@panel} : suppression de la bordure gauche accentuée → bordure fine uniforme + fond teinté (le titre garde la couleur d'accent).
+- {@step} : le titre n'est plus un gros titre. Chaque étape est une boîte encadrée avec une petite étiquette « Étape N » (+ « — Titre » si fourni) posée sur la bordure haute (style légende de fieldset), au lieu de la timeline badge+titre. Tests panel-stepper.test.ts mis à jour (htsl-step-label). Core 328.
