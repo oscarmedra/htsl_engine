@@ -318,4 +318,35 @@ export const examples: Example[] = [
 }
 `,
   },
+  {
+    id: "pas-a-pas",
+    label: "Résolution pas à pas",
+    category: "Mathématiques",
+    description: "Étapes numérotées {@stepper} + encadré neutre {@panel}.",
+    src: String.raw`{h1:Résoudre une équation du second degré}
+
+{@panel[color=indigo, title="Objectif"]:
+  {p:Résoudre $x^2 - 2x - 3 = 0$ et interpréter les solutions.}
+}
+
+{@stepper:
+  {@step[title="Identifier les coefficients"]:
+    {p:$a = 1$, $\ b = -2$, $\ c = -3$.}
+  }
+  {@step[title="Calculer le discriminant"]:
+    {@mtb: \Delta = b^2 - 4ac = (-2)^2 - 4(1)(-3) = 16}
+  }
+  {@step[title="Appliquer la formule"]:
+    {@mtb: x = \frac{-b \pm \sqrt{\Delta}}{2a} = \frac{2 \pm 4}{2}}
+  }
+  {@step[title="Conclure"]:
+    {p:Les solutions sont $x_1 = 3$ et $x_2 = -1$.}
+  }
+}
+
+{@panel[color=green, title="À retenir"]:
+  {p:Le signe de $\Delta$ donne le nombre de racines réelles.}
+}
+`,
+  },
 ];

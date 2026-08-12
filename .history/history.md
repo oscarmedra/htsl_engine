@@ -874,3 +874,12 @@ playground-only : main.ts enveloppe katex pour forcer throwOnError:true (strictK
 dernier bon rendu conservé + bandeau (« Formule LaTeX invalide ou incomplète — … »).
 Le cœur garde throwOnError:false pour les documents publiés (dégradation gracieuse).
 Vérifié moteur : @mta avec `w^` → throw en strict, OK en gracieux, `w^2` OK en strict.
+
+## Nouveaux objets : encadré neutre {@panel} & étapes numérotées {@stepper}
+
+{@panel} (alias overview/box/panneau) : encadré sans étiquette ni numéro, attribut
+color (slate défaut + 7 couleurs) et title optionnel. {@stepper} + {@step} (alias
+etapes/etape) : conteneur parent qui numérote auto ses steps (badge + timeline
+verticale), title optionnel par step. renderer (panel/stepper/step + panelColor),
+registry (3 objets), css (.htsl-panel*/.htsl-stepper/.htsl-step*). Rendu pur, 0 JS.
+Tests panel-stepper.test.ts (9) ; core 328, codemirror 37. Prompt IA + .docs/25.

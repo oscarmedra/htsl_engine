@@ -127,6 +127,9 @@ class Renderer {
     if (node.path === "tabs.tab") return this.tabsTab(node);
     if (node.path === "quiz") return this.quiz(node, hashAttr);
     if (node.path === "flashcard") return this.flashcard(node);
+    if (node.path === "panel") return this.panel(node);
+    if (node.path === "stepper") return this.stepper(node);
+    if (node.path === "stepper.step") return this.step(node, 0);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isParamPath(node.path)) return renderParam(node);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr, paramValues(this.paramCtx));
@@ -262,6 +265,42 @@ class Renderer {
   /** A standalone {@tabs.tab:…} (outside {@tabs:}) → just its content panel. */
   private tabsTab(node: ObjectNode): string {
     return `<div class="htsl-tab-panel">${this.childrenHtml(node)}</div>`;
+  }
+
+  /** Neutral emphasis box ({@panel}) — no label or number by default; a `title`
+   *  is shown only if given, and `color` picks the accent (default neutral). */
+  private panel(node: ObjectNode): string {
+    const color = panelColor(node.attrs["color"]);
+    const title = node.attrs["title"];
+    const head = title ? `<div class="htsl-panel-title">${escapeHtml(title)}</div>` : "";
+    return (
+      `<div class="htsl-panel htsl-panel--${color}">` +
+      head +
+      `<div class="htsl-panel-body">${this.childrenHtml(node)}</div>` +
+      `</div>`
+    );
+  }
+
+  /** Numbered steps ({@stepper: {@step:…}}). Each direct {@step} is auto-numbered. */
+  private stepper(node: ObjectNode): string {
+    const steps = node.children.filter(
+      (c): c is ObjectNode => c.type === "object" && c.path === "stepper.step",
+    );
+    const body = steps.map((s, i) => this.step(s, i + 1)).join("");
+    return `<div class="htsl-stepper">${body}</div>`;
+  }
+
+  /** One step. `n` is its 1-based number (0 = standalone {@step} outside a stepper). */
+  private step(node: ObjectNode, n: number): string {
+    const title = node.attrs["title"];
+    const titleHtml = title ? `<div class="htsl-step-title">${escapeHtml(title)}</div>` : "";
+    const num = n > 0 ? String(n) : "•";
+    return (
+      `<div class="htsl-step">` +
+      `<div class="htsl-step-num">${num}</div>` +
+      `<div class="htsl-step-main">${titleHtml}<div class="htsl-step-body">${this.childrenHtml(node)}</div></div>` +
+      `</div>`
+    );
   }
 
   /** Render an object's children (compact), dropping comments. */
@@ -458,6 +497,13 @@ function rawTextOf(node: ElementNode): string {
     .filter((c): c is TextNode => c.type === "text")
     .map((c) => c.value)
     .join("");
+}
+
+/** Named accents for `{@panel[color=…]}`. Unknown → neutral "slate". */
+const PANEL_COLORS = new Set(["slate", "indigo", "blue", "green", "red", "amber", "violet", "teal"]);
+function panelColor(raw: string | undefined): string {
+  const c = (raw ?? "").trim().toLowerCase();
+  return PANEL_COLORS.has(c) ? c : "slate";
 }
 
 /** HTML boolean attributes: rendered bare (`controls`) when truthy, omitted when

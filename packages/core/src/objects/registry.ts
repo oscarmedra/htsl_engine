@@ -547,6 +547,50 @@ registerObject({
   example: "{@flashcard:\n  {front: $e^{i\\pi}+1$}\n  {back: $= 0$}\n}",
 });
 
+// --- generic container boxes (panel) & numbered steps (stepper) ---
+registerObject({
+  path: "panel",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["overview", "box", "panneau"],
+  description:
+    "Encadré neutre, sans étiquette ni numéro (contrairement à {@theorem}…). Attribut color pour l'accent, title optionnel.",
+  attrs: [
+    {
+      name: "color",
+      type: "enum",
+      required: false,
+      default: "slate",
+      values: ["slate", "indigo", "blue", "green", "red", "amber", "violet", "teal"],
+      description: "Couleur d'accent (défaut : slate, neutre).",
+    },
+    { name: "title", type: "string", required: false, description: "Titre optionnel (affiché seulement s'il est fourni)." },
+  ],
+  snippet: "{@panel[color=${1:indigo}]: ${2:contenu}}",
+  example: "{@panel[color=indigo, title=\"En bref\"]: {p:Un contenu mis en valeur.}}",
+});
+registerObject({
+  path: "stepper",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["etapes"],
+  description: "Suite d'étapes numérotées automatiquement : contient des {@step:…} (badge + trait vertical).",
+  attrs: [],
+  snippet: "{@stepper:\n  {@step[title=${1:\"Étape 1\"}]: ${2:…}}\n  {@step[title=${3:\"Étape 2\"}]: ${4:…}}\n}",
+  example:
+    "{@stepper:\n  {@step[title=\"Poser le problème\"]: {p:On écrit l'équation.}}\n  {@step[title=\"Résoudre\"]: {@mtb: \\Delta = b^2 - 4ac}}\n}",
+});
+registerObject({
+  path: "stepper.step",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["step", "etape"],
+  description: "Une étape d'un {@stepper:…} (numérotée automatiquement). Attribut title optionnel.",
+  attrs: [{ name: "title", type: "string", required: false, description: "Titre de l'étape (affiché après le numéro)." }],
+  snippet: "{@step[title=${1:\"Étape\"}]: ${2:contenu}}",
+  example: "{@step[title=\"Calculer\"]: {@mtb: x = \\frac{-b}{2a}}}",
+});
+
 // --- variation / sign tables ---
 registerObject({
   path: "variations",
