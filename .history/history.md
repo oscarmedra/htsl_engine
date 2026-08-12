@@ -888,3 +888,11 @@ Tests panel-stepper.test.ts (9) ; core 328, codemirror 37. Prompt IA + .docs/25.
 
 - {@panel} : suppression de la bordure gauche accentuée → bordure fine uniforme + fond teinté (le titre garde la couleur d'accent).
 - {@step} : le titre n'est plus un gros titre. Chaque étape est une boîte encadrée avec une petite étiquette « Étape N » (+ « — Titre » si fourni) posée sur la bordure haute (style légende de fieldset), au lieu de la timeline badge+titre. Tests panel-stepper.test.ts mis à jour (htsl-step-label). Core 328.
+
+## Lot 1 des composants suggérés : mise en page & touches
+
+5 objets purs (0 JS) : {@columns}+{@col} (grille responsive), {@deflist} (glossaire
+dt/dd), {@timeline}+{@event} (frise datée), {@mark} (surligneur), {@badge}/{@pill}
+(pastille inline, palette partagée avec {@panel}). renderer + registry (7 objets) +
+css. Tests layout-lot1.test.ts (8) ; core 336, codemirror 37. Prompt IA + .docs/26.
+Reste : lot 2 (exercise/checklist/stepper guidé/numberline), lot 3 (chimie/code/qty/vérité).

@@ -257,6 +257,13 @@ Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteu
 - **Transitions** : attribut `transition` = `none` (défaut), `fade`, `slide`, `zoom` — ex. `{@slider[transition=fade]:…}` (animation d'entrée de chaque slide).
 - **Défilement auto** : attribut `autoplay` = durée par slide (`"8s"`, `"2m"`, `"500ms"`) → avance seul et ajoute un bouton ▶/⏸ ; `loop=true` revient au début après le dernier. Une interaction (flèches, clic) met en pause ; respecte `prefers-reduced-motion`. Ex. `{@slider[transition=slide, autoplay="6s", loop=true]:…}`.
 
+### Mise en page & touches
+- **`{@columns: {@col:…} {@col:…}}`** : colonnes côte à côte (empilées sur mobile). Idéal pour « énoncé | solution », comparaisons.
+- **`{@deflist: {term:…} {def:…} …}`** (alias `glossaire`) : liste de définitions / glossaire → `<dl>`.
+- **`{@timeline: {@event[date="1687"]:…} …}`** (alias `chronologie`) : frise chronologique (point + date + contenu).
+- **`{@mark: …}`** : surligneur (met en évidence un bout de texte, inline).
+- **`{@badge[color=green]: Nouveau}`** (alias `pill`, `tag`) : petite étiquette inline colorée (mêmes couleurs que `{@panel}`).
+
 ### Style (Tailwind CSS)
 Charge Tailwind en tête de document : `{script[src="https://cdn.tailwindcss.com"]/}`
 Toutes les classes Tailwind sont utilisables via `[class="..."]`.

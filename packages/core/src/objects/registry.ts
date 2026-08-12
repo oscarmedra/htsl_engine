@@ -591,6 +591,87 @@ registerObject({
   example: "{@step[title=\"Calculer\"]: {@mtb: x = \\frac{-b}{2a}}}",
 });
 
+// --- layout & inline touches (columns / deflist / timeline / mark / badge) ---
+registerObject({
+  path: "columns",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["colonnes"],
+  description: "Colonnes côte à côte : contient des {@col:…} (empilées sur petit écran).",
+  attrs: [],
+  snippet: "{@columns:\n  {@col: ${1:gauche}}\n  {@col: ${2:droite}}\n}",
+  example: "{@columns:\n  {@col: {h3:Énoncé} {p:…}}\n  {@col: {h3:Solution} {p:…}}\n}",
+});
+registerObject({
+  path: "columns.col",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["col", "colonne"],
+  description: "Une colonne d'un {@columns:…} (peut contenir n'importe quel HTSL).",
+  attrs: [],
+  snippet: "{@col: ${1:contenu}}",
+  example: "{@col: {p:Contenu de la colonne.}}",
+});
+registerObject({
+  path: "deflist",
+  contentModel: "html",
+  category: "document",
+  aliases: ["glossaire", "definitions"],
+  description: "Liste de définitions / glossaire : paires {term:…} / {def:…} → <dl>.",
+  attrs: [],
+  snippet: "{@deflist:\n  {term: ${1:Terme}} {def: ${2:définition}}\n}",
+  example: "{@deflist:\n  {term: Vitesse} {def: distance parcourue par unité de temps}\n  {term: Accélération} {def: variation de la vitesse}\n}",
+});
+registerObject({
+  path: "timeline",
+  contentModel: "html",
+  category: "document",
+  aliases: ["chronologie"],
+  description: "Frise chronologique : contient des {@event[date=…]:…} (point + date + contenu).",
+  attrs: [],
+  snippet: "{@timeline:\n  {@event[date=${1:\"1687\"}]: ${2:…}}\n  {@event[date=${3:\"1905\"}]: ${4:…}}\n}",
+  example: "{@timeline:\n  {@event[date=\"1687\"]: {p:Newton — Principia}}\n  {@event[date=\"1905\"]: {p:Einstein — relativité restreinte}}\n}",
+});
+registerObject({
+  path: "timeline.event",
+  contentModel: "html",
+  category: "document",
+  aliases: ["event", "evenement"],
+  description: "Un évènement d'une {@timeline:…} (attribut date).",
+  attrs: [{ name: "date", type: "string", required: false, description: "Date/étiquette affichée." }],
+  snippet: "{@event[date=${1:\"1905\"}]: ${2:contenu}}",
+  example: "{@event[date=\"1905\"]: {p:Un évènement.}}",
+});
+registerObject({
+  path: "mark",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["surligne", "highlight"],
+  description: "Surligneur : met en évidence un bout de texte (inline).",
+  attrs: [],
+  snippet: "{@mark: ${1:texte}}",
+  example: "{p:Un point {@mark: important} du cours.}",
+});
+registerObject({
+  path: "badge",
+  contentModel: "html",
+  category: "structure",
+  aliases: ["pill", "tag", "etiquette"],
+  description: "Petite étiquette inline colorée. Attribut color (mêmes couleurs que {@panel}).",
+  attrs: [
+    {
+      name: "color",
+      type: "enum",
+      required: false,
+      default: "slate",
+      values: ["slate", "indigo", "blue", "green", "red", "amber", "violet", "teal"],
+      description: "Couleur (défaut : slate).",
+    },
+  ],
+  snippet: "{@badge[color=${1:green}]: ${2:Nouveau}}",
+  example: "{p:{@badge[color=green]: Nouveau} une fonctionnalité.}",
+});
+
 // --- variation / sign tables ---
 registerObject({
   path: "variations",

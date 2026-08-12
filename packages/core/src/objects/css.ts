@@ -186,14 +186,15 @@ export const mathCss = `
 .htsl-panel-title { font-weight: 700; margin-bottom: 0.3em; color: var(--pc-accent, #334155); }
 .htsl-panel-body > :first-child { margin-top: 0; }
 .htsl-panel-body > :last-child { margin-bottom: 0; }
-.htsl-panel--slate  { --pc-accent: #64748b; --pc-bg: #f8fafc; --pc-border: #e2e8f0; }
-.htsl-panel--indigo { --pc-accent: #4f46e5; --pc-bg: #eef2ff; --pc-border: #c7d2fe; }
-.htsl-panel--blue   { --pc-accent: #2563eb; --pc-bg: #eff6ff; --pc-border: #bfdbfe; }
-.htsl-panel--green  { --pc-accent: #16a34a; --pc-bg: #f0fdf4; --pc-border: #bbf7d0; }
-.htsl-panel--red    { --pc-accent: #dc2626; --pc-bg: #fef2f2; --pc-border: #fecaca; }
-.htsl-panel--amber  { --pc-accent: #d97706; --pc-bg: #fffbeb; --pc-border: #fde68a; }
-.htsl-panel--violet { --pc-accent: #7c3aed; --pc-bg: #f5f3ff; --pc-border: #ddd6fe; }
-.htsl-panel--teal   { --pc-accent: #0d9488; --pc-bg: #f0fdfa; --pc-border: #99f6e4; }
+/* Shared accent palette for {@panel} and {@badge}. */
+.htsl-panel--slate,  .htsl-badge--slate  { --pc-accent: #64748b; --pc-bg: #f1f5f9; --pc-border: #e2e8f0; }
+.htsl-panel--indigo, .htsl-badge--indigo { --pc-accent: #4f46e5; --pc-bg: #eef2ff; --pc-border: #c7d2fe; }
+.htsl-panel--blue,   .htsl-badge--blue   { --pc-accent: #2563eb; --pc-bg: #eff6ff; --pc-border: #bfdbfe; }
+.htsl-panel--green,  .htsl-badge--green  { --pc-accent: #16a34a; --pc-bg: #f0fdf4; --pc-border: #bbf7d0; }
+.htsl-panel--red,    .htsl-badge--red    { --pc-accent: #dc2626; --pc-bg: #fef2f2; --pc-border: #fecaca; }
+.htsl-panel--amber,  .htsl-badge--amber  { --pc-accent: #d97706; --pc-bg: #fffbeb; --pc-border: #fde68a; }
+.htsl-panel--violet, .htsl-badge--violet { --pc-accent: #7c3aed; --pc-bg: #f5f3ff; --pc-border: #ddd6fe; }
+.htsl-panel--teal,   .htsl-badge--teal   { --pc-accent: #0d9488; --pc-bg: #f0fdfa; --pc-border: #99f6e4; }
 
 /* Numbered steps ({@stepper: {@step:…}}) — each step is a bordered box with a
    small "Étape N" label tab sitting on its top edge (like a fieldset legend). */
@@ -215,6 +216,41 @@ export const mathCss = `
 }
 .htsl-step-body > :first-child { margin-top: 0; }
 .htsl-step-body > :last-child { margin-bottom: 0; }
+
+/* Columns ({@columns: {@col:…}}) — side by side, stacked on narrow screens. */
+.htsl-columns { display: grid; grid-template-columns: repeat(var(--htsl-cols, 2), 1fr); gap: 1rem; margin: 1em 0; }
+.htsl-col { min-width: 0; }
+.htsl-col > :first-child { margin-top: 0; }
+.htsl-col > :last-child { margin-bottom: 0; }
+@media (max-width: 640px) { .htsl-columns { grid-template-columns: 1fr; } }
+
+/* Definition list / glossary ({@deflist}). */
+.htsl-deflist { margin: 1em 0; display: grid; grid-template-columns: max-content 1fr; gap: 0.35em 1em; }
+.htsl-deflist dt { font-weight: 600; color: #334155; }
+.htsl-deflist dd { margin: 0; color: #475569; }
+
+/* Timeline ({@timeline: {@event[date=…]:…}}) — vertical line + dots. */
+.htsl-timeline { margin: 1em 0; padding-left: 0.4rem; }
+.htsl-tl-event { display: grid; grid-template-columns: auto 1fr; gap: 0.8rem; position: relative; padding-bottom: 1.1rem; }
+.htsl-tl-event:last-child { padding-bottom: 0; }
+.htsl-tl-event:not(:last-child)::before {
+  content: ""; position: absolute; left: 0.34rem; top: 0.9rem; bottom: -0.1rem; width: 2px; background: #e3e6ea;
+}
+.htsl-tl-dot { width: 0.72rem; height: 0.72rem; border-radius: 50%; background: #3b5bdb; margin-top: 0.35rem; position: relative; z-index: 1; box-shadow: 0 0 0 3px #eef2ff; }
+.htsl-tl-date { font-family: ui-monospace, monospace; font-size: 0.78rem; font-weight: 700; color: #3b5bdb; }
+.htsl-tl-body > :first-child { margin-top: 0.1rem; }
+.htsl-tl-body > :last-child { margin-bottom: 0; }
+
+/* Highlighter ({@mark}). */
+.htsl-mark { background: #fef08a; padding: 0.05em 0.15em; border-radius: 3px; }
+
+/* Inline badge / pill ({@badge}, {@pill}). */
+.htsl-badge {
+  display: inline-block; padding: 0.05em 0.55em; border-radius: 999px;
+  font-size: 0.78em; font-weight: 600; line-height: 1.5;
+  background: var(--pc-bg, #f1f5f9); color: var(--pc-accent, #475569);
+  border: 1px solid var(--pc-border, #e2e8f0);
+}
 
 /* Reveal ({@reveal}) — native <details>, zero JS. */
 .htsl-reveal { border: 1px solid #e3e6ea; border-radius: 8px; margin: 1em 0; background: #fff; overflow: hidden; }

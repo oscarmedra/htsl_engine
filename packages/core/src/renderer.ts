@@ -130,6 +130,13 @@ class Renderer {
     if (node.path === "panel") return this.panel(node);
     if (node.path === "stepper") return this.stepper(node);
     if (node.path === "stepper.step") return this.step(node, 0);
+    if (node.path === "columns") return this.columns(node);
+    if (node.path === "columns.col") return `<div class="htsl-col">${this.childrenHtml(node)}</div>`;
+    if (node.path === "deflist") return this.deflist(node);
+    if (node.path === "timeline") return this.timeline(node);
+    if (node.path === "timeline.event") return this.timelineEvent(node);
+    if (node.path === "mark") return `<mark class="htsl-mark">${this.childrenHtml(node)}</mark>`;
+    if (node.path === "badge") return this.badge(node);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isParamPath(node.path)) return renderParam(node);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr, paramValues(this.paramCtx));
@@ -302,6 +309,49 @@ class Renderer {
       `<div class="htsl-step-body">${this.childrenHtml(node)}</div>` +
       `</div>`
     );
+  }
+
+  /** Side-by-side layout ({@columns: {@col:…}{@col:…}}). Stacks on narrow screens. */
+  private columns(node: ObjectNode): string {
+    const cols = node.children.filter(
+      (c): c is ObjectNode => c.type === "object" && c.path === "columns.col",
+    );
+    const body = cols.map((c) => `<div class="htsl-col">${this.childrenHtml(c)}</div>`).join("");
+    return `<div class="htsl-columns" style="--htsl-cols:${cols.length || 1}">${body}</div>`;
+  }
+
+  /** Definition list / glossary ({@deflist: {term:…}{def:…}…}) → <dl>. */
+  private deflist(node: ObjectNode): string {
+    const rows = node.children
+      .filter((c): c is ElementNode => c.type === "element" && (c.tag === "term" || c.tag === "def"))
+      .map((c) => (c.tag === "term" ? `<dt>${this.elementBody(c)}</dt>` : `<dd>${this.elementBody(c)}</dd>`))
+      .join("");
+    return `<dl class="htsl-deflist">${rows}</dl>`;
+  }
+
+  /** Chronological timeline ({@timeline: {@event[date=…]:…}}). */
+  private timeline(node: ObjectNode): string {
+    const events = node.children.filter(
+      (c): c is ObjectNode => c.type === "object" && c.path === "timeline.event",
+    );
+    return `<div class="htsl-timeline">${events.map((e) => this.timelineEvent(e)).join("")}</div>`;
+  }
+
+  private timelineEvent(node: ObjectNode): string {
+    const date = node.attrs["date"];
+    const dateHtml = date ? `<div class="htsl-tl-date">${escapeHtml(date)}</div>` : "";
+    return (
+      `<div class="htsl-tl-event">` +
+      `<div class="htsl-tl-dot"></div>` +
+      `<div class="htsl-tl-main">${dateHtml}<div class="htsl-tl-body">${this.childrenHtml(node)}</div></div>` +
+      `</div>`
+    );
+  }
+
+  /** Small inline label ({@badge[color=…]:…}, alias pill/tag). Reuses the palette. */
+  private badge(node: ObjectNode): string {
+    const color = panelColor(node.attrs["color"]);
+    return `<span class="htsl-badge htsl-badge--${color}">${this.childrenHtml(node)}</span>`;
   }
 
   /** Render an object's children (compact), dropping comments. */
