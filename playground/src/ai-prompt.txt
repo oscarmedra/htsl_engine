@@ -264,6 +264,12 @@ Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteu
 - **`{@mark: …}`** : surligneur (met en évidence un bout de texte, inline).
 - **`{@badge[color=green]: Nouveau}`** (alias `pill`, `tag`) : petite étiquette inline colorée (mêmes couleurs que `{@panel}`).
 
+### Pédagogie (exercices, listes, droite graduée)
+- **`{@exercise[title="…"]: énoncé {solution: …}}`** (alias `exercice`) : exercice **numéroté automatiquement** (« Exercice N »). L'enfant optionnel `{solution: …}` devient une **correction repliable**.
+- **`{@checklist: {item: …} {item[checked=true]: …}}`** : liste à **cases à cocher** natives (cochables, sans JS).
+- **`{@stepper[guided=true]: {@step:…}}`** : variante du stepper où les étapes sont **repliées** (l'élève les révèle une à une, sans JS).
+- **`{@numberline[from=-3, to=3, ticks=1]: {point[x, name, color]/} {segment[from, to, open, color]/}}`** : **droite graduée** (SVG). `open` ∈ none/left/right/both (borne creuse = exclue). Idéal pour intervalles et inéquations.
+
 ### Style (Tailwind CSS)
 Charge Tailwind en tête de document : `{script[src="https://cdn.tailwindcss.com"]/}`
 Toutes les classes Tailwind sont utilisables via `[class="..."]`.

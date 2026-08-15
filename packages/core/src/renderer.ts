@@ -74,6 +74,7 @@ class Renderer {
   private calloutCtx: CalloutContext = { info: new Map(), labels: new Map() };
   private paramCtx: ParamContext = new Map();
   private flashcardCounter = 0;
+  private exerciseCounter = 0;
 
   constructor(options: RenderOptions) {
     this.options = options;
@@ -137,6 +138,9 @@ class Renderer {
     if (node.path === "timeline.event") return this.timelineEvent(node);
     if (node.path === "mark") return `<mark class="htsl-mark">${this.childrenHtml(node)}</mark>`;
     if (node.path === "badge") return this.badge(node);
+    if (node.path === "exercise") return this.exercise(node);
+    if (node.path === "checklist") return this.checklist(node);
+    if (node.path === "numberline") return this.numberline(node);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isParamPath(node.path)) return renderParam(node);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr, paramValues(this.paramCtx));
@@ -288,27 +292,101 @@ class Renderer {
     );
   }
 
-  /** Numbered steps ({@stepper: {@step:…}}). Each direct {@step} is auto-numbered. */
+  /** Numbered steps ({@stepper: {@step:…}}). `guided=true` collapses each step
+   *  (native <details>) so the reader reveals them one by one — zero JS. */
   private stepper(node: ObjectNode): string {
+    const guided = node.attrs["guided"] !== undefined && node.attrs["guided"] !== "false";
     const steps = node.children.filter(
       (c): c is ObjectNode => c.type === "object" && c.path === "stepper.step",
     );
-    const body = steps.map((s, i) => this.step(s, i + 1)).join("");
-    return `<div class="htsl-stepper">${body}</div>`;
+    const body = steps.map((s, i) => this.step(s, i + 1, guided)).join("");
+    return `<div class="htsl-stepper${guided ? " htsl-stepper--guided" : ""}">${body}</div>`;
   }
 
   /** One step: a bordered box with a small "Étape N" label tab on its top edge.
-   *  `n` is its 1-based number (0 = standalone {@step} outside a stepper). */
-  private step(node: ObjectNode, n: number): string {
+   *  `n` = 1-based number (0 = standalone {@step}); `guided` = collapsed reveal. */
+  private step(node: ObjectNode, n: number, guided = false): string {
     const title = node.attrs["title"];
     const base = n > 0 ? `Étape ${n}` : "Étape";
     const label = title ? `${base} — ${escapeHtml(title)}` : base;
+    const body = `<div class="htsl-step-body">${this.childrenHtml(node)}</div>`;
+    if (guided) {
+      return `<details class="htsl-step htsl-step--guided"><summary class="htsl-step-label">${label}</summary>${body}</details>`;
+    }
+    return `<div class="htsl-step"><span class="htsl-step-label">${label}</span>${body}</div>`;
+  }
+
+  /** Numbered exercise ({@exercise[title=…]: … {solution:…}}). The optional
+   *  {solution:…} child becomes a collapsible <details>. Numbered per document. */
+  private exercise(node: ObjectNode): string {
+    const n = ++this.exerciseCounter;
+    const title = node.attrs["title"];
+    const head = `Exercice ${n}${title ? ` — ${escapeHtml(title)}` : ""}`;
+    const solution = this.els(node, "solution")[0];
+    const body = node.children
+      .filter((c) => c.type !== "comment" && !(c.type === "element" && c.tag === "solution"))
+      .map((c) => this.compact(c))
+      .join("")
+      .trim();
+    const sol = solution
+      ? `<details class="htsl-exo-solution"><summary>Solution</summary>` +
+        `<div class="htsl-exo-solution-body">${this.elementBody(solution)}</div></details>`
+      : "";
     return (
-      `<div class="htsl-step">` +
-      `<span class="htsl-step-label">${label}</span>` +
-      `<div class="htsl-step-body">${this.childrenHtml(node)}</div>` +
+      `<div class="htsl-exo">` +
+      `<div class="htsl-exo-head">${head}</div>` +
+      `<div class="htsl-exo-body">${body}</div>` +
+      sol +
       `</div>`
     );
+  }
+
+  /** Checkable list ({@checklist: {item:…}}) — native checkboxes (zero JS). */
+  private checklist(node: ObjectNode): string {
+    const items = this.els(node, "item")
+      .map((it) => {
+        const checked =
+          it.attrs["checked"] !== undefined && it.attrs["checked"] !== "false" ? " checked" : "";
+        return `<li><label><input type="checkbox"${checked}> ${this.elementBody(it)}</label></li>`;
+      })
+      .join("");
+    return `<ul class="htsl-checklist">${items}</ul>`;
+  }
+
+  /** Number line ({@numberline[from,to,ticks]: {point[x,name]/} {segment[from,to,open]/}}). */
+  private numberline(node: ObjectNode): string {
+    const from = numAttr(node.attrs["from"], -5);
+    const to = numAttr(node.attrs["to"], 5);
+    const ticks = Math.max(numAttr(node.attrs["ticks"], 1), 1e-4);
+    const W = 520, H = 64, mL = 24, mR = 24, y = 38;
+    const span = to - from || 1;
+    const X = (v: number): number => mL + ((v - from) / span) * (W - mL - mR);
+    const p: string[] = [];
+    p.push(`<line x1="${mL - 6}" y1="${y}" x2="${W - mR + 6}" y2="${y}" stroke="#334155" stroke-width="1.5"/>`);
+    p.push(`<polygon points="${W - mR + 6},${y} ${W - mR - 2},${y - 4} ${W - mR - 2},${y + 4}" fill="#334155"/>`);
+    for (let v = Math.ceil(from / ticks) * ticks; v <= to + 1e-9; v += ticks) {
+      const x = X(v).toFixed(1);
+      p.push(`<line x1="${x}" y1="${y - 4}" x2="${x}" y2="${y + 4}" stroke="#64748b" stroke-width="1"/>`);
+      p.push(`<text x="${x}" y="${y + 18}" text-anchor="middle" font-size="11" fill="#475569">${Number(v.toFixed(6))}</text>`);
+    }
+    for (const el of node.children) {
+      if (el.type !== "element") continue;
+      const color = escapeHtml(el.attrs["color"] ?? "#3b5bdb");
+      if (el.tag === "segment" || el.tag === "interval") {
+        const a = X(numAttr(el.attrs["from"], from));
+        const b = X(numAttr(el.attrs["to"], to));
+        const open = (el.attrs["open"] ?? "").toLowerCase();
+        p.push(`<line x1="${a.toFixed(1)}" y1="${y}" x2="${b.toFixed(1)}" y2="${y}" stroke="${color}" stroke-width="4" stroke-linecap="round" opacity="0.7"/>`);
+        p.push(endpoint(a, y, color, open === "left" || open === "both"));
+        p.push(endpoint(b, y, color, open === "right" || open === "both"));
+      } else if (el.tag === "point") {
+        const x = X(numAttr(el.attrs["x"], 0)).toFixed(1);
+        p.push(`<circle cx="${x}" cy="${y}" r="4.5" fill="${color}"/>`);
+        const name = el.attrs["name"];
+        if (name) p.push(`<text x="${x}" y="${y - 9}" text-anchor="middle" font-size="12" fill="${color}">${escapeHtml(name)}</text>`);
+      }
+    }
+    return `<svg class="htsl-numberline" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${p.join("")}</svg>`;
   }
 
   /** Side-by-side layout ({@columns: {@col:…}{@col:…}}). Stacks on narrow screens. */
@@ -555,6 +633,19 @@ const PANEL_COLORS = new Set(["slate", "indigo", "blue", "green", "red", "amber"
 function panelColor(raw: string | undefined): string {
   const c = (raw ?? "").trim().toLowerCase();
   return PANEL_COLORS.has(c) ? c : "slate";
+}
+
+/** Parse a numeric attribute, falling back to `def`. Used by {@numberline}. */
+function numAttr(raw: string | undefined, def: number): number {
+  const n = Number((raw ?? "").trim());
+  return Number.isFinite(n) ? n : def;
+}
+
+/** A number-line endpoint marker: hollow when open (exclusive), filled when closed. */
+function endpoint(x: number, y: number, color: string, open: boolean): string {
+  return open
+    ? `<circle cx="${x.toFixed(1)}" cy="${y}" r="4" fill="#fff" stroke="${color}" stroke-width="2"/>`
+    : `<circle cx="${x.toFixed(1)}" cy="${y}" r="4" fill="${color}"/>`;
 }
 
 /** HTML boolean attributes: rendered bare (`controls`) when truthy, omitted when

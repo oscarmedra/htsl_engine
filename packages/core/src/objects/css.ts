@@ -252,6 +252,43 @@ export const mathCss = `
   border: 1px solid var(--pc-border, #e2e8f0);
 }
 
+/* Guided stepper ({@stepper[guided=true]}) — each step is a collapsed <details>
+   shown as a clickable bar (the label is a normal-flow <summary>, not a tab). */
+details.htsl-step--guided { padding: 0; }
+details.htsl-step--guided > summary.htsl-step-label {
+  position: static; display: block; margin: 0; border: none;
+  border-radius: 8px; background: #f1f5f9; color: #334155;
+  padding: 0.55rem 0.9rem; cursor: pointer; list-style: none;
+}
+details.htsl-step--guided[open] > summary.htsl-step-label { border-radius: 8px 8px 0 0; }
+details.htsl-step--guided > summary::-webkit-details-marker { display: none; }
+details.htsl-step--guided > summary::before { content: "▸ "; color: #94a3b8; }
+details.htsl-step--guided[open] > summary::before { content: "▾ "; }
+details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
+
+/* Numbered exercise ({@exercise}) with an optional collapsible solution. */
+.htsl-exo { border: 1px solid #e3e6ea; border-radius: 10px; margin: 1em 0; overflow: hidden; background: #fff; }
+.htsl-exo-head { font-weight: 700; color: #3730a3; background: #eef2ff; padding: 0.5em 0.9em; border-bottom: 1px solid #e0e7ff; }
+.htsl-exo-body { padding: 0.7em 0.9em; }
+.htsl-exo-body > :first-child { margin-top: 0; }
+.htsl-exo-body > :last-child { margin-bottom: 0; }
+.htsl-exo-solution { border-top: 1px solid #eef0f3; }
+.htsl-exo-solution > summary { cursor: pointer; padding: 0.45em 0.9em; font-weight: 600; color: #15803d; background: #f0fdf4; list-style: none; }
+.htsl-exo-solution > summary::-webkit-details-marker { display: none; }
+.htsl-exo-solution > summary::before { content: "▸ "; color: #86efac; }
+.htsl-exo-solution[open] > summary::before { content: "▾ "; }
+.htsl-exo-solution-body { padding: 0.7em 0.9em; }
+
+/* Checklist ({@checklist: {item:…}}) — native checkboxes. */
+.htsl-checklist { list-style: none; padding-left: 0; margin: 1em 0; }
+.htsl-checklist li { margin: 0.25em 0; }
+.htsl-checklist label { display: flex; align-items: baseline; gap: 0.55em; cursor: pointer; }
+.htsl-checklist input { margin: 0; transform: translateY(1px); accent-color: #3b5bdb; cursor: pointer; }
+.htsl-checklist input:checked + * , .htsl-checklist label:has(input:checked) { color: #64748b; }
+
+/* Number line ({@numberline}) — SVG. */
+.htsl-numberline { display: block; max-width: 100%; height: auto; margin: 0.8em auto; }
+
 /* Reveal ({@reveal}) — native <details>, zero JS. */
 .htsl-reveal { border: 1px solid #e3e6ea; border-radius: 8px; margin: 1em 0; background: #fff; overflow: hidden; }
 .htsl-reveal-summary {

@@ -896,3 +896,13 @@ dt/dd), {@timeline}+{@event} (frise datée), {@mark} (surligneur), {@badge}/{@pi
 (pastille inline, palette partagée avec {@panel}). renderer + registry (7 objets) +
 css. Tests layout-lot1.test.ts (8) ; core 336, codemirror 37. Prompt IA + .docs/26.
 Reste : lot 2 (exercise/checklist/stepper guidé/numberline), lot 3 (chimie/code/qty/vérité).
+
+## Lot 2 des composants suggérés : pédagogie
+
+4 objets (0 JS de contenu) : {@exercise}+{solution} (numéroté par doc + correction
+repliable via <details>), {@checklist} (cases natives), {@stepper[guided=true]}
+(étapes repliées en <details>), {@numberline} (droite graduée SVG : point + segment
+avec bornes ouvertes/fermées). renderer (exercise/checklist/numberline + step guided
++ helpers numAttr/endpoint), registry (3 objets + attr guided), css. Tests
+pedagogy-lot2.test.ts (8) ; core 343, codemirror 37. Prompt IA + .docs/27.
+Reste : lot 3 (chimie/code/qty/table de vérité).

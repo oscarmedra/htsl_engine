@@ -574,8 +574,10 @@ registerObject({
   contentModel: "html",
   category: "structure",
   aliases: ["etapes"],
-  description: "Suite d'étapes numérotées automatiquement : contient des {@step:…} (badge + trait vertical).",
-  attrs: [],
+  description: "Suite d'étapes numérotées automatiquement : contient des {@step:…} (boîte à étiquette « Étape N »). guided=true = étapes repliées à révéler une à une.",
+  attrs: [
+    { name: "guided", type: "boolean", required: false, default: "false", description: "Étapes repliées (révélation pas à pas, sans JS)." },
+  ],
   snippet: "{@stepper:\n  {@step[title=${1:\"Étape 1\"}]: ${2:…}}\n  {@step[title=${3:\"Étape 2\"}]: ${4:…}}\n}",
   example:
     "{@stepper:\n  {@step[title=\"Poser le problème\"]: {p:On écrit l'équation.}}\n  {@step[title=\"Résoudre\"]: {@mtb: \\Delta = b^2 - 4ac}}\n}",
@@ -670,6 +672,45 @@ registerObject({
   ],
   snippet: "{@badge[color=${1:green}]: ${2:Nouveau}}",
   example: "{p:{@badge[color=green]: Nouveau} une fonctionnalité.}",
+});
+
+// --- pedagogy (exercise / checklist / number line) ---
+registerObject({
+  path: "exercise",
+  contentModel: "html",
+  category: "document",
+  aliases: ["exercice"],
+  description:
+    "Exercice numéroté automatiquement (« Exercice N »). Un enfant {solution:…} devient une correction repliable. Attribut title optionnel.",
+  attrs: [{ name: "title", type: "string", required: false, description: "Intitulé affiché après le numéro." }],
+  snippet: "{@exercise[title=${1:\"…\"}]:\n  ${2:énoncé}\n  {solution: ${3:correction}}\n}",
+  example:
+    "{@exercise[title=\"Second degré\"]:\n  {p:Résoudre $x^2 - 2x - 3 = 0$.}\n  {solution: {p:$x_1 = 3$, $x_2 = -1$.}}\n}",
+});
+registerObject({
+  path: "checklist",
+  contentModel: "html",
+  category: "document",
+  aliases: ["todo", "cases"],
+  description: "Liste à cases à cocher (natives, cochables) : enfants {item:…} ({item[checked=true]:…} = déjà coché).",
+  attrs: [],
+  snippet: "{@checklist:\n  {item: ${1:première tâche}}\n  {item: ${2:deuxième tâche}}\n}",
+  example: "{@checklist:\n  {item[checked=true]: Poser l'équation}\n  {item: Calculer le discriminant}\n}",
+});
+registerObject({
+  path: "numberline",
+  contentModel: "html",
+  category: "géométrie",
+  aliases: ["droite", "droitegraduee"],
+  description:
+    "Droite graduée (SVG) : attributs from, to, ticks. Enfants {point[x, name, color]/}, {segment[from, to, open, color]/} (open : none|left|right|both).",
+  attrs: [
+    { name: "from", type: "number", required: false, default: "-5", description: "Borne gauche." },
+    { name: "to", type: "number", required: false, default: "5", description: "Borne droite." },
+    { name: "ticks", type: "number", required: false, default: "1", description: "Pas des graduations." },
+  ],
+  snippet: "{@numberline[from=${1:-3}, to=${2:3}]:\n  {segment[from=${3:0}, to=${4:2}, open=right]/}\n  {point[x=${5:-1}, name=A]/}\n}",
+  example: "{@numberline[from=-3, to=3]:\n  {segment[from=0, to=2, open=right, color=crimson]/}\n  {point[x=-1, name=A]/}\n}",
 });
 
 // --- variation / sign tables ---
