@@ -916,3 +916,14 @@ language-… compatible highlight.js). ContentModel += "raw". renderer (truthtab
 codeblock + cases ce/qty dans math.ts), registry (4 objets), css, lexer (raw obj).
 Tests science-lot3.test.ts (7) ; core 349, codemirror 37. Prompt IA + .docs/28.
 Série des 3 lots (mise en page / pédagogie / scientifique) terminée.
+
+## Playground : éditer un dossier local (File System Access) — Voie B
+
+Ouvrir un clone local d'un repo .htsl et éditer/créer/enregistrer sur le disque,
+sans serveur ni jeton, repos privés inclus (git reste à l'utilisateur). Bouton
+📂 Dossier → showDirectoryPicker ; tiroir listant les .htsl (récursif) ; clic =
+charger ; Ctrl/Cmd+S = écrire ; ＋ Nouveau = créer ; réouverture du dernier dossier
+(IndexedDB) ; indicateur « ● non enregistré » ; repli Firefox/Safari. Nouveau
+module files.ts + câblage main.ts + UI (index.html) + CSS. Playground only, 0 core.
+Câblage vérifié (UI + fsSupported + 0 erreur) ; le flux réel (picker) se teste
+côté utilisateur (geste requis). .docs/29.

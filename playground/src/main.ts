@@ -28,6 +28,7 @@ import {
 } from "./persistence";
 import { FrameRenderer } from "./frame";
 import { setupTemplates } from "./templates";
+import * as fsx from "./files";
 import { htslHoverDoc } from "./help";
 
 /* -------------------------------------------------------------------------- */
@@ -178,6 +179,20 @@ function run(view: EditorView, force = false): void {
 
 let renderQueued = false;
 let saveTimer: number | undefined;
+
+// --- Local-folder editing (File System Access) state ---
+let currentDir: unknown = null;
+let currentFile: { handle: unknown; path: string } | null = null;
+let fileDirty = false;
+let loadingFile = false; // true while we programmatically load a file (suppress dirty)
+
+/** Mark the open local file as modified (skipped during programmatic loads). */
+function markFileDirty(): void {
+  if (loadingFile || !currentFile || fileDirty) return;
+  fileDirty = true;
+  updateFileIndicator();
+}
+
 const updateListener = EditorView.updateListener.of((u) => {
   if (!u.docChanged) return;
   // Live preview: coalesce to at most one render per animation frame so the
@@ -194,6 +209,8 @@ const updateListener = EditorView.updateListener.of((u) => {
   // wasteful, and losing the last few hundred ms on a hard refresh is harmless.
   window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => saveLocal(view.state.doc.toString()), 400);
+  // Mark the open local file as modified (unless we are loading into it).
+  markFileDirty();
   // Editing supersedes a shared link → drop the hash so a refresh uses the
   // local copy (the Share button regenerates a fresh link on demand).
   if (location.hash) window.history.replaceState(null, "", location.pathname + location.search);
@@ -401,6 +418,139 @@ const templates = setupTemplates(view, (src) => {
   run(view, true);
 });
 $("btn-insert").addEventListener("click", () => templates.toggle());
+
+/* -------------------------------------------------------------------------- */
+/* Local folder (File System Access) — open a clone of your repo, edit & save  */
+/* -------------------------------------------------------------------------- */
+
+const filesEl = $("files");
+const filesList = $("files-list");
+const filesPathEl = $("files-path");
+const editorFileEl = document.getElementById("editor-file");
+
+function updateFileIndicator(): void {
+  if (!editorFileEl) return;
+  editorFileEl.textContent = currentFile ? ` · ${currentFile.path}${fileDirty ? " ●" : ""}` : "";
+  editorFileEl.title = fileDirty ? "Modifications non enregistrées (Ctrl/Cmd + S)" : "Enregistré sur le disque";
+}
+
+/** Load text into the editor without marking the file dirty. */
+function loadIntoEditor(src: string): void {
+  loadingFile = true;
+  view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: src } });
+  loadingFile = false;
+  view.focus();
+  run(view, true);
+}
+
+function fileError(msg: string): void {
+  bannerEl.hidden = false;
+  bannerEl.textContent = msg;
+}
+
+async function refreshFileList(): Promise<void> {
+  filesList.innerHTML = "";
+  if (!currentDir) return;
+  const entries = await fsx.listHtsl(currentDir);
+  if (entries.length === 0) {
+    filesList.innerHTML = '<div class="pal-empty">Aucun fichier .htsl dans ce dossier.</div>';
+    return;
+  }
+  for (const e of entries) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "pal-entry files-entry";
+    if (currentFile && currentFile.path === e.path) b.classList.add("is-current");
+    b.textContent = e.path;
+    b.addEventListener("click", () => void openEntry(e));
+    filesList.appendChild(b);
+  }
+}
+
+async function openEntry(e: { handle: unknown; path: string }): Promise<void> {
+  if (fileDirty && !window.confirm("Des modifications ne sont pas enregistrées. Ouvrir un autre fichier quand même ?")) return;
+  try {
+    const text = await fsx.readFile(e.handle);
+    currentFile = { handle: e.handle, path: e.path };
+    fileDirty = false;
+    loadIntoEditor(text);
+    updateFileIndicator();
+    void refreshFileList();
+  } catch (err) {
+    fileError(`Impossible d'ouvrir « ${e.path} » : ${(err as Error).message}`);
+  }
+}
+
+async function openFolder(forcePick = false): Promise<void> {
+  let dir: unknown = null;
+  if (!forcePick) dir = await fsx.lastFolder();
+  if (!dir) dir = await fsx.pickFolder();
+  if (!dir) return; // user cancelled
+  if (!(await fsx.ensurePermission(dir, "readwrite"))) {
+    if (!forcePick) return void openFolder(true); // stale remembered handle → pick fresh
+    fileError("Autorisation refusée sur le dossier.");
+    return;
+  }
+  currentDir = dir;
+  currentFile = null;
+  fileDirty = false;
+  updateFileIndicator();
+  filesPathEl.textContent = `📂 ${(dir as { name: string }).name}`;
+  await fsx.rememberFolder(dir);
+  await refreshFileList();
+  filesEl.hidden = false;
+}
+
+async function saveCurrentFile(): Promise<void> {
+  if (!currentFile) return;
+  try {
+    await fsx.writeFile(currentFile.handle, view.state.doc.toString());
+    fileDirty = false;
+    updateFileIndicator();
+    flash($("btn-folder"), "💾 Enregistré");
+  } catch (err) {
+    fileError(`Échec de l'enregistrement : ${(err as Error).message}`);
+  }
+}
+
+async function newFile(): Promise<void> {
+  if (!currentDir) return;
+  const name = window.prompt("Nom du nouveau fichier (ex. cours/intro.htsl) :", "nouveau.htsl");
+  if (!name) return;
+  try {
+    const handle = await fsx.createFile(currentDir, name);
+    await fsx.writeFile(handle, "");
+    currentFile = { handle, path: name.toLowerCase().endsWith(".htsl") ? name : `${name}.htsl` };
+    fileDirty = false;
+    loadIntoEditor("");
+    updateFileIndicator();
+    await refreshFileList();
+  } catch (err) {
+    fileError(`Impossible de créer le fichier : ${(err as Error).message}`);
+  }
+}
+
+$("btn-folder").addEventListener("click", () => {
+  if (!fsx.fsSupported()) {
+    fileError("Ce navigateur ne permet pas d'ouvrir un dossier (Chrome/Edge requis). Utilisez « Télécharger » à la place.");
+    return;
+  }
+  if (currentDir) filesEl.hidden = !filesEl.hidden;
+  else void openFolder();
+});
+$("files-open").addEventListener("click", () => void openFolder(true));
+$("files-new").addEventListener("click", () => void newFile());
+$("files-close").addEventListener("click", () => (filesEl.hidden = true));
+
+// Ctrl/Cmd + S → save the open file to disk (never the browser's "save page").
+window.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+    if (currentFile) {
+      e.preventDefault();
+      void saveCurrentFile();
+    }
+  }
+});
 
 // Exposed for debugging / scripting from the console.
 (window as unknown as { htslView: EditorView }).htslView = view;

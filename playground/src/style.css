@@ -94,6 +94,19 @@ body {
 .pal-hint { color: var(--muted); font-size: 0.74rem; font-style: italic; padding: 0.2rem 0.5rem 0.4rem; }
 .pal-hint { font-family: var(--mono); }
 
+/* Local folder drawer (File System Access) */
+#files .palette-head strong { margin-right: auto; }
+.files-new {
+  border: 1px solid var(--border); background: #fff; color: var(--ink);
+  border-radius: 6px; font-size: 0.75rem; padding: 0.2rem 0.5rem; cursor: pointer;
+}
+.files-new:hover { background: var(--accent-soft); border-color: var(--accent); }
+.files-path { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--border); }
+.files-entry { font-family: var(--mono); font-size: 0.78rem; }
+.files-entry.is-current { background: var(--accent-soft); border-color: var(--accent); font-weight: 600; }
+/* Current-file name + unsaved-dot next to "Éditeur HTSL" */
+.editor-file { text-transform: none; letter-spacing: 0; font-weight: 400; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
 /* The autocompletion popup must float above everything and never be clipped. */
 .cm-tooltip.cm-tooltip-autocomplete { z-index: 600; }
 /* Toggle switches (Éditeur / AST). The native checkbox keeps its id + change
