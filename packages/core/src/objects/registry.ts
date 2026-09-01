@@ -15,7 +15,7 @@
 
 import { CALLOUT_TYPES, CALLOUT_REF_PATH } from "./callout.js";
 
-export type ContentModel = "math" | "html" | "void";
+export type ContentModel = "math" | "html" | "void" | "raw";
 
 export type AttrType =
   | "number"
@@ -711,6 +711,52 @@ registerObject({
   ],
   snippet: "{@numberline[from=${1:-3}, to=${2:3}]:\n  {segment[from=${3:0}, to=${4:2}, open=right]/}\n  {point[x=${5:-1}, name=A]/}\n}",
   example: "{@numberline[from=-3, to=3]:\n  {segment[from=0, to=2, open=right, color=crimson]/}\n  {point[x=-1, name=A]/}\n}",
+});
+
+// --- science : chemistry / physical quantity / truth table ---
+registerObject({
+  path: "math.text.chem",
+  contentModel: "math",
+  category: "formules",
+  aliases: ["ce", "chem", "chimie"],
+  description: "Chimie (mhchem) : {@ce: H2SO4 + H2O -> …} → \\ce{…}. Nécessite l'extension mhchem de KaTeX.",
+  attrs: [],
+  snippet: "{@ce: ${1:H2O}}",
+  example: "{@ce: 2 H2 + O2 -> 2 H2O}",
+});
+registerObject({
+  path: "math.object.qty",
+  contentModel: "void",
+  category: "formules",
+  aliases: ["qty", "grandeur"],
+  description: "Grandeur physique : valeur + unité (unité en romain). Ex. {@qty[value=9.81, unit=\"m\\cdot s^{-2}\"]/}.",
+  attrs: [
+    { name: "value", type: "string", required: false, description: "Valeur (LaTeX possible, ex. 3 \\times 10^8)." },
+    { name: "unit", type: "string", required: false, description: "Unité en notation LaTeX (ex. m\\cdot s^{-2})." },
+  ],
+  snippet: "{@qty[value=${1:9.81}, unit=${2:\"m\\\\cdot s^{-2}\"}]/}",
+  example: "{@qty[value=9.81, unit=\"m\\cdot s^{-2}\"]/}",
+});
+registerObject({
+  path: "truthtable",
+  contentModel: "html",
+  category: "formules",
+  aliases: ["verite", "tabverite"],
+  description: "Table de vérité : un {head: a, b, …} (en-tête) et des {row: V, F, …} (colonnes séparées par des virgules). V/1/vrai et F/0/faux sont colorés.",
+  attrs: [],
+  snippet: "{@truthtable:\n  {head: p, q, p ∧ q}\n  {row: V, V, V}\n  {row: V, F, F}\n  {row: F, V, F}\n  {row: F, F, F}\n}",
+  example: "{@truthtable:\n  {head: p, q, p ∧ q}\n  {row: V, V, V}\n  {row: V, F, F}\n  {row: F, V, F}\n  {row: F, F, F}\n}",
+});
+registerObject({
+  path: "codeblock",
+  contentModel: "raw",
+  category: "structure",
+  aliases: ["listing", "source"],
+  description:
+    "Bloc de code : contenu pris VERBATIM (les { } et \\ n'ont pas besoin d'être échappés). Attribut lang → classe language-… (compatible highlight.js si chargé).",
+  attrs: [{ name: "lang", type: "string", required: false, description: "Langage (python, js, c…) pour la coloration." }],
+  snippet: "{@codeblock[lang=${1:python}]:\n${2:code}\n}",
+  example: "{@codeblock[lang=python]:\ndef carre(x):\n    return x * x\n}",
 });
 
 // --- variation / sign tables ---

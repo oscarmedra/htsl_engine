@@ -141,6 +141,8 @@ class Renderer {
     if (node.path === "exercise") return this.exercise(node);
     if (node.path === "checklist") return this.checklist(node);
     if (node.path === "numberline") return this.numberline(node);
+    if (node.path === "truthtable") return this.truthtable(node);
+    if (node.path === "codeblock") return this.codeblock(node);
     if (isThreePath(node.path)) return renderThree(node, hashAttr);
     if (isParamPath(node.path)) return renderParam(node);
     if (isPlotPath(node.path)) return renderPlot(node, hashAttr, paramValues(this.paramCtx));
@@ -387,6 +389,45 @@ class Renderer {
       }
     }
     return `<svg class="htsl-numberline" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${p.join("")}</svg>`;
+  }
+
+  /** Truth table ({@truthtable: {head: a,b,…} {row: V,F,…}}). V/1/vrai & F/0/faux coloured. */
+  private truthtable(node: ObjectNode): string {
+    const cellsOf = (el: ElementNode): string[] =>
+      el.children
+        .map((c) => (c.type === "text" ? c.value : ""))
+        .join("")
+        .split(",")
+        .map((s) => s.trim());
+    const cellClass = (v: string): string => {
+      const low = v.toLowerCase();
+      if (["v", "1", "vrai", "true", "⊤"].includes(low)) return ' class="htsl-tt-true"';
+      if (["f", "0", "faux", "false", "⊥"].includes(low)) return ' class="htsl-tt-false"';
+      return "";
+    };
+    const head = this.els(node, "head")[0];
+    const rows = this.els(node, "row");
+    const thead = head
+      ? `<thead><tr>${cellsOf(head).map((c) => `<th>${escapeHtml(c)}</th>`).join("")}</tr></thead>`
+      : "";
+    const tbody = `<tbody>${rows
+      .map((r) => `<tr>${cellsOf(r).map((c) => `<td${cellClass(c)}>${escapeHtml(c)}</td>`).join("")}</tr>`)
+      .join("")}</tbody>`;
+    return `<table class="htsl-truthtable">${thead}${tbody}</table>`;
+  }
+
+  /** Verbatim code block ({@codeblock[lang]:…}). The content is raw text (lexer);
+   *  the language becomes a `language-…` class (highlight.js-compatible). */
+  private codeblock(node: ObjectNode): string {
+    const lang = node.attrs["lang"];
+    const langAttr = lang ? ` data-lang="${escapeHtml(lang)}"` : "";
+    const langClass = lang ? ` class="language-${escapeHtml(lang)}"` : "";
+    const code = node.children
+      .map((c) => (c.type === "text" ? c.value : ""))
+      .join("")
+      .replace(/^\r?\n/, "")
+      .replace(/\s+$/, "");
+    return `<pre class="htsl-code"${langAttr}><code${langClass}>${escapeHtml(code)}</code></pre>`;
   }
 
   /** Side-by-side layout ({@columns: {@col:…}{@col:…}}). Stacks on narrow screens. */

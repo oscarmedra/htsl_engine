@@ -270,6 +270,12 @@ Un diaporama navigable (boutons ⟵/⟶, flèches clavier, plein écran, compteu
 - **`{@stepper[guided=true]: {@step:…}}`** : variante du stepper où les étapes sont **repliées** (l'élève les révèle une à une, sans JS).
 - **`{@numberline[from=-3, to=3, ticks=1]: {point[x, name, color]/} {segment[from, to, open, color]/}}`** : **droite graduée** (SVG). `open` ∈ none/left/right/both (borne creuse = exclue). Idéal pour intervalles et inéquations.
 
+### Scientifique
+- **Chimie** : **`{@ce: 2 H2 + O2 -> 2 H2O}`** (alias `chimie`) rend une équation chimique (mhchem). Aussi utilisable en ligne dans une formule si mhchem est chargé.
+- **`{@qty[value="9.81", unit="m/s^2"]/}`** (alias `grandeur`) : grandeur physique (valeur + unité droite en `\mathrm`). L'unité s'écrit en LaTeX (`m\cdot s^{-2}`, `N`, `\Omega`…).
+- **`{@truthtable: {head: p, q, p∧q} {row: V, V, V} …}`** (alias `verite`) : table de vérité stylée (V/1/vrai en vert, F/0/faux en rouge).
+- **`{@codeblock[lang=python]: … }`** (alias `listing`, `source`) : bloc de code pris **VERBATIM** (les `{ }` et `\` n'ont PAS besoin d'être échappés). `lang` ajoute `language-…` (coloration via highlight.js si tu le charges dans le document). ⚠️ pas `{@code}` (le `{code:…}` en ligne existe déjà) ni le `$…$` math ici — c'est du code brut.
+
 ### Style (Tailwind CSS)
 Charge Tailwind en tête de document : `{script[src="https://cdn.tailwindcss.com"]/}`
 Toutes les classes Tailwind sont utilisables via `[class="..."]`.

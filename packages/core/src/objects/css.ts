@@ -289,6 +289,21 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 /* Number line ({@numberline}) — SVG. */
 .htsl-numberline { display: block; max-width: 100%; height: auto; margin: 0.8em auto; }
 
+/* Truth table ({@truthtable}). */
+.htsl-truthtable { border-collapse: collapse; margin: 1em auto; }
+.htsl-truthtable th, .htsl-truthtable td { border: 1px solid #cbd5e1; padding: 0.3em 0.85em; text-align: center; }
+.htsl-truthtable thead th { background: #eef2ff; font-weight: 700; color: #3730a3; }
+.htsl-truthtable td.htsl-tt-true { color: #16a34a; font-weight: 600; }
+.htsl-truthtable td.htsl-tt-false { color: #dc2626; font-weight: 600; }
+
+/* Verbatim code block ({@codeblock}) — light theme, highlight.js-compatible. */
+.htsl-code {
+  margin: 1em 0; padding: 0.75em 1em; border-radius: 8px;
+  background: #f6f8fa; border: 1px solid #e3e6ea; color: #24292e;
+  font-size: 0.85em; line-height: 1.5; overflow-x: auto;
+}
+.htsl-code code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: none; color: inherit; padding: 0; white-space: pre; }
+
 /* Reveal ({@reveal}) — native <details>, zero JS. */
 .htsl-reveal { border: 1px solid #e3e6ea; border-radius: 8px; margin: 1em 0; background: #fff; overflow: hidden; }
 .htsl-reveal-summary {

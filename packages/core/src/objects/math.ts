@@ -63,6 +63,11 @@ export function latexOfObject(obj: ObjectNode): string {
       return complexLatex(obj);
     case "math.object.interval":
       return intervalLatex(obj);
+    case "math.text.chem":
+      // Chemistry via KaTeX's mhchem: {@ce: H2SO4 + H2O -> …} → \ce{…}.
+      return `\\ce{${latexOfChildren(obj.children).trim()}}`;
+    case "math.object.qty":
+      return qtyLatex(obj);
     case "math.constant.pi":
       return "\\pi";
     case "math.constant.e":
@@ -203,6 +208,15 @@ function intervalLatex(obj: ObjectNode): string {
   const left = open === "left" || open === "both" ? "\\left]" : "\\left[";
   const right = open === "right" || open === "both" ? "\\right[" : "\\right]";
   return `${left} ${from}, ${to} ${right}`;
+}
+
+/** Physical quantity ({@qty[value, unit]}) → value + thin space + upright unit. */
+function qtyLatex(obj: ObjectNode): string {
+  const value = (obj.attrs["value"] ?? "").trim();
+  const unit = (obj.attrs["unit"] ?? "").trim();
+  if (!unit) return value;
+  const u = `\\mathrm{${unit}}`;
+  return value ? `${value}\\,${u}` : u;
 }
 
 /* -------------------------------------------------------------------------- */

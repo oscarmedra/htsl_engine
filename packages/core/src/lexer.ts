@@ -246,11 +246,13 @@ class Lexer {
         this.stack.pop(); // leave header
         const objectMath = frame.path !== null && contentModelOf(frame.path) === "math";
         const rowMath = frame.path === null && frame.tag !== undefined && MATH_ROW_TAGS.has(frame.tag);
-        const isRaw = frame.path === null && frame.tag !== undefined && RAW_TEXT_TAGS.has(frame.tag);
+        const isRawEl = frame.path === null && frame.tag !== undefined && RAW_TEXT_TAGS.has(frame.tag);
+        // Objects declaring the "raw" content model ({@codeblock:…}) read verbatim.
+        const isRawObj = frame.path !== null && contentModelOf(frame.path) === "raw";
         if (objectMath || rowMath) {
           this.stack.push({ kind: "math", closer: "brace", depth: 0 });
-        } else if (isRaw) {
-          this.stack.push({ kind: "raw", tag: frame.tag!, depth: 0 });
+        } else if (isRawEl || isRawObj) {
+          this.stack.push({ kind: "raw", tag: isRawObj ? "codeblock" : frame.tag!, depth: 0 });
         } else {
           this.stack.push({ kind: "content" });
           // `{!set H: "…raw…"}`: a quoted directive value is taken verbatim

@@ -906,3 +906,13 @@ avec bornes ouvertes/fermées). renderer (exercise/checklist/numberline + step g
 + helpers numAttr/endpoint), registry (3 objets + attr guided), css. Tests
 pedagogy-lot2.test.ts (8) ; core 343, codemirror 37. Prompt IA + .docs/27.
 Reste : lot 3 (chimie/code/qty/table de vérité).
+
+## Lot 3 des composants suggérés : scientifique
+
+4 objets : chimie {@ce} (\ce{…} mhchem ; playground charge katex/contrib/mhchem),
+{@qty} (valeur + unité \mathrm), {@truthtable} (table V/F colorée), {@codeblock}
+(bloc de code VERBATIM via nouveau content model "raw" dans le lexer ; classe
+language-… compatible highlight.js). ContentModel += "raw". renderer (truthtable/
+codeblock + cases ce/qty dans math.ts), registry (4 objets), css, lexer (raw obj).
+Tests science-lot3.test.ts (7) ; core 349, codemirror 37. Prompt IA + .docs/28.
+Série des 3 lots (mise en page / pédagogie / scientifique) terminée.

@@ -10,6 +10,7 @@ import { lintGutter } from "@codemirror/lint";
 import { parse, render, registry, mathCss, HTSLError } from "@noah-medra/htsl-core";
 import type { Node } from "@noah-medra/htsl-core";
 import katex from "katex";
+import "katex/contrib/mhchem"; // registers \ce{…} on the shared katex instance (chemistry)
 
 // Editor behaviour comes entirely from the reusable @noah-medra/htsl-codemirror package.
 import { htslLanguage, htslCompletion, htslLinter } from "@noah-medra/htsl-codemirror";
