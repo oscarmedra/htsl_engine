@@ -29,7 +29,7 @@
           </label>
         </div>
         <div class="toolbar">
-          <button id="btn-folder" title="Ouvrir un dossier local (un clone de votre repo) — éditer / créer / enregistrer les .htsl sur le disque">📂 Dossier</button>
+          <button id="btn-open" title="Ouvrir un fichier .htsl (Ctrl/Cmd+S pour l'enregistrer — écriture directe sur Chrome/Edge, téléchargement sinon)">📂 Ouvrir</button>
           <button id="btn-insert" class="primary" title="Charger un modèle de document (pour insérer un objet, tapez / dans l'éditeur)">📄 Modèles</button>
           <a id="btn-docs" class="btn-link" href="documentation.html" target="_blank" rel="noopener" title="Documentation complète : intégrations, objets, prompt IA">📖 Documentation</a>
           <button id="btn-copy" title="Copier le HTML rendu">Copier HTML</button>
@@ -74,17 +74,6 @@
         <div id="palette-list" class="palette-list"></div>
       </aside>
 
-      <!-- Dossier local (File System Access) -->
-      <aside id="files" class="palette" hidden>
-        <div class="palette-head">
-          <strong>Dossier</strong>
-          <button id="files-open" class="files-new" title="Ouvrir / changer de dossier">Ouvrir…</button>
-          <button id="files-new" class="files-new" title="Créer un nouveau fichier .htsl">＋ Nouveau</button>
-          <button id="files-close" title="Fermer">✕</button>
-        </div>
-        <div id="files-path" class="files-path"></div>
-        <div id="files-list" class="palette-list"></div>
-      </aside>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

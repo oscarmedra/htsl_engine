@@ -927,3 +927,13 @@ charger ; Ctrl/Cmd+S = écrire ; ＋ Nouveau = créer ; réouverture du dernier 
 module files.ts + câblage main.ts + UI (index.html) + CSS. Playground only, 0 core.
 Câblage vérifié (UI + fsSupported + 0 erreur) ; le flux réel (picker) se teste
 côté utilisateur (geste requis). .docs/29.
+
+## Pivot : « Ouvrir un fichier » (au lieu d'un dossier) — compatible Brave
+
+Brave désactive l'API File System Access (showDirectoryPicker) ; et le besoin réel
+était juste d'ouvrir le contenu d'UN fichier. Pivot : bouton 📂 Ouvrir →
+openFilePicker() qui tente showOpenFilePicker (Chrome/Edge → handle + réécriture en
+place) puis retombe sur <input type=file> (Brave/Firefox/Safari, universel). Ctrl/Cmd+S
+= réécriture (handle) ou téléchargement (sinon). Suppression du tiroir dossier + des
+helpers folder (listHtsl/pickFolder/IndexedDB…). files.ts réécrit, main.ts adapté,
+index.html (bouton + drawer retiré), css nettoyé. Playground only. .docs/29 réécrit.

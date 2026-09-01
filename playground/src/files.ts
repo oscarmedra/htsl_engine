@@ -1,123 +1,83 @@
 /**
- * Local-folder editing via the File System Access API — open a clone of your
- * `.htsl` repo, read/edit/create files directly on disk, then commit with git.
- * No server, no token, works with private repos. Chromium only (feature-detected;
- * the caller falls back to import/download elsewhere).
+ * Open a single `.htsl` file into the editor and save it back — designed to work
+ * in EVERY browser, Brave included.
  *
- * The types for this API are still uneven across TS lib versions, so this module
- * uses light `any` casts at the boundary rather than shipping a full d.ts.
+ * Opening: use the File System Access picker when available (Chrome/Edge) so we
+ * get a handle for seamless write-back; otherwise fall back to a classic
+ * `<input type="file">` (Brave/Firefox/Safari). Saving: write back through the
+ * handle when we have one, else download the file. No server, no token.
+ *
+ * The File System Access types are uneven across TS lib versions, so the API
+ * boundary uses light `any` casts.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-type DirHandle = any; // FileSystemDirectoryHandle
-type FileHandle = any; // FileSystemFileHandle
 
-export interface HtslEntry {
-  path: string; // relative to the opened folder, e.g. "cours/matrices.htsl"
-  handle: FileHandle;
+export interface OpenedFile {
+  text: string;
+  name: string;
+  /** Present only when opened via the File System Access API (write-back capable). */
+  handle: any | null;
 }
 
-/** True when the browser supports opening a folder (Chromium). */
-export function fsSupported(): boolean {
-  return typeof (window as any).showDirectoryPicker === "function";
-}
-
-/** Prompt the user to choose a folder. Returns null if they cancel. */
-export async function pickFolder(): Promise<DirHandle | null> {
-  try {
-    return await (window as any).showDirectoryPicker({ mode: "readwrite" });
-  } catch {
-    return null; // user dismissed the picker
-  }
-}
-
-/** Ensure read/write permission on a handle (re-prompts if needed). */
-export async function ensurePermission(handle: any, mode: "read" | "readwrite" = "readwrite"): Promise<boolean> {
-  try {
-    const opts = { mode };
-    if ((await handle.queryPermission(opts)) === "granted") return true;
-    return (await handle.requestPermission(opts)) === "granted";
-  } catch {
-    return false;
-  }
-}
-
-const SKIP_DIRS = new Set([".git", "node_modules", "dist", ".cache"]);
-
-/** Recursively collect every `.htsl` file, sorted by relative path. */
-export async function listHtsl(dir: DirHandle, prefix = ""): Promise<HtslEntry[]> {
-  const out: HtslEntry[] = [];
-  for await (const entry of (dir as any).values()) {
-    const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (entry.kind === "file" && entry.name.toLowerCase().endsWith(".htsl")) {
-      out.push({ path: rel, handle: entry });
-    } else if (entry.kind === "directory" && !entry.name.startsWith(".") && !SKIP_DIRS.has(entry.name)) {
-      out.push(...(await listHtsl(entry, rel)));
+/**
+ * Ask the user for a `.htsl` file. Prefers the FS Access picker (write-back), and
+ * falls back to a classic file input if it's absent OR blocked (e.g. Brave).
+ * Resolves null if the user cancels.
+ */
+export async function openFilePicker(): Promise<OpenedFile | null> {
+  const picker = (window as any).showOpenFilePicker;
+  if (typeof picker === "function") {
+    try {
+      const [handle] = await picker({
+        types: [{ description: "HTSL", accept: { "text/plain": [".htsl", ".txt"] } }],
+      });
+      const file = await handle.getFile();
+      return { text: await file.text(), name: handle.name, handle };
+    } catch (e: any) {
+      if (e && e.name === "AbortError") return null; // user cancelled
+      // otherwise the API is blocked (Brave) → fall through to the classic input
     }
   }
-  out.sort((a, b) => a.path.localeCompare(b.path, "fr"));
-  return out;
+  return openViaInput();
 }
 
-export async function readFile(handle: FileHandle): Promise<string> {
-  const file = await handle.getFile();
-  return file.text();
+function openViaInput(): Promise<OpenedFile | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".htsl,.txt,text/plain";
+    input.style.display = "none";
+    input.addEventListener("change", async () => {
+      const f = input.files && input.files[0];
+      input.remove();
+      resolve(f ? { text: await f.text(), name: f.name, handle: null } : null);
+    });
+    document.body.appendChild(input);
+    input.click();
+  });
 }
 
-export async function writeFile(handle: FileHandle, text: string): Promise<void> {
+/** Whether a file opened via `openFilePicker` can be written back in place. */
+export function canWriteBack(handle: any): boolean {
+  return !!handle && typeof handle.createWritable === "function";
+}
+
+export async function writeBack(handle: any, text: string): Promise<void> {
   const writable = await handle.createWritable();
   await writable.write(text);
   await writable.close();
 }
 
-/** Create (or open) a `.htsl` file under `dir`, supporting `sub/dir/name.htsl`. */
-export async function createFile(dir: DirHandle, relPath: string): Promise<FileHandle> {
-  const clean = relPath.trim().replace(/^\/+/, "");
-  const name = clean.toLowerCase().endsWith(".htsl") ? clean : `${clean}.htsl`;
-  const parts = name.split("/").filter(Boolean);
-  let d = dir;
-  for (let i = 0; i < parts.length - 1; i++) d = await d.getDirectoryHandle(parts[i]!, { create: true });
-  return d.getFileHandle(parts[parts.length - 1]!, { create: true });
-}
-
-/* --- Persist the chosen folder so we can offer to reopen it after a reload --- */
-
-const DB_NAME = "htsl-fs";
-const STORE = "handles";
-const KEY = "lastDir";
-
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-export async function rememberFolder(handle: DirHandle): Promise<void> {
-  try {
-    const db = await openDb();
-    await new Promise<void>((resolve) => {
-      const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).put(handle, KEY);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => resolve();
-    });
-  } catch {
-    /* storage unavailable — reopen-on-reload just won't be offered */
-  }
-}
-
-export async function lastFolder(): Promise<DirHandle | null> {
-  try {
-    const db = await openDb();
-    return await new Promise((resolve) => {
-      const req = db.transaction(STORE).objectStore(STORE).get(KEY);
-      req.onsuccess = () => resolve(req.result ?? null);
-      req.onerror = () => resolve(null);
-    });
-  } catch {
-    return null;
-  }
+/** Save `text` as a download named `name` (the universal fallback, incl. Brave). */
+export function downloadText(name: string, text: string): void {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name && name.trim() ? name : "document.htsl";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
