@@ -86,3 +86,15 @@ Registre : `transition` (enum), `autoplay` (string), `loop` (boolean) documenté
 Tests `slides.test.ts` (10) : transition par défaut/inconnue, parsing des durées
 (ms/s/m/nu), bouton play conditionnel, flag loop. Vérifié en navigateur : fade
 animé, autoplay 1→3 puis boucle, ▶/⏸, pause sur nav manuelle ; 0 erreur.
+
+## Correctif : la transition ne « fait plus de bruit » à l'édition
+
+L'animation d'entrée était déclenchée par `.is-active`. Or, en éditant à
+l'intérieur d'un deck, chaque frappe re-rend le bloc → le morph retire `is-active`
+puis le runtime le remet → l'animation **rejouait à chaque frappe** (clignotement).
+Correctif : l'animation est désormais liée à une classe transitoire
+**`.htsl-slide-enter`** que le runtime (`slides-client.ts`) ajoute **uniquement lors
+d'un vrai changement de slide** (`go()` si l'index change, `tickAuto()`), jamais dans
+`applyState()`/l'hydratation. Résultat : éditer un deck ne rejoue plus la transition ;
+seules la navigation (flèches/boutons) et l'autoplay l'animent. Vérifié : 0 replay à
+la frappe, la navigation anime puis se stabilise (opacité 1). Core 349, codemirror 37.

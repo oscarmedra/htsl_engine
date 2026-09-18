@@ -937,3 +937,13 @@ place) puis retombe sur <input type=file> (Brave/Firefox/Safari, universel). Ctr
 = réécriture (handle) ou téléchargement (sinon). Suppression du tiroir dossier + des
 helpers folder (listHtsl/pickFolder/IndexedDB…). files.ts réécrit, main.ts adapté,
 index.html (bouton + drawer retiré), css nettoyé. Playground only. .docs/29 réécrit.
+
+## Slider : la transition ne rejoue plus à chaque frappe (« fait du bruit »)
+
+Bug : l'animation d'entrée était sur .is-active → éditer dans un deck re-rendait le
+bloc, le morph retirait/remettait is-active → l'animation rejouait à chaque frappe
+(clignotement). Fix : animation liée à une classe transitoire .htsl-slide-enter
+ajoutée par le runtime (slides-client) uniquement sur un vrai changement de slide
+(go() si l'index change, tickAuto) — jamais dans applyState/hydratation. CSS :
+règles d'animation sur .htsl-slide-enter (+ reduced-motion). Vérifié navigateur
+(0 replay en frappe, navigation anime + se stabilise). Core 349, codemirror 37.

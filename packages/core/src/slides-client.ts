@@ -110,6 +110,7 @@ function tickAuto(deck: HTMLElement, win: SlidesWindow): void {
     deck.setAttribute("data-htsl-index", String(i + 1));
   }
   applyState(deck);
+  animateEntrance(deck);
   if (s?.playing) restartCountdown(deck, s.ms);
 }
 
@@ -145,9 +146,21 @@ function applyState(deck: HTMLElement): void {
   );
 }
 
+/** Play the entrance animation on the active slide — only on a real slide change,
+ *  never on a re-render (so editing a deck doesn't re-trigger it every keystroke). */
+function animateEntrance(deck: HTMLElement): void {
+  const active = deck.querySelector<HTMLElement>(".htsl-deck-stage > section.is-active");
+  if (!active) return;
+  active.classList.remove("htsl-slide-enter");
+  void active.offsetWidth; // reflow → restart the CSS animation from scratch
+  active.classList.add("htsl-slide-enter");
+}
+
 function go(deck: HTMLElement, delta: number): void {
-  deck.setAttribute("data-htsl-index", String(Number(deck.getAttribute("data-htsl-index") ?? "0") + delta));
+  const before = deck.getAttribute("data-htsl-index");
+  deck.setAttribute("data-htsl-index", String(Number(before ?? "0") + delta));
   applyState(deck);
+  if (deck.getAttribute("data-htsl-index") !== before) animateEntrance(deck);
 }
 
 function toggleFullscreen(deck: HTMLElement): void {

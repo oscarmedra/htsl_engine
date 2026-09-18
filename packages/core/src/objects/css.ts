@@ -82,14 +82,17 @@ export const mathCss = `
 .htsl-deck-stage > section { display: none; }
 .htsl-deck:not(.htsl-deck--ready) .htsl-deck-stage > section:first-child { display: block; }
 .htsl-deck.htsl-deck--ready .htsl-deck-stage > section.is-active { display: block; }
-.htsl-deck[data-htsl-transition="fade"].htsl-deck--ready .htsl-deck-stage > section.is-active { animation: htsl-fade 0.35s ease; }
-.htsl-deck[data-htsl-transition="slide"].htsl-deck--ready .htsl-deck-stage > section.is-active { animation: htsl-slidein 0.35s ease; }
-.htsl-deck[data-htsl-transition="zoom"].htsl-deck--ready .htsl-deck-stage > section.is-active { animation: htsl-zoomin 0.32s ease; }
+/* The entrance animation runs ONLY on a real slide change: the runtime adds
+   .htsl-slide-enter to the newly-active slide (never on a re-render), so editing
+   inside a deck no longer replays the animation on every keystroke. */
+.htsl-deck[data-htsl-transition="fade"] .htsl-deck-stage > section.htsl-slide-enter { animation: htsl-fade 0.35s ease; }
+.htsl-deck[data-htsl-transition="slide"] .htsl-deck-stage > section.htsl-slide-enter { animation: htsl-slidein 0.35s ease; }
+.htsl-deck[data-htsl-transition="zoom"] .htsl-deck-stage > section.htsl-slide-enter { animation: htsl-zoomin 0.32s ease; }
 @keyframes htsl-fade { from { opacity: 0; } }
 @keyframes htsl-slidein { from { opacity: 0; transform: translateX(30px); } }
 @keyframes htsl-zoomin { from { opacity: 0; transform: scale(0.96); } }
 @media (prefers-reduced-motion: reduce) {
-  .htsl-deck--ready .htsl-deck-stage > section.is-active { animation: none !important; }
+  .htsl-deck-stage > section.htsl-slide-enter { animation: none !important; }
 }
 .htsl-deck-nav {
   display: flex; align-items: center; justify-content: center; gap: 0.9rem;
