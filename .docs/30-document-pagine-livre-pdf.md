@@ -117,3 +117,16 @@ courant. `@page { margin: 16mm }` ajouté à l'impression pour de vraies marges.
 Tests étendus : `paged-document.test.ts` passe de 10 à 14 (grid/header/footer doc +
 surcharge page + numéro dans le pied + alias grille/lignes + options inertes hors
 document). Core 360, codemirror 37 (400 au total).
+
+## Correctif : le texte repose sur les lignes du cadrillage
+
+Remarque utilisateur : avec `grid=lines`, le texte flottait entre les lignes (corps
+de texte à 25,6px d'interligne vs pas du cadrillage à 28px → dérive). Correctif :
+une variable partagée `--htsl-rule` (28px) pilote **à la fois** le dégradé du fond
+**et** la hauteur de ligne du contenu (`line-height: var(--htsl-rule)`), plus des
+marges de bloc d'un interligne (`margin: 0 0 var(--htsl-rule)`) et des titres sur
+2 interlignes (`line-height: calc(var(--htsl-rule) * 2)`). Résultat : le corps de
+texte repose sur les lignes et les paragraphes sont séparés d'un interligne pile
+(vérifié navigateur : line-height = margin = 28px). Limite subsistante : math /
+images / titres de hauteur atypique peuvent encore dériver — le cadrillage reste un
+guide, pas une contrainte stricte pour tout contenu.

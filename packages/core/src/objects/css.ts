@@ -489,18 +489,32 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   font: 500 0.82rem/1.3 system-ui, sans-serif; color: #6b7280;
 }
 .htsl-doc-num { font: 500 0.82rem/1 ui-monospace, monospace; color: #94a3b8; }
-/* Background grids (writing aid). Only print with "Background graphics" enabled. */
+/* Background grids (writing aid). Only print with "Background graphics" enabled.
+   The ruling step --htsl-rule is shared by the gradient AND the text line-height so
+   the body text rests on the lines (ruled/squares only). Headings take 2 rulings and
+   block margins are whole rulings, so the rhythm holds; math/images may still drift. */
+.htsl-doc-page--grid-lines .htsl-doc-content,
+.htsl-doc-page--grid-squares .htsl-doc-content { --htsl-rule: 28px; }
 .htsl-doc-page--grid-lines .htsl-doc-content {
-  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, #d5deee 27px, #d5deee 28px);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--htsl-rule) - 1px), #d5deee calc(var(--htsl-rule) - 1px), #d5deee var(--htsl-rule));
 }
 .htsl-doc-page--grid-squares .htsl-doc-content {
   background-image:
-    repeating-linear-gradient(to bottom, transparent 0, transparent 27px, #d5deee 27px, #d5deee 28px),
-    repeating-linear-gradient(to right, transparent 0, transparent 27px, #d5deee 27px, #d5deee 28px);
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--htsl-rule) - 1px), #d5deee calc(var(--htsl-rule) - 1px), #d5deee var(--htsl-rule)),
+    repeating-linear-gradient(to right, transparent 0, transparent calc(var(--htsl-rule) - 1px), #d5deee calc(var(--htsl-rule) - 1px), #d5deee var(--htsl-rule));
 }
 .htsl-doc-page--grid-dots .htsl-doc-content {
   background-image: radial-gradient(#c4d0e6 1.2px, transparent 1.4px);
   background-size: 22px 22px;
+}
+/* Lock the text rhythm to the ruling so text sits on the lines. */
+.htsl-doc-page--grid-lines .htsl-doc-content,
+.htsl-doc-page--grid-squares .htsl-doc-content { line-height: var(--htsl-rule); }
+.htsl-doc-page--grid-lines .htsl-doc-content > *,
+.htsl-doc-page--grid-squares .htsl-doc-content > * { margin-top: 0; margin-bottom: var(--htsl-rule); }
+.htsl-doc-page--grid-lines .htsl-doc-content :is(h1, h2, h3, h4, h5, h6),
+.htsl-doc-page--grid-squares .htsl-doc-content :is(h1, h2, h3, h4, h5, h6) {
+  line-height: calc(var(--htsl-rule) * 2);
 }
 @media print {
   @page { margin: 16mm; }
