@@ -88,3 +88,32 @@ codemirror 37 (395 au total), 0 erreur console.
   {@page: {h1:Chapitre 2} {p:La suite…}}
 }
 ```
+
+## Options en-tête / pied de page / cadrillage (héritées + surchargeables)
+
+Ajout d'options qui **ne vivent que dans le contexte `{@document}`** (comme
+slider/slide, `{@page}` se rend gracieusement seul mais sans ces options) :
+
+- Sur **`{@document}`** (défauts pour toutes les pages) : `grid`
+  (`none`|`lines`|`squares`|`dots`, alias `grille`→squares, `lignes`→lines),
+  `header` (en-tête courant), `footer` (pied courant).
+- Sur **`{@page}`** : mêmes attributs `grid`/`header`/`footer` qui **surchargent**
+  le document pour cette page.
+
+Rendu (`docPage`) : la page devient `header? + .htsl-doc-content + footer?`. Type
+`PageOptions` + helper `docGrid` (renderer.ts). Le numéro de page (`numbers`) migre
+du `::after` vers le **pied** (à droite, `.htsl-doc-num`). La feuille est un
+`flex column` avec `.htsl-doc-content { flex:1 }` → le pied colle en bas d'une page
+courte (vérifié : footerTop 1021 / 1123px A4).
+
+Cadrillage = fond CSS (`repeating-linear-gradient` / `radial-gradient` sur
+`.htsl-doc-content`). **Limites honnêtes** : (1) le cadrillage ne s'imprime que si
+« Graphiques d'arrière-plan » est coché ; (2) l'en-tête/pied s'affiche une fois par
+`{@page}` logique — si une page déborde sur 2 feuilles physiques, il ne se répète pas
+(les en-têtes par feuille physique exigeraient `@page`, sans HTML libre). Pour la
+rédaction d'un livre (une page écrite ≈ une feuille), c'est un vrai en-tête/pied
+courant. `@page { margin: 16mm }` ajouté à l'impression pour de vraies marges.
+
+Tests étendus : `paged-document.test.ts` passe de 10 à 14 (grid/header/footer doc +
+surcharge page + numéro dans le pied + alias grille/lignes + options inertes hors
+document). Core 360, codemirror 37 (400 au total).

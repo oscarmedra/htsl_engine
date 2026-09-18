@@ -206,7 +206,14 @@ class Renderer {
     const pages = node.children.filter(
       (c): c is ObjectNode => c.type === "object" && c.path === "document.page",
     );
-    const body = pages.map((p, i) => this.docPage(p, i + 1)).join("");
+    // Document-level defaults for every page (each page may override them).
+    const defaults: PageOptions = {
+      numbers,
+      grid: docGrid(node.attrs["grid"]),
+      header: node.attrs["header"],
+      footer: node.attrs["footer"],
+    };
+    const body = pages.map((p, i) => this.docPage(p, i + 1, defaults)).join("");
     const n = pages.length;
     const cls =
       `htsl-doc htsl-doc--${fmt}` +
@@ -234,14 +241,38 @@ class Renderer {
     );
   }
 
-  /** One document page. `n` = 1-based number (0 = standalone {@page}). */
-  private docPage(node: ObjectNode, n: number): string {
+  /** One document page. `n` = 1-based number (0 = standalone {@page}). `opts` are
+   *  the document defaults (header / footer / grid / numbers); a page attribute of
+   *  the same name overrides them. Header/footer/grid only live inside a document. */
+  private docPage(node: ObjectNode, n: number, opts?: PageOptions): string {
     const inner = node.children
       .filter((c) => c.type !== "comment")
       .map((c) => this.compact(c))
       .join("");
     const numAttr = n > 0 ? ` data-htsl-page="${n}"` : "";
-    return `<section class="htsl-doc-page"${numAttr}>${inner}</section>`;
+    // Standalone {@page} (no document context): a plain sheet, no header/footer/grid.
+    if (!opts) return `<section class="htsl-doc-page"${numAttr}>${inner}</section>`;
+
+    const grid = node.attrs["grid"] !== undefined ? docGrid(node.attrs["grid"]) : opts.grid;
+    const header = node.attrs["header"] ?? opts.header;
+    const footer = node.attrs["footer"] ?? opts.footer;
+    const gridCls = grid !== "none" ? ` htsl-doc-page--grid-${grid}` : "";
+    const headHtml = header ? `<div class="htsl-doc-head">${escapeHtml(header)}</div>` : "";
+    const showNum = opts.numbers && n > 0;
+    const footHtml =
+      footer || showNum
+        ? `<div class="htsl-doc-foot">` +
+          `<span class="htsl-doc-foot-text">${footer ? escapeHtml(footer) : ""}</span>` +
+          (showNum ? `<span class="htsl-doc-num">${n}</span>` : "") +
+          `</div>`
+        : "";
+    return (
+      `<section class="htsl-doc-page${gridCls}"${numAttr}>` +
+      headHtml +
+      `<div class="htsl-doc-content">${inner}</div>` +
+      footHtml +
+      `</section>`
+    );
   }
 
   /** Render one `{@slider.slide:…}` as a `<section>` (its children = slide body). */
@@ -732,6 +763,23 @@ const DOC_FORMATS = new Set(["a4", "letter", "a5"]);
 function docFormat(raw: string | undefined): string {
   const f = (raw ?? "").trim().toLowerCase();
   return DOC_FORMATS.has(f) ? f : "a4";
+}
+
+/** Per-page defaults inherited from `{@document}` (each page may override them). */
+interface PageOptions {
+  numbers: boolean;
+  grid: string;
+  header?: string | undefined;
+  footer?: string | undefined;
+}
+
+/** Grid overlay for `{@document}` / `{@page}`. Unknown → "none". `squares` = graph. */
+const DOC_GRIDS = new Set(["none", "lines", "squares", "dots"]);
+function docGrid(raw: string | undefined): string {
+  const g = (raw ?? "").trim().toLowerCase();
+  if (g === "grid" || g === "grille") return "squares";
+  if (g === "lignes") return "lines";
+  return DOC_GRIDS.has(g) ? g : "none";
 }
 
 /** Parse a numeric attribute, falling back to `def`. Used by {@numberline}. */

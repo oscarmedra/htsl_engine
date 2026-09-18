@@ -619,6 +619,16 @@ registerObject({
       values: ["flow", "book"],
       description: "flow : feuilles empilées (défaut). book : lecture comme un vrai livre, on feuillette page par page (flèches / clic).",
     },
+    {
+      name: "grid",
+      type: "enum",
+      required: false,
+      default: "none",
+      values: ["none", "lines", "squares", "dots"],
+      description: "Cadrillage de fond appliqué à toutes les pages (aide à l'écriture). lines : lignes. squares : quadrillage. dots : points. (Coche « Graphiques d'arrière-plan » pour l'imprimer.)",
+    },
+    { name: "header", type: "string", required: false, description: "En-tête courant répété en haut de chaque page." },
+    { name: "footer", type: "string", required: false, description: "Pied de page courant répété en bas de chaque page." },
   ],
   snippet: "{@document:\n  {@page: ${1:Contenu de la première page}}\n  {@page: ${2:Contenu de la deuxième page}}\n}",
   example:
@@ -630,8 +640,18 @@ registerObject({
   category: "document",
   aliases: ["page", "feuille"],
   description:
-    "Une page d'un {@document:…}. On y écrit librement ; à l'impression elle occupe une feuille, et son trop-plein continue automatiquement sur la feuille suivante.",
-  attrs: [],
+    "Une page d'un {@document:…}. On y écrit librement ; à l'impression elle occupe une feuille, et son trop-plein continue automatiquement sur la feuille suivante. grid/header/footer surchargent, pour cette page, les valeurs du document.",
+  attrs: [
+    {
+      name: "grid",
+      type: "enum",
+      required: false,
+      values: ["none", "lines", "squares", "dots"],
+      description: "Cadrillage de cette page seule (surcharge le document).",
+    },
+    { name: "header", type: "string", required: false, description: "En-tête de cette page seule (surcharge le document)." },
+    { name: "footer", type: "string", required: false, description: "Pied de cette page seule (surcharge le document)." },
+  ],
   snippet: "{@page: ${1:contenu de la page}}",
   example: "{@page: {h2:Titre} {p:Un paragraphe.}}",
 });

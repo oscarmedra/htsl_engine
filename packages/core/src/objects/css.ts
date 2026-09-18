@@ -461,6 +461,7 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 .htsl-doc-page {
   position: relative;
   box-sizing: border-box;
+  display: flex; flex-direction: column;
   width: min(210mm, 100%);
   min-height: 297mm;
   padding: 20mm;
@@ -473,13 +474,36 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 .htsl-doc--a5 .htsl-doc-page { width: min(148mm, 100%); min-height: 210mm; padding: 15mm; }
 .htsl-doc-page > :first-child { margin-top: 0; }
 .htsl-doc-page > :last-child { margin-bottom: 0; }
-/* Optional page number (bottom-centred). On screen only, one per logical page. */
-.htsl-doc--numbered .htsl-doc-page::after {
-  content: attr(data-htsl-page);
-  position: absolute; left: 0; right: 0; bottom: 8mm;
-  text-align: center; font: 500 0.85rem/1 ui-monospace, monospace; color: #94a3b8;
+/* Content area grows so the footer sticks to the bottom of a short page. */
+.htsl-doc-content { flex: 1 1 auto; }
+.htsl-doc-content > :first-child { margin-top: 0; }
+.htsl-doc-content > :last-child { margin-bottom: 0; }
+/* Running header / footer (repeated per page; the number sits at the footer end). */
+.htsl-doc-head {
+  margin-bottom: 6mm; padding-bottom: 2mm; border-bottom: 1px solid #e3e6ea;
+  font: 500 0.82rem/1.3 system-ui, sans-serif; color: #6b7280;
+}
+.htsl-doc-foot {
+  margin-top: 6mm; padding-top: 2mm; border-top: 1px solid #e3e6ea;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1em;
+  font: 500 0.82rem/1.3 system-ui, sans-serif; color: #6b7280;
+}
+.htsl-doc-num { font: 500 0.82rem/1 ui-monospace, monospace; color: #94a3b8; }
+/* Background grids (writing aid). Only print with "Background graphics" enabled. */
+.htsl-doc-page--grid-lines .htsl-doc-content {
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, #d5deee 27px, #d5deee 28px);
+}
+.htsl-doc-page--grid-squares .htsl-doc-content {
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0, transparent 27px, #d5deee 27px, #d5deee 28px),
+    repeating-linear-gradient(to right, transparent 0, transparent 27px, #d5deee 27px, #d5deee 28px);
+}
+.htsl-doc-page--grid-dots .htsl-doc-content {
+  background-image: radial-gradient(#c4d0e6 1.2px, transparent 1.4px);
+  background-size: 22px 22px;
 }
 @media print {
+  @page { margin: 16mm; }
   .htsl-doc { display: block; background: none; padding: 0; margin: 0; border-radius: 0; }
   .htsl-doc-pdf { display: none !important; }
   .htsl-doc-page {
@@ -488,7 +512,6 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
     break-before: page; break-inside: auto;
   }
   .htsl-doc-page:first-child { break-before: auto; }
-  .htsl-doc--numbered .htsl-doc-page::after { display: none; }
 }
 
 /* Book reader (@document[mode=book]) — leaf through pages one at a time on

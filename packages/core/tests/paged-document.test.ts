@@ -8,7 +8,9 @@ describe("{@document} — paged document for print / PDF", () => {
     expect(html).toContain("data-htsl-doc");
     const pages = [...html.matchAll(/class="htsl-doc-page"/g)];
     expect(pages).toHaveLength(2);
-    expect(html).toContain('<section class="htsl-doc-page" data-htsl-page="1"><p>un</p></section>');
+    expect(html).toContain(
+      '<section class="htsl-doc-page" data-htsl-page="1"><div class="htsl-doc-content"><p>un</p></div></section>',
+    );
   });
 
   it("includes a download-as-PDF button (wired by the trusted runtime)", () => {
@@ -44,10 +46,45 @@ describe("{@document} — paged document for print / PDF", () => {
     expect(compile("{@pages:{@page:x}}")).toContain('class="htsl-doc');
   });
 
-  it("renders a standalone {@page} with no number outside a document", () => {
-    const html = compile("{@page:{p:x}}");
+  it("renders a standalone {@page} with no number/header/footer/grid outside a document", () => {
+    const html = compile("{@page[grid=lines, header=X]:{p:x}}");
     expect(html).toContain('<section class="htsl-doc-page"><p>x</p></section>');
     expect(html).not.toContain("data-htsl-page");
+    expect(html).not.toContain("htsl-doc-head"); // options only live inside {@document}
+    expect(html).not.toContain("grid-lines");
+  });
+});
+
+describe("{@document} — grid, header & footer", () => {
+  it("applies a document-level grid, header and footer to every page", () => {
+    const html = compile(
+      '{@document[grid=lines, header="Mon livre", footer="© 2026"]:{@page:{p:a}}{@page:{p:b}}}',
+    );
+    expect([...html.matchAll(/htsl-doc-page--grid-lines/g)]).toHaveLength(2);
+    expect([...html.matchAll(/<div class="htsl-doc-head">Mon livre<\/div>/g)]).toHaveLength(2);
+    expect([...html.matchAll(/htsl-doc-foot-text">© 2026</g)]).toHaveLength(2);
+  });
+
+  it("lets a page override the document header/footer/grid", () => {
+    const html = compile(
+      '{@document[grid=lines, header="Défaut"]:{@page[header="Spécial", grid=dots]:{p:a}}}',
+    );
+    expect(html).toContain('<div class="htsl-doc-head">Spécial</div>');
+    expect(html).not.toContain("Défaut");
+    expect(html).toContain("htsl-doc-page--grid-dots");
+    expect(html).not.toContain("grid-lines");
+  });
+
+  it("puts the page number in the footer when numbers=true", () => {
+    const html = compile("{@document[numbers=true]:{@page:{p:a}}{@page:{p:b}}}");
+    const nums = [...html.matchAll(/htsl-doc-num">(\d+)</g)].map((m) => m[1]);
+    expect(nums).toEqual(["1", "2"]);
+  });
+
+  it("maps the grid aliases grille/lignes and rejects unknown values", () => {
+    expect(compile("{@document[grid=grille]:{@page:x}}")).toContain("grid-squares");
+    expect(compile("{@document[grid=lignes]:{@page:x}}")).toContain("grid-lines");
+    expect(compile("{@document[grid=zigzag]:{@page:x}}")).not.toContain("htsl-doc-page--grid");
   });
 });
 

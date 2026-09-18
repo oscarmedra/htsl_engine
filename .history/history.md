@@ -969,3 +969,16 @@ de la boîte d'impression (le rasterisation image écartée : texte flou). Véri
 navigateur (bouton→print, titre=titre, <details> ouvert pendant l'impression puis
 restauré, 0 erreur). registry/renderer/css/runtime/index + tests/paged-document.test.ts
 (10). Core 356, codemirror 37. .docs/30.
+
+## {@document}/{@page} : en-tête, pied de page & cadrillage
+
+Options ajoutées, effectives uniquement dans le contexte document (héritées de
+{@document}, surchargeables par {@page}) : grid (none|lines|squares|dots, alias
+grille/lignes), header, footer. docPage rend header? + .htsl-doc-content + footer? ;
+le numéro (numbers) migre dans le pied ; feuille en flex column → pied collé en bas.
+Cadrillage = fond CSS (n'imprime qu'avec « Graphiques d'arrière-plan »). En-tête/pied
+= une fois par page logique (pas de répétition sur une page qui déborde sur 2 feuilles
+— limite @page). @page{margin:16mm} en impression. Type PageOptions + helper docGrid.
+exactOptionalPropertyTypes → header?/footer?: string|undefined. Vérifié navigateur
+(page 1 défauts squares/en-tête/pied/n°1 ; page 2 surcharge lines/en-tête/n°2 ; pied
+en bas ; 0 erreur). Tests 10→14. Core 360, codemirror 37 (400). .docs/30 complété.
