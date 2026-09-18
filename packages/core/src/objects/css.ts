@@ -439,4 +439,90 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 .htsl-ol-roman > li::before { content: "(" counter(htsl-ol, lower-roman) ") "; }
 .htsl-ol-roman-upper > li::before { content: "(" counter(htsl-ol, upper-roman) ") "; }
 .htsl-ol-paren > li::before { content: counter(htsl-ol, decimal) ") "; }
+
+/* Paged document (@document > @page) — sheets on screen, real pages in print.
+   On screen every page is a white sheet that GROWS with its content (nothing is
+   clipped). In print each page starts on a fresh sheet and any overflow flows
+   onto the next sheet automatically (the browser's own pagination). */
+.htsl-doc {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 1.2rem;
+  background: #eef1f5; padding: 1.4rem; border-radius: 10px; margin: 1em 0;
+}
+.htsl-doc-pdf {
+  position: absolute; top: 0.7rem; right: 0.7rem; z-index: 2;
+  cursor: pointer; border: 1px solid #cbd0d8; background: #fff; color: #1f2937;
+  padding: 0.4em 0.75em; border-radius: 7px;
+  font: 600 0.85rem/1 system-ui, sans-serif;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+.htsl-doc-pdf:hover { background: #eef2ff; border-color: #3b5bdb; }
+.htsl-doc-pdf:active { transform: translateY(1px); }
+.htsl-doc-page {
+  position: relative;
+  box-sizing: border-box;
+  width: min(210mm, 100%);
+  min-height: 297mm;
+  padding: 20mm;
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.16), 0 8px 24px rgba(15, 23, 42, 0.1);
+  border-radius: 2px;
+}
+.htsl-doc--letter .htsl-doc-page { width: min(216mm, 100%); min-height: 279mm; }
+.htsl-doc--a5 .htsl-doc-page { width: min(148mm, 100%); min-height: 210mm; padding: 15mm; }
+.htsl-doc-page > :first-child { margin-top: 0; }
+.htsl-doc-page > :last-child { margin-bottom: 0; }
+/* Optional page number (bottom-centred). On screen only, one per logical page. */
+.htsl-doc--numbered .htsl-doc-page::after {
+  content: attr(data-htsl-page);
+  position: absolute; left: 0; right: 0; bottom: 8mm;
+  text-align: center; font: 500 0.85rem/1 ui-monospace, monospace; color: #94a3b8;
+}
+@media print {
+  .htsl-doc { display: block; background: none; padding: 0; margin: 0; border-radius: 0; }
+  .htsl-doc-pdf { display: none !important; }
+  .htsl-doc-page {
+    width: auto; min-height: 0; padding: 0; margin: 0;
+    background: none; box-shadow: none; border-radius: 0;
+    break-before: page; break-inside: auto;
+  }
+  .htsl-doc-page:first-child { break-before: auto; }
+  .htsl-doc--numbered .htsl-doc-page::after { display: none; }
+}
+
+/* Book reader (@document[mode=book]) — leaf through pages one at a time on
+   screen, like a real book. Print is unaffected (all pages shown, one per sheet). */
+.htsl-doc--book {
+  background: #e8e2d6; gap: 0.9rem; padding: 1.6rem 1rem;
+}
+.htsl-doc--book:focus { outline: none; }
+.htsl-doc--book:focus-visible { outline: 2px solid #3b5bdb; outline-offset: 3px; }
+.htsl-doc--book .htsl-book-stage { perspective: 2000px; width: min(210mm, 100%); }
+.htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: none; margin: 0 auto; }
+.htsl-doc--book .htsl-book-stage > .htsl-doc-page.is-current { display: block; }
+/* Before hydration, show the first page so the reader is never blank. */
+.htsl-doc--book:not([data-htsl-book-ready]) .htsl-book-stage > .htsl-doc-page:first-child { display: block; }
+.htsl-book-turn-next { transform-origin: left center; animation: htsl-book-turn-fwd 0.45s ease; }
+.htsl-book-turn-prev { transform-origin: right center; animation: htsl-book-turn-bwd 0.45s ease; }
+@keyframes htsl-book-turn-fwd { from { transform: rotateY(-92deg); opacity: 0.25; } to { transform: rotateY(0); opacity: 1; } }
+@keyframes htsl-book-turn-bwd { from { transform: rotateY(92deg); opacity: 0.25; } to { transform: rotateY(0); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .htsl-book-turn-next, .htsl-book-turn-prev { animation: none; }
+}
+.htsl-book-nav { display: flex; align-items: center; gap: 0.6rem; }
+.htsl-book-btn {
+  cursor: pointer; border: 1px solid #cbd0d8; background: #fff; color: #1f2937;
+  width: 2.2rem; height: 2.2rem; border-radius: 999px; font-size: 1.2rem; line-height: 1;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+.htsl-book-btn:hover { background: #eef2ff; border-color: #3b5bdb; }
+.htsl-book-btn:disabled { opacity: 0.4; cursor: default; }
+.htsl-book-counter { font: 500 0.85rem/1 ui-monospace, monospace; color: #4b5563; min-width: 3.2rem; text-align: center; }
+@media print {
+  .htsl-doc--book { background: none; padding: 0; }
+  .htsl-doc--book .htsl-book-nav { display: none; }
+  .htsl-doc--book .htsl-book-stage { perspective: none; width: auto; }
+  .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: block !important; animation: none !important; }
+}
 `.trim();

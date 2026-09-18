@@ -36,6 +36,7 @@ export { hydrateScenes, pendingScenes, purgeScenes } from "./scene-client.js";
 export type { PlotlyLike } from "./scene-client.js";
 export { hydrateThree, pendingThree, purgeThree } from "./three-client.js";
 export { hydrateSlides, pendingSlides, purgeSlides } from "./slides-client.js";
+export { hydrateBooks, pendingBooks, purgeBooks } from "./book-client.js";
 export { hydrateTabs, pendingTabs, purgeTabs } from "./tabs-client.js";
 export { hydrateQuiz, pendingQuiz, purgeQuiz } from "./quiz-client.js";
 export { hydrateParams, purgeParams } from "./param-client.js";

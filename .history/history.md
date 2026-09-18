@@ -947,3 +947,25 @@ ajoutée par le runtime (slides-client) uniquement sur un vrai changement de sli
 (go() si l'index change, tickAuto) — jamais dans applyState/hydratation. CSS :
 règles d'animation sur .htsl-slide-enter (+ reduced-motion). Vérifié navigateur
 (0 replay en frappe, navigation anime + se stabilise). Core 349, codemirror 37.
+
+## Document paginé `{@document}` / `{@page}` — livre & PDF propre
+
+Nouveau couple parent/enfant (comme slider/slide) pour rédiger des documents longs /
+livres et imprimer proprement. `{@document}` (alias livre/pages ; attrs format
+a4|letter|a5, numbers, mode flow|book) contient des `{@page}` (alias page/feuille,
+numérotées). Écran : feuilles blanches en min-height qui grandissent (rien coupé).
+Impression : chaque page démarre sur une feuille neuve (break-before:page) et son
+débordement continue tout seul sur la suivante (pagination native = la « duplication
+en deux » demandée, zéro JS). Correctif du vrai bug « composants cachés en PDF » :
+runtime.ts wirePrint écoute beforeprint → ouvre tous les <details> repliés (guided
+steps, solutions, reveal) puis les restaure sur afterprint (CSS seul insuffisant :
+shadow DOM). Mode livre (book-client.ts, calqué slides-client) : feuilletage page à
+page, flèches/←→, compteur, tourne-page 3D via classe transitoire posée seulement sur
+vrai changement (pas de bruit à la frappe), reduced-motion respecté ; impression
+montre toutes les pages. Bouton « ⬇ PDF » dans le composant (data-htsl-pdf) câblé par
+wirePrint : fixe le titre (nom du PDF) et print() du document seul. Rappel navigateur :
+pas d'écriture silencieuse de PDF possible → vrai PDF via « Enregistrer au format PDF »
+de la boîte d'impression (le rasterisation image écartée : texte flou). Vérifié
+navigateur (bouton→print, titre=titre, <details> ouvert pendant l'impression puis
+restauré, 0 erreur). registry/renderer/css/runtime/index + tests/paged-document.test.ts
+(10). Core 356, codemirror 37. .docs/30.

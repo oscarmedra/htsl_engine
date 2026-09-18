@@ -22,6 +22,7 @@
 import { hydrateScenes, pendingScenes, purgeScenes, type PlotlyLike } from "./scene-client.js";
 import { hydrateThree, pendingThree, purgeThree, type ThreeNS } from "./three-client.js";
 import { hydrateSlides, purgeSlides } from "./slides-client.js";
+import { hydrateBooks } from "./book-client.js";
 import { hydrateTabs, purgeTabs } from "./tabs-client.js";
 import { hydrateQuiz, purgeQuiz } from "./quiz-client.js";
 import { hydrateParams, purgeParams } from "./param-client.js";
@@ -40,7 +41,11 @@ interface RuntimeWindow {
   MutationObserver?: typeof MutationObserver;
   requestAnimationFrame?: (cb: (t: number) => void) => number;
   cancelAnimationFrame?: (id: number) => void;
+  addEventListener?: (type: string, cb: (e: Event) => void) => void;
+  focus?: () => void;
+  print?: () => void;
   __htslDeps?: Map<string, Promise<void>>;
+  __htslPrintWired?: boolean;
 }
 
 export interface HtslRuntime {
@@ -53,6 +58,44 @@ function targetWindow(win?: RuntimeWindow): RuntimeWindow | undefined {
   if (win) return win;
   const g = globalThis as unknown as { window?: RuntimeWindow };
   return g.window;
+}
+
+/**
+ * Reveal collapsed content for printing / PDF export. Interactive components use
+ * native `<details>` (guided steps, exercise solutions, {@reveal}…): when closed
+ * their body is hidden by the browser and would be MISSING from the PDF. Before
+ * printing we force every closed `<details>` open, and restore them afterwards.
+ * Wired once per window; safe in an iframe (the frame's own print events fire).
+ */
+function wirePrint(w: RuntimeWindow): void {
+  if (w.__htslPrintWired || typeof w.addEventListener !== "function") return;
+  w.__htslPrintWired = true;
+  const opened = new Set<Element>();
+  w.addEventListener("beforeprint", () => {
+    opened.clear();
+    w.document.querySelectorAll("details:not([open])").forEach((d) => {
+      d.setAttribute("open", "");
+      opened.add(d);
+    });
+  });
+  w.addEventListener("afterprint", () => {
+    opened.forEach((d) => {
+      if (d.isConnected) d.removeAttribute("open");
+    });
+    opened.clear();
+  });
+
+  // "Download as PDF" button inside {@document}: print only the document, giving
+  // a real vector PDF via the browser's "Save as PDF" (no silent write exists).
+  w.addEventListener("click", (e) => {
+    const btn = (e.target as Element | null)?.closest?.("[data-htsl-pdf]");
+    if (!btn) return;
+    const doc = btn.closest(".htsl-doc");
+    const heading = doc?.querySelector("h1, h2, h3")?.textContent?.trim();
+    if (heading) w.document.title = heading.slice(0, 60);
+    w.focus?.();
+    w.print?.();
+  });
 }
 
 /**
@@ -94,10 +137,13 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
   const w = targetWindow(win);
   if (!w?.document) return 0;
 
+  wirePrint(w);
+
   let drawn = 0;
 
   // Slide decks + tabs (pure DOM, no external dependency → always hydrated, cheap).
   drawn += hydrateSlides(root, w);
+  drawn += hydrateBooks(root, w);
   drawn += hydrateTabs(root, w);
   drawn += hydrateQuiz(root, w);
   drawn += hydrateParams(root, w);

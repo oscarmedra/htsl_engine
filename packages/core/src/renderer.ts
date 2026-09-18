@@ -131,6 +131,8 @@ class Renderer {
     if (node.path === "panel") return this.panel(node);
     if (node.path === "stepper") return this.stepper(node);
     if (node.path === "stepper.step") return this.step(node, 0);
+    if (node.path === "document") return this.pagedDoc(node);
+    if (node.path === "document.page") return this.docPage(node, 0);
     if (node.path === "columns") return this.columns(node);
     if (node.path === "columns.col") return `<div class="htsl-col">${this.childrenHtml(node)}</div>`;
     if (node.path === "deflist") return this.deflist(node);
@@ -191,6 +193,55 @@ class Renderer {
       `</div>` +
       `</div>`
     );
+  }
+
+  /** Paged document ({@document: {@page:…}}) for clean print / PDF. On screen
+   *  each page is a visible sheet that GROWS with its content (nothing clipped);
+   *  in print each page starts on a fresh sheet and overflow flows onto the next
+   *  sheet automatically — the browser's own pagination. `numbers` adds a footer. */
+  private pagedDoc(node: ObjectNode): string {
+    const fmt = docFormat(node.attrs["format"]);
+    const numbers = node.attrs["numbers"] !== undefined && node.attrs["numbers"] !== "false";
+    const book = node.attrs["mode"] === "book";
+    const pages = node.children.filter(
+      (c): c is ObjectNode => c.type === "object" && c.path === "document.page",
+    );
+    const body = pages.map((p, i) => this.docPage(p, i + 1)).join("");
+    const n = pages.length;
+    const cls =
+      `htsl-doc htsl-doc--${fmt}` +
+      (numbers ? " htsl-doc--numbered" : "") +
+      (book ? " htsl-doc--book" : "");
+    // A "download as PDF" button, wired by the trusted runtime to print ONLY the
+    // document (a real vector PDF via the browser's "Save as PDF"). Hidden in print.
+    const pdfBtn =
+      `<button type="button" class="htsl-doc-pdf" data-htsl-pdf ` +
+      `title="Télécharger en PDF (choisir « Enregistrer au format PDF » dans la boîte d'impression)" ` +
+      `aria-label="Télécharger en PDF">↓ PDF</button>`;
+    // Flow mode: a plain stack of sheets. Book mode: a page-flip reader hydrated
+    // by the trusted runtime (state in data-htsl-book-index, morph-safe).
+    if (!book) return `<div class="${cls}" data-htsl-doc>${pdfBtn}${body}</div>`;
+    return (
+      `<div class="${cls}" data-htsl-doc data-htsl-book data-htsl-book-index="0" tabindex="0">` +
+      pdfBtn +
+      `<div class="htsl-book-stage">${body}</div>` +
+      `<div class="htsl-book-nav">` +
+      `<button type="button" class="htsl-book-btn htsl-book-prev" aria-label="Page précédente">&#8249;</button>` +
+      `<span class="htsl-book-counter">${n ? 1 : 0} / ${n}</span>` +
+      `<button type="button" class="htsl-book-btn htsl-book-next" aria-label="Page suivante">&#8250;</button>` +
+      `</div>` +
+      `</div>`
+    );
+  }
+
+  /** One document page. `n` = 1-based number (0 = standalone {@page}). */
+  private docPage(node: ObjectNode, n: number): string {
+    const inner = node.children
+      .filter((c) => c.type !== "comment")
+      .map((c) => this.compact(c))
+      .join("");
+    const numAttr = n > 0 ? ` data-htsl-page="${n}"` : "";
+    return `<section class="htsl-doc-page"${numAttr}>${inner}</section>`;
   }
 
   /** Render one `{@slider.slide:…}` as a `<section>` (its children = slide body). */
@@ -674,6 +725,13 @@ const PANEL_COLORS = new Set(["slate", "indigo", "blue", "green", "red", "amber"
 function panelColor(raw: string | undefined): string {
   const c = (raw ?? "").trim().toLowerCase();
   return PANEL_COLORS.has(c) ? c : "slate";
+}
+
+/** Sheet format for `{@document[format=…]}`. Unknown → "a4". */
+const DOC_FORMATS = new Set(["a4", "letter", "a5"]);
+function docFormat(raw: string | undefined): string {
+  const f = (raw ?? "").trim().toLowerCase();
+  return DOC_FORMATS.has(f) ? f : "a4";
 }
 
 /** Parse a numeric attribute, falling back to `def`. Used by {@numberline}. */

@@ -593,6 +593,49 @@ registerObject({
   example: "{@step[title=\"Calculer\"]: {@mtb: x = \\frac{-b}{2a}}}",
 });
 
+// --- paged document for print / PDF (document > page) ---
+registerObject({
+  path: "document",
+  contentModel: "html",
+  category: "document",
+  aliases: ["livre", "pages"],
+  description:
+    "Document paginé pour l'impression / PDF : contient des {@page:…}. Chaque page démarre sur une nouvelle feuille à l'impression ; si son contenu déborde, il se poursuit tout seul sur la feuille suivante (rien n'est coupé). Idéal pour rédiger un livre.",
+  attrs: [
+    {
+      name: "format",
+      type: "enum",
+      required: false,
+      default: "a4",
+      values: ["a4", "letter", "a5"],
+      description: "Format de la feuille à l'écran (défaut : a4).",
+    },
+    { name: "numbers", type: "boolean", required: false, default: "false", description: "Numéroter les pages (bas de page)." },
+    {
+      name: "mode",
+      type: "enum",
+      required: false,
+      default: "flow",
+      values: ["flow", "book"],
+      description: "flow : feuilles empilées (défaut). book : lecture comme un vrai livre, on feuillette page par page (flèches / clic).",
+    },
+  ],
+  snippet: "{@document:\n  {@page: ${1:Contenu de la première page}}\n  {@page: ${2:Contenu de la deuxième page}}\n}",
+  example:
+    "{@document[numbers=true]:\n  {@page: {h1:Chapitre 1} {p:Le début de l'histoire…}}\n  {@page: {h1:Chapitre 2} {p:La suite…}}\n}",
+});
+registerObject({
+  path: "document.page",
+  contentModel: "html",
+  category: "document",
+  aliases: ["page", "feuille"],
+  description:
+    "Une page d'un {@document:…}. On y écrit librement ; à l'impression elle occupe une feuille, et son trop-plein continue automatiquement sur la feuille suivante.",
+  attrs: [],
+  snippet: "{@page: ${1:contenu de la page}}",
+  example: "{@page: {h2:Titre} {p:Un paragraphe.}}",
+});
+
 // --- layout & inline touches (columns / deflist / timeline / mark / badge) ---
 registerObject({
   path: "columns",
