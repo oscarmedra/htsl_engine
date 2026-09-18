@@ -130,3 +130,15 @@ texte repose sur les lignes et les paragraphes sont séparés d'un interligne pi
 (vérifié navigateur : line-height = margin = 28px). Limite subsistante : math /
 images / titres de hauteur atypique peuvent encore dériver — le cadrillage reste un
 guide, pas une contrainte stricte pour tout contenu.
+
+## Correctif mode livre : pied ancré en bas (révélé en testant le cadrillage)
+
+En testant `grid` en `mode=book`, un bug est apparu : la règle
+`.htsl-doc--book …-page.is-current { display: block }` **écrasait** le
+`display: flex` de base de `.htsl-doc-page` → le contenu ne s'étirait plus et le pied
+(+ numéro) remontait sous le texte au lieu du bas de la feuille (footerTop 264 au lieu
+de ~1025). En mode flow le problème n'existait pas (pas d'écrasement). Correctif :
+la page courante (et le fallback pré-hydratation) passent en `display: flex`, ce qui
+préserve la colonne flex → pied ancré en bas (vérifié : pageH 1123, footerTop 1025,
+marge 76px = padding 20mm), cadrillage sur toute la hauteur. (NB : bug des backticks
+dans un commentaire CSS rencontré une 4e fois lors de ce correctif, corrigé.)

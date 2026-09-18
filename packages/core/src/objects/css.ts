@@ -537,9 +537,11 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 .htsl-doc--book:focus-visible { outline: 2px solid #3b5bdb; outline-offset: 3px; }
 .htsl-doc--book .htsl-book-stage { perspective: 2000px; width: min(210mm, 100%); }
 .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: none; margin: 0 auto; }
-.htsl-doc--book .htsl-book-stage > .htsl-doc-page.is-current { display: block; }
+/* Keep the flex column (base .htsl-doc-page) so the footer stays pinned to the
+   bottom of the sheet — a plain block here would let it float under the text. */
+.htsl-doc--book .htsl-book-stage > .htsl-doc-page.is-current { display: flex; }
 /* Before hydration, show the first page so the reader is never blank. */
-.htsl-doc--book:not([data-htsl-book-ready]) .htsl-book-stage > .htsl-doc-page:first-child { display: block; }
+.htsl-doc--book:not([data-htsl-book-ready]) .htsl-book-stage > .htsl-doc-page:first-child { display: flex; }
 .htsl-book-turn-next { transform-origin: left center; animation: htsl-book-turn-fwd 0.45s ease; }
 .htsl-book-turn-prev { transform-origin: right center; animation: htsl-book-turn-bwd 0.45s ease; }
 @keyframes htsl-book-turn-fwd { from { transform: rotateY(-92deg); opacity: 0.25; } to { transform: rotateY(0); opacity: 1; } }
