@@ -982,3 +982,12 @@ Cadrillage = fond CSS (n'imprime qu'avec « Graphiques d'arrière-plan »). En-t
 exactOptionalPropertyTypes → header?/footer?: string|undefined. Vérifié navigateur
 (page 1 défauts squares/en-tête/pied/n°1 ; page 2 surcharge lines/en-tête/n°2 ; pied
 en bas ; 0 erreur). Tests 10→14. Core 360, codemirror 37 (400). .docs/30 complété.
+
+## Impression : la grille remplit toute la feuille du PDF
+
+Bug : à l'export PDF le cadrillage s'arrêtait après le texte (min-height:0 en print
+réduisait la feuille au contenu). Fix : @page{margin:0} (padding 20mm de la page =
+marge), .htsl-doc-page width:100% + min-height par format ~1mm sous la feuille (296/
+278/209mm) → contenu flex + grille jusqu'en bas, sans feuille blanche parasite. Mode
+livre en print : page courante display:flex !important (au lieu de block). Vérifié
+écran (A4 1123px, contenu flex 879px). Core 360, codemirror 37 (400). .docs/30.

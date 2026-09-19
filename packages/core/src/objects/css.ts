@@ -517,15 +517,23 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   line-height: calc(var(--htsl-rule) * 2);
 }
 @media print {
-  @page { margin: 16mm; }
+  /* Sheet edges = paper edges; each page's own padding (20mm) is the margin. */
+  @page { margin: 0; }
   .htsl-doc { display: block; background: none; padding: 0; margin: 0; border-radius: 0; }
   .htsl-doc-pdf { display: none !important; }
+  /* Each page fills one physical sheet, so the flex content and the grid reach the
+     bottom edge. min-height comes from the per-format screen rules (297/279/210mm);
+     padding (the text margin) is kept from those rules too. */
   .htsl-doc-page {
-    width: auto; min-height: 0; padding: 0; margin: 0;
-    background: none; box-shadow: none; border-radius: 0;
+    width: 100%; margin: 0;
+    background: #fff; box-shadow: none; border-radius: 0;
     break-before: page; break-inside: auto;
   }
   .htsl-doc-page:first-child { break-before: auto; }
+  /* Fill the sheet but stay ~1mm under it so a full page never spills a blank one. */
+  .htsl-doc-page { min-height: 296mm; }
+  .htsl-doc--letter .htsl-doc-page { min-height: 278mm; }
+  .htsl-doc--a5 .htsl-doc-page { min-height: 209mm; }
 }
 
 /* Book reader (@document[mode=book]) — leaf through pages one at a time on
@@ -562,6 +570,6 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   .htsl-doc--book { background: none; padding: 0; }
   .htsl-doc--book .htsl-book-nav { display: none; }
   .htsl-doc--book .htsl-book-stage { perspective: none; width: auto; }
-  .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: block !important; animation: none !important; }
+  .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: flex !important; animation: none !important; }
 }
 `.trim();

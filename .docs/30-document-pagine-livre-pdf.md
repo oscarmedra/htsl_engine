@@ -142,3 +142,17 @@ la page courante (et le fallback pré-hydratation) passent en `display: flex`, c
 préserve la colonne flex → pied ancré en bas (vérifié : pageH 1123, footerTop 1025,
 marge 76px = padding 20mm), cadrillage sur toute la hauteur. (NB : bug des backticks
 dans un commentaire CSS rencontré une 4e fois lors de ce correctif, corrigé.)
+
+## Correctif impression : la grille remplit toute la feuille du PDF
+
+À l'export PDF, le cadrillage s'arrêtait après le texte (le reste de la feuille
+restait blanc) alors qu'à l'écran il remplissait la page. Cause : le bloc `@media
+print` mettait `.htsl-doc-page { min-height: 0; padding: 0 }` → la feuille se
+réduisait à la hauteur du contenu (le flex ne pouvait plus s'étirer). Correctif :
+`@page { margin: 0 }` (les bords de la feuille = bords du papier, le padding 20mm de
+la page fait la marge de texte) + en impression `.htsl-doc-page { width: 100% }` et
+une `min-height` par format ~1mm sous la feuille (296mm A4 / 278 letter / 209 a5) pour
+que le contenu flex et la grille atteignent le bas sans déborder sur une feuille
+blanche. Mode livre : la page courante passe en `display: flex !important` à
+l'impression (au lieu de block) pour le même remplissage. Vérifié à l'écran : page
+1123px (A4), contenu flex étiré à 879px, grille jusqu'en bas.
