@@ -26,6 +26,11 @@ const DYNAMIC: ReadonlyArray<readonly [string, string]> = [
   ["htsl-three", "data-htsl-three"],
 ];
 
+/** Live navigation state kept across re-renders: the renderer always emits index
+ *  0, so without this, editing a slide / a book page beyond the first would snap
+ *  the preview back to the first one. The runtime clamps it if it goes stale. */
+const STATE_ATTRS = ["data-htsl-book-index", "data-htsl-index"] as const;
+
 /** The iframe window, as the runtime's loadDependency/hydrate expect it. */
 type RuntimeWin = Parameters<HtslRuntime["hydrate"]>[1];
 
@@ -157,6 +162,12 @@ export class FrameRenderer {
         const fh = from.getAttribute("data-htsl-hash");
         const th = to.getAttribute("data-htsl-hash");
         if (fh !== null && fh === th) return false; // identical block → keep as-is
+        // Carry live navigation state (current slide / book page) onto the new node
+        // so editing a page other than the first keeps the preview on that page.
+        for (const attr of STATE_ATTRS) {
+          const live = from.getAttribute(attr);
+          if (live !== null && to.hasAttribute(attr)) to.setAttribute(attr, live);
+        }
         // Same dynamic slot (scene→scene, three→three): update only the data and
         // keep the element; the runtime redraws it (Plotly.react / Three rebuild).
         for (const [cls, attr] of DYNAMIC) {

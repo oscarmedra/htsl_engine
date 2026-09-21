@@ -1039,3 +1039,11 @@ Le PDF sortait toujours en A4 (le CSS dimensionne l'élément page, pas la feuil
 non pilotable par style inline). Fix : le renderer émet <style>@media print{@page{size:
 <w>mm <h>mm;margin:0}}</style> selon le format → PDF en A3/diapo paysage/etc. (après le
 @page{size:A4} du playground → l'emporte). Tests 17→18 (405).
+
+## Édition mode livre : reste sur la page courante (morph préserve l'index)
+
+En mode=book, éditer une page > 1 ramenait l'aperçu page 1 (le renderer émet toujours
+data-htsl-book-index=0, écrasé par le morph). Fix playground frame.ts : onBeforeElUpdated
+reporte STATE_ATTRS (data-htsl-book-index, data-htsl-index) de l'élément vivant vers le
+nouveau nœud → position livre/slide préservée à travers les re-rendus. Vérifié (édition
+page 2 reste page 2).

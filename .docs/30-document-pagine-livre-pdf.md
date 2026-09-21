@@ -224,3 +224,15 @@ correspondant au format. Le PDF sort donc en A3, en diapo paysage, etc. (émis a
 feuille du PDF ; plusieurs documents de formats différents dans une même impression
 partagent la dernière règle (cas rare). Tests 17→18 (405). Choisir « Marges : par
 défaut » dans la boîte d'impression pour respecter le format.
+
+## Correctif édition : le mode livre ne revient plus page 1 en modifiant une autre page
+
+Souci : en `mode=book`, éditer une page > 1 re-rendait le bloc du document ; le
+renderer émet toujours `data-htsl-book-index="0"`, donc le morph écrasait la position
+courante → l'aperçu revenait page 1, impossible de voir la page en cours d'édition.
+Fix côté playground (`frame.ts`) : dans le `onBeforeElUpdated` de morphdom, on reporte
+les attributs d'état de navigation (`STATE_ATTRS` = data-htsl-book-index,
+data-htsl-index) de l'élément vivant vers le nouveau nœud avant le morph → la page (ou
+la slide `{@slider}`) courante est préservée à travers les re-rendus (le runtime la
+borne si elle devient hors limites). Vérifié : édition de la page 2 → l'aperçu reste
+page 2.
