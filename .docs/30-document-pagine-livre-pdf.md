@@ -156,3 +156,25 @@ que le contenu flex et la grille atteignent le bas sans déborder sur une feuill
 blanche. Mode livre : la page courante passe en `display: flex !important` à
 l'impression (au lieu de block) pour le même remplissage. Vérifié à l'écran : page
 1123px (A4), contenu flex étiré à 879px, grille jusqu'en bas.
+
+## Correctif : un document d'une page ne fait plus deux pages en PDF + alerte de débordement
+
+Bug : un `{@document}` d'une seule `{@page}` sortait sur **deux** feuilles en PDF.
+Cause = conflit de géométrie d'impression. Le playground (`frame.ts`) imposait
+`@page { margin: 1.8cm 2cm }` → zone imprimable ~261mm, alors que la page était réglée
+à ~296mm pour remplir la feuille → débordement systématique sur une 2ᵉ feuille.
+
+Correctif (les deux réglages s'accordent) : `frame.ts` passe à `@page { margin: 0 }`
+et remet les marges des documents ordinaires dans `body { padding: 1.8cm 2cm }` (même
+rendu). Le moteur (`css.ts`) neutralise ce padding pour les vrais documents via
+`body:has(.htsl-doc) { margin: 0; padding: 0 }` (le document gère ses marges par le
+padding 20mm de la page). Résultat : zone imprimable = 297mm, page ~296mm → **une page
+tient sur une feuille**, la grille remplit toujours.
+
+Nouvelle fonctionnalité (demande utilisateur) : **alerte de débordement**. Le runtime
+(`markPageOverflow`, appelé dans `hydrate`) compare `offsetHeight` de chaque
+`.htsl-doc-page` à son `min-height` (= une feuille) ; s'il dépasse, il pose la classe
+`.htsl-doc-page--overflow` → petit badge rouge « ⚠ Le contenu déborde de la page »
+(CSS `::before`, absolu, `pointer-events:none`). Purement informatif à l'écran,
+non bloquant, masqué à l'impression. Vérifié : page courte 1123px = pas d'alerte ;
+page longue 2733px = alerte. Core 360, codemirror 37 (400).

@@ -42,8 +42,8 @@ const BASE_CSS = `
   .htsl-hover { box-shadow: 0 0 0 2px #93c5fd; border-radius: 4px; cursor: pointer; }
   /* PDF export (print): A4 page sized for mathematical documents. */
   @media print {
-    @page { size: A4; margin: 1.8cm 2cm; }
-    body { padding: 0; width: auto; font-size: 11.5pt; line-height: 1.55; }
+    @page { size: A4; margin: 0; }
+    body { padding: 1.8cm 2cm; width: auto; font-size: 11.5pt; line-height: 1.55; }
     h1 { font-size: 1.9em; } h2 { font-size: 1.45em; } h3 { font-size: 1.2em; }
     .htsl-edit, .htsl-hover { background: none !important; box-shadow: none !important; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

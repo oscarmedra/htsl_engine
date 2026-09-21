@@ -991,3 +991,16 @@ marge), .htsl-doc-page width:100% + min-height par format ~1mm sous la feuille (
 278/209mm) → contenu flex + grille jusqu'en bas, sans feuille blanche parasite. Mode
 livre en print : page courante display:flex !important (au lieu de block). Vérifié
 écran (A4 1123px, contenu flex 879px). Core 360, codemirror 37 (400). .docs/30.
+
+## Doc 1 page → 1 feuille PDF (conflit @page corrigé) + alerte de débordement
+
+Bug : un {@document} d'une page sortait sur 2 feuilles. Cause : frame.ts imposait
+@page{margin:1.8cm 2cm} (imprimable ~261mm) vs page réglée ~296mm → débordement. Fix :
+frame.ts @page{margin:0} + body{padding:1.8cm 2cm} (marges des docs ordinaires), et le
+moteur neutralise pour les documents via body:has(.htsl-doc){margin:0;padding:0} → page
+296mm sur feuille 297mm = 1 page, grille remplit toujours. Nouvelle feature : alerte de
+débordement — runtime markPageOverflow() compare offsetHeight au min-height (1 feuille)
+et pose .htsl-doc-page--overflow → badge rouge « ⚠ Le contenu déborde de la page »
+(::before, non bloquant, masqué en print). Vérifié (courte pas d'alerte / longue alerte).
+Piège octal : "\26A0" dans un template literal → utiliser le caractère ⚠ direct. Core
+360, codemirror 37 (400). .docs/30.

@@ -516,9 +516,26 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 .htsl-doc-page--grid-squares .htsl-doc-content :is(h1, h2, h3, h4, h5, h6) {
   line-height: calc(var(--htsl-rule) * 2);
 }
+/* Overflow warning: the runtime adds .htsl-doc-page--overflow when a page's content
+   is taller than one sheet (it will spill onto the next printed page). Purely an
+   on-screen authoring aid — non-blocking, and hidden from print. */
+.htsl-doc-page--overflow::before {
+  content: "⚠ Le contenu déborde de la page";
+  position: absolute; top: 6px; left: 6px; z-index: 3;
+  background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;
+  padding: 2px 9px; border-radius: 999px;
+  font: 600 0.72rem/1.4 system-ui, sans-serif;
+  pointer-events: none;
+}
+
 @media print {
-  /* Sheet edges = paper edges; each page's own padding (20mm) is the margin. */
+  .htsl-doc-page--overflow::before { display: none; }
+  /* Sheet edges = paper edges; each page's own padding (20mm) is the margin. The
+     document owns its margins, so neutralise any host body padding/margin (the
+     playground adds 1.8cm 2cm for plain docs) — otherwise the near-full-height page
+     would overflow onto a blank second sheet. */
   @page { margin: 0; }
+  body:has(.htsl-doc) { margin: 0; padding: 0; }
   .htsl-doc { display: block; background: none; padding: 0; margin: 0; border-radius: 0; }
   .htsl-doc-pdf { display: none !important; }
   /* Each page fills one physical sheet, so the flex content and the grid reach the

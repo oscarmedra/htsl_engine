@@ -42,6 +42,7 @@ interface RuntimeWindow {
   requestAnimationFrame?: (cb: (t: number) => void) => number;
   cancelAnimationFrame?: (id: number) => void;
   addEventListener?: (type: string, cb: (e: Event) => void) => void;
+  getComputedStyle?: (el: Element) => CSSStyleDeclaration;
   focus?: () => void;
   print?: () => void;
   __htslDeps?: Map<string, Promise<void>>;
@@ -58,6 +59,23 @@ function targetWindow(win?: RuntimeWindow): RuntimeWindow | undefined {
   if (win) return win;
   const g = globalThis as unknown as { window?: RuntimeWindow };
   return g.window;
+}
+
+/**
+ * Flag `{@page}` elements whose content is taller than one sheet — they will spill
+ * onto the next printed page. On screen a page's `min-height` equals one sheet, so
+ * an `offsetHeight` beyond it means the content overflowed. Adds a class the CSS
+ * turns into a small red warning; purely informative, never blocks rendering.
+ */
+function markPageOverflow(w: RuntimeWindow): void {
+  const gcs = w.getComputedStyle;
+  if (typeof gcs !== "function") return;
+  const pages = w.document.querySelectorAll<HTMLElement>(".htsl-doc-page");
+  pages.forEach((p) => {
+    const min = parseFloat(gcs.call(w, p).minHeight) || 0;
+    const overflow = min > 0 && p.offsetHeight > min + 2;
+    p.classList.toggle("htsl-doc-page--overflow", overflow);
+  });
 }
 
 /**
@@ -138,6 +156,7 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
   if (!w?.document) return 0;
 
   wirePrint(w);
+  markPageOverflow(w);
 
   let drawn = 0;
 
