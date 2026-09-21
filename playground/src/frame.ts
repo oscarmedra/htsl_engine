@@ -235,6 +235,17 @@ export class FrameRenderer {
     return (t?.closest("[data-htsl-component]") as HTMLElement | null) ?? null;
   }
 
+  /** A block selectable from the preview: a user component instance, or a
+   *  `{@document}` / `{@page}` (which now carry a source range). Clicking it
+   *  reveals & selects its source in the editor. */
+  private selectableBlock(t: Element | null): HTMLElement | null {
+    return (
+      (t?.closest(
+        "[data-htsl-component], .htsl-doc-page[data-htsl-range], .htsl-doc[data-htsl-range]",
+      ) as HTMLElement | null) ?? null
+    );
+  }
+
   private installBlockEditing(doc: Document): void {
     // Highlight the component instance under the cursor.
     doc.addEventListener("mouseover", (ev) => {
@@ -245,9 +256,12 @@ export class FrameRenderer {
       el?.classList.add("htsl-hover");
     });
 
-    // Click a component instance → reveal & select its source in the main editor.
+    // Click a component instance or a document page → select its source.
     doc.addEventListener("click", (ev) => {
-      const el = this.componentInstance(ev.target as Element | null);
+      const target = ev.target as Element | null;
+      // Controls (PDF button, book nav) do their own job — don't select source.
+      if (target?.closest("[data-htsl-pdf], .htsl-book-btn, .htsl-deck-btn")) return;
+      const el = this.selectableBlock(target);
       if (!el || !this.onBlockClick) return;
       const [s, e] = (el.getAttribute("data-htsl-range") ?? "").split("-").map(Number);
       if (s === undefined || e === undefined) return;

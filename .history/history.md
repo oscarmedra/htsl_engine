@@ -1047,3 +1047,12 @@ data-htsl-book-index=0, écrasé par le morph). Fix playground frame.ts : onBefo
 reporte STATE_ATTRS (data-htsl-book-index, data-htsl-index) de l'élément vivant vers le
 nouveau nœud → position livre/slide préservée à travers les re-rendus. Vérifié (édition
 page 2 reste page 2).
+
+## Clic sur une page → sélection source (comme les composants)
+
+rangeAttr généralisé aux ObjectNode ; {@document} et chaque {@page} portent
+data-htsl-range. frame.ts : selectableBlock() = [data-htsl-component],
+.htsl-doc-page[data-htsl-range], .htsl-doc[data-htsl-range] au clic → onBlockClick ;
+garde sur les contrôles (data-htsl-pdf, htsl-book-btn, htsl-deck-btn). Vérifié (clic
+page 2 sélectionne sa source en flow et en livre ; flèches ne sélectionnent pas).
+Tests 18→19.

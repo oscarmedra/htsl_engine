@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compile } from "../src/index.js";
+import { compile, parse, render } from "../src/index.js";
 
 describe("{@document} — paged document for print / PDF", () => {
   it("wraps its {@page} children as sheets (default a4, flow mode)", () => {
@@ -77,6 +77,14 @@ describe("{@document} — paged document for print / PDF", () => {
   it("supports the aliases livre / pages and page / feuille", () => {
     expect(compile("{@livre:{@feuille:x}}")).toContain("htsl-doc-page");
     expect(compile("{@pages:{@page:x}}")).toContain('class="htsl-doc');
+  });
+
+  it("tags the document and each page with a source range (editableText) for click-to-select", () => {
+    const ast = parse("{@document:{@page:{p:a}}{@page:{p:b}}}", { ranges: true });
+    const html = render(ast, { editableText: true, source: "x" });
+    // one range on the .htsl-doc root + one per page section
+    expect(html).toMatch(/class="htsl-doc [^"]*"[^>]*data-htsl-range="\d+-\d+"/);
+    expect([...html.matchAll(/<section class="htsl-doc-page" data-htsl-range="\d+-\d+"/g)]).toHaveLength(2);
   });
 
   it("renders a standalone {@page} with no number/header/footer/grid outside a document", () => {

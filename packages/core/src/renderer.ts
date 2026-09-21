@@ -102,8 +102,9 @@ class Renderer {
     return this.options.hashBlocks ? ` data-htsl-hash="${htslHash(node)}"` : "";
   }
 
-  /** ` data-htsl-range="start-end"` so the preview can edit an element's source. */
-  private rangeAttr(node: ElementNode): string {
+  /** ` data-htsl-range="start-end"` so the preview can edit / select a node's
+   *  source (elements and objects alike carry a range when parsed with ranges). */
+  private rangeAttr(node: { range?: [number, number] }): string {
     return this.options.editableText && node.range
       ? ` data-htsl-range="${node.range[0]}-${node.range[1]}"`
       : "";
@@ -239,10 +240,11 @@ class Renderer {
       `aria-label="Télécharger en PDF">↓ PDF</button>`;
     // Flow mode: a plain stack of sheets. Book mode: a page-flip reader hydrated
     // by the trusted runtime (state in data-htsl-book-index, morph-safe).
-    if (!book) return `${pageRule}<div class="${cls}"${sizeStyle} data-htsl-doc>${pdfBtn}${body}</div>`;
+    const docRange = this.rangeAttr(node);
+    if (!book) return `${pageRule}<div class="${cls}"${sizeStyle}${docRange} data-htsl-doc>${pdfBtn}${body}</div>`;
     return (
       pageRule +
-      `<div class="${cls}"${sizeStyle} data-htsl-doc data-htsl-book data-htsl-book-index="0" tabindex="0">` +
+      `<div class="${cls}"${sizeStyle}${docRange} data-htsl-doc data-htsl-book data-htsl-book-index="0" tabindex="0">` +
       pdfBtn +
       `<div class="htsl-book-stage">${body}</div>` +
       `<div class="htsl-book-nav">` +
@@ -263,8 +265,9 @@ class Renderer {
       .map((c) => this.compact(c))
       .join("");
     const numAttr = n > 0 ? ` data-htsl-page="${n}"` : "";
+    const range = this.rangeAttr(node); // click a page in the preview → select its source
     // Standalone {@page} (no document context): a plain sheet, no header/footer/grid.
-    if (!opts) return `<section class="htsl-doc-page"${numAttr}>${inner}</section>`;
+    if (!opts) return `<section class="htsl-doc-page"${range}${numAttr}>${inner}</section>`;
 
     const grid = node.attrs["grid"] !== undefined ? docGrid(node.attrs["grid"]) : opts.grid;
     const header = node.attrs["header"] ?? opts.header;
@@ -280,7 +283,7 @@ class Renderer {
           `</div>`
         : "";
     return (
-      `<section class="htsl-doc-page${gridCls}"${numAttr}>` +
+      `<section class="htsl-doc-page${gridCls}"${range}${numAttr}>` +
       headHtml +
       `<div class="htsl-doc-content">${inner}</div>` +
       footHtml +

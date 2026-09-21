@@ -236,3 +236,16 @@ data-htsl-index) de l'élément vivant vers le nouveau nœud avant le morph → 
 la slide `{@slider}`) courante est préservée à travers les re-rendus (le runtime la
 borne si elle devient hors limites). Vérifié : édition de la page 2 → l'aperçu reste
 page 2.
+
+## Clic sur une page → sélection de sa source dans l'éditeur
+
+Comme pour les instances de composants, on peut cliquer une page (ou le document) dans
+l'aperçu pour révéler/sélectionner sa source. Le renderer pose `data-htsl-range` (via
+`rangeAttr`, généralisé aux nœuds objet) sur `.htsl-doc` et sur chaque `.htsl-doc-page`
+(les `ObjectNode` portent une `range` en parse `ranges:true`). Côté playground
+(`frame.ts`), un `selectableBlock()` cible `[data-htsl-component], .htsl-doc-page[data-htsl-range],
+.htsl-doc[data-htsl-range]` au clic → `onBlockClick(start,end)`. Un garde ignore les
+contrôles (`[data-htsl-pdf]`, `.htsl-book-btn`, `.htsl-deck-btn`) pour ne pas
+sélectionner en naviguant/imprimant. Vérifié : clic page 2 → sélection exacte de
+`{@page:…}` (flow et livre) ; flèche du livre → navigue sans toucher la sélection.
+Tests 18→19 (405).
