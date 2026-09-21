@@ -527,6 +527,11 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   font: 600 0.72rem/1.4 system-ui, sans-serif;
   pointer-events: none;
 }
+/* A page that overflows one sheet switches from flex to block layout: a flex
+   container DUPLICATES / clips its content when it breaks across printed sheets
+   (Chrome print bug). Block paginates cleanly. Pages that fit keep the flex layout
+   (footer pinned to the bottom, grid filling the sheet) since they never fragment. */
+.htsl-doc-page--overflow { display: block; }
 
 @media print {
   .htsl-doc-page--overflow::before { display: none; }

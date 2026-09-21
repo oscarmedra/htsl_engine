@@ -1004,3 +1004,13 @@ et pose .htsl-doc-page--overflow → badge rouge « ⚠ Le contenu déborde de l
 (::before, non bloquant, masqué en print). Vérifié (courte pas d'alerte / longue alerte).
 Piège octal : "\26A0" dans un template literal → utiliser le caractère ⚠ direct. Core
 360, codemirror 37 (400). .docs/30.
+
+## Correctif duplication PDF : page qui déborde en block (pas flex)
+
+Bug (vu dans un PDF réel) : une {@page} qui s'étale sur plusieurs feuilles dupliquait
+des lignes (flex + fragmentation = bug d'impression Chrome). Fix minimal : la classe
+.htsl-doc-page--overflow (déjà posée par le runtime quand la page dépasse une feuille)
+bascule la page en display:block → pagination propre, plus de duplication. Les pages
+qui tiennent (une feuille, jamais fragmentées) gardent le flex (pied en bas, grille
+remplie). Vérifié écran : page courte flex/1 feuille, page longue block. Core 360,
+codemirror 37 (400).
