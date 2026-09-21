@@ -178,3 +178,21 @@ Nouvelle fonctionnalité (demande utilisateur) : **alerte de débordement**. Le 
 (CSS `::before`, absolu, `pointer-events:none`). Purement informatif à l'écran,
 non bloquant, masqué à l'impression. Vérifié : page courte 1123px = pas d'alerte ;
 page longue 2733px = alerte. Core 360, codemirror 37 (400).
+
+## Formats de page étendus (ISO A/B/C, US, tailles libres)
+
+`{@document[format=…]}` accepte désormais tous les formats standard, résolus en
+dimensions par le renderer (`PAGE_FORMATS`, mm) : a0–a10, b0–b10, c0–c10, letter,
+legal, tabloid, ledger, executive, statement, dl, card. Plus une **taille libre**
+entre guillemets : `format="300x400"` (mm), `format="30x40cm"`, `format="8.5x11in"`
+(parseCustomFormat, séparateur x/×/*). Inconnu → a4.
+
+Plutôt que du CSS par format, le renderer pose des **variables CSS** sur `.htsl-doc` :
+`--htsl-doc-w`, `--htsl-doc-h` (mm, arrondies) et `--htsl-doc-pad` (marge intérieure
+adaptée à la taille : 20/15/10/6/4 mm selon le petit côté). `.htsl-doc-page` lit ces
+variables (`width: min(var(--htsl-doc-w),100%)`, `min-height`, `padding`), en flow, en
+livre et en impression (`min-height: calc(var(--htsl-doc-h) - 1mm)`). Le nom sert de
+classe `htsl-doc--<nom>` (ou `--custom`). Note : une taille libre doit être quotée
+(le lexer coupe `300x400` en deux jetons sinon) ; les formats plus larges que le
+panneau sont bornés à 100% à l'écran (aspect tassé) mais corrects au format/PDF.
+Tests : paged-document 14→16 (variables de taille, custom mm/cm/in, fallback a4). 402.

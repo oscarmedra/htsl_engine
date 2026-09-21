@@ -216,9 +216,14 @@ class Renderer {
     const body = pages.map((p, i) => this.docPage(p, i + 1, defaults)).join("");
     const n = pages.length;
     const cls =
-      `htsl-doc htsl-doc--${fmt}` +
+      `htsl-doc htsl-doc--${fmt.name}` +
       (numbers ? " htsl-doc--numbered" : "") +
       (book ? " htsl-doc--book" : "");
+    // Sheet size + inner margin as CSS variables, so any format works with no
+    // per-format CSS (the page reads --htsl-doc-w/-h/-pad).
+    const pad = docPad(Math.min(fmt.w, fmt.h));
+    const mm = (v: number) => Math.round(v * 100) / 100; // tidy stray float precision
+    const sizeStyle = ` style="--htsl-doc-w:${mm(fmt.w)}mm;--htsl-doc-h:${mm(fmt.h)}mm;--htsl-doc-pad:${pad}mm"`;
     // A "download as PDF" button, wired by the trusted runtime to print ONLY the
     // document (a real vector PDF via the browser's "Save as PDF"). Hidden in print.
     const pdfBtn =
@@ -227,9 +232,9 @@ class Renderer {
       `aria-label="Télécharger en PDF">↓ PDF</button>`;
     // Flow mode: a plain stack of sheets. Book mode: a page-flip reader hydrated
     // by the trusted runtime (state in data-htsl-book-index, morph-safe).
-    if (!book) return `<div class="${cls}" data-htsl-doc>${pdfBtn}${body}</div>`;
+    if (!book) return `<div class="${cls}"${sizeStyle} data-htsl-doc>${pdfBtn}${body}</div>`;
     return (
-      `<div class="${cls}" data-htsl-doc data-htsl-book data-htsl-book-index="0" tabindex="0">` +
+      `<div class="${cls}"${sizeStyle} data-htsl-doc data-htsl-book data-htsl-book-index="0" tabindex="0">` +
       pdfBtn +
       `<div class="htsl-book-stage">${body}</div>` +
       `<div class="htsl-book-nav">` +
@@ -758,11 +763,46 @@ function panelColor(raw: string | undefined): string {
   return PANEL_COLORS.has(c) ? c : "slate";
 }
 
-/** Sheet format for `{@document[format=…]}`. Unknown → "a4". */
-const DOC_FORMATS = new Set(["a4", "letter", "a5"]);
-function docFormat(raw: string | undefined): string {
+/** Standard page sizes in millimetres [width, height] (ISO A/B/C, US, named). */
+const PAGE_FORMATS: Record<string, [number, number]> = {
+  a0: [841, 1189], a1: [594, 841], a2: [420, 594], a3: [297, 420], a4: [210, 297],
+  a5: [148, 210], a6: [105, 148], a7: [74, 105], a8: [52, 74], a9: [37, 52], a10: [26, 37],
+  b0: [1000, 1414], b1: [707, 1000], b2: [500, 707], b3: [353, 500], b4: [250, 353],
+  b5: [176, 250], b6: [125, 176], b7: [88, 125], b8: [62, 88], b9: [44, 62], b10: [31, 44],
+  c0: [917, 1297], c1: [648, 917], c2: [458, 648], c3: [324, 458], c4: [229, 324],
+  c5: [162, 229], c6: [114, 162], c7: [81, 114], c8: [57, 81], c9: [40, 57], c10: [28, 40],
+  letter: [216, 279], legal: [216, 356], tabloid: [279, 432], ledger: [432, 279],
+  executive: [184, 267], statement: [140, 216],
+  dl: [110, 220], card: [85, 55], carte: [85, 55],
+};
+
+/** Parse a custom size like "300x400", "30x40cm", "8.5x11in" → [w, h] in mm. */
+function parseCustomFormat(raw: string): [number, number] | null {
+  const m = raw.match(/^(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*(mm|cm|in)?$/);
+  if (!m) return null;
+  const unit = m[3] === "cm" ? 10 : m[3] === "in" ? 25.4 : 1;
+  return [parseFloat(m[1] ?? "") * unit, parseFloat(m[2] ?? "") * unit];
+}
+
+/** Resolve `{@document[format=…]}` to a name (for the CSS class) + size in mm.
+ *  Accepts a named format, a custom "WxH[mm|cm|in]", else falls back to A4. */
+function docFormat(raw: string | undefined): { name: string; w: number; h: number } {
   const f = (raw ?? "").trim().toLowerCase();
-  return DOC_FORMATS.has(f) ? f : "a4";
+  const named = PAGE_FORMATS[f];
+  if (named) return { name: f, w: named[0], h: named[1] };
+  const custom = parseCustomFormat(f);
+  if (custom) return { name: "custom", w: custom[0], h: custom[1] };
+  return { name: "a4", w: 210, h: 297 };
+}
+
+/** Page inner margin (mm), scaled to the sheet's shorter side so tiny formats
+ *  (cards, A8…) don't get a huge margin. */
+function docPad(minSide: number): number {
+  if (minSide >= 200) return 20;
+  if (minSide >= 120) return 15;
+  if (minSide >= 80) return 10;
+  if (minSide >= 50) return 6;
+  return 4;
 }
 
 /** Per-page defaults inherited from `{@document}` (each page may override them). */

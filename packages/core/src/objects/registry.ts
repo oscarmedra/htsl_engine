@@ -604,11 +604,11 @@ registerObject({
   attrs: [
     {
       name: "format",
-      type: "enum",
+      type: "string",
       required: false,
       default: "a4",
-      values: ["a4", "letter", "a5"],
-      description: "Format de la feuille à l'écran (défaut : a4).",
+      description:
+        "Format de la feuille (défaut a4). Noms : a0–a10, b0–b10, c0–c10, letter, legal, tabloid, ledger, executive, statement, dl, card. Ou taille libre entre guillemets : format=\"300x400\" (mm), format=\"30x40cm\", format=\"8.5x11in\".",
     },
     { name: "numbers", type: "boolean", required: false, default: "false", description: "Numéroter les pages (bas de page)." },
     {

@@ -31,8 +31,25 @@ describe("{@document} — paged document for print / PDF", () => {
     expect(compile("{@document[format=a5]:{@page:x}}")).toContain("htsl-doc--a5");
   });
 
+  it("sets the sheet size as CSS variables from the named format", () => {
+    const a3 = compile("{@document[format=a3]:{@page:x}}");
+    expect(a3).toContain("htsl-doc--a3");
+    expect(a3).toContain("--htsl-doc-w:297mm");
+    expect(a3).toContain("--htsl-doc-h:420mm");
+  });
+
+  it("accepts a custom size (mm default, cm, in) — quoted", () => {
+    expect(compile('{@document[format="300x400"]:{@page:x}}')).toContain("--htsl-doc-w:300mm;--htsl-doc-h:400mm");
+    expect(compile('{@document[format="30x40cm"]:{@page:x}}')).toContain("--htsl-doc-w:300mm;--htsl-doc-h:400mm");
+    const inch = compile('{@document[format="8.5x11in"]:{@page:x}}');
+    expect(inch).toContain("--htsl-doc-w:215.9mm");
+    expect(inch).toContain("htsl-doc--custom");
+  });
+
   it("falls back to a4 for an unknown format", () => {
-    expect(compile("{@document[format=poster]:{@page:x}}")).toContain("htsl-doc--a4");
+    const html = compile("{@document[format=banana]:{@page:x}}");
+    expect(html).toContain("htsl-doc--a4");
+    expect(html).toContain("--htsl-doc-w:210mm;--htsl-doc-h:297mm");
   });
 
   it("ignores non-page children when numbering", () => {

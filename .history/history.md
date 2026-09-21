@@ -1014,3 +1014,12 @@ bascule la page en display:block → pagination propre, plus de duplication. Les
 qui tiennent (une feuille, jamais fragmentées) gardent le flex (pied en bas, grille
 remplie). Vérifié écran : page courte flex/1 feuille, page longue block. Core 360,
 codemirror 37 (400).
+
+## Formats de page étendus (A/B/C, US, tailles libres)
+
+{@document[format=…]} accepte a0–a10, b0–b10, c0–c10, letter/legal/tabloid/ledger/
+executive/statement, dl, card, + taille libre quotée "300x400"/"30x40cm"/"8.5x11in".
+Renderer : PAGE_FORMATS + parseCustomFormat → variables CSS --htsl-doc-w/-h (mm
+arrondies) + --htsl-doc-pad (20/15/10/6/4mm selon petit côté) posées sur .htsl-doc ;
+.htsl-doc-page lit les variables (écran flow/livre + print min-height calc(h-1mm)).
+format=string dans le registre. Custom doit être quoté (lexer). Tests 14→16 (402).

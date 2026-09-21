@@ -462,16 +462,14 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   position: relative;
   box-sizing: border-box;
   display: flex; flex-direction: column;
-  width: min(210mm, 100%);
-  min-height: 297mm;
-  padding: 20mm;
+  width: min(var(--htsl-doc-w, 210mm), 100%);
+  min-height: var(--htsl-doc-h, 297mm);
+  padding: var(--htsl-doc-pad, 20mm);
   background: #fff;
   color: #111827;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.16), 0 8px 24px rgba(15, 23, 42, 0.1);
   border-radius: 2px;
 }
-.htsl-doc--letter .htsl-doc-page { width: min(216mm, 100%); min-height: 279mm; }
-.htsl-doc--a5 .htsl-doc-page { width: min(148mm, 100%); min-height: 210mm; padding: 15mm; }
 .htsl-doc-page > :first-child { margin-top: 0; }
 .htsl-doc-page > :last-child { margin-bottom: 0; }
 /* Content area grows so the footer sticks to the bottom of a short page. */
@@ -553,9 +551,7 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   }
   .htsl-doc-page:first-child { break-before: auto; }
   /* Fill the sheet but stay ~1mm under it so a full page never spills a blank one. */
-  .htsl-doc-page { min-height: 296mm; }
-  .htsl-doc--letter .htsl-doc-page { min-height: 278mm; }
-  .htsl-doc--a5 .htsl-doc-page { min-height: 209mm; }
+  .htsl-doc-page { min-height: calc(var(--htsl-doc-h, 297mm) - 1mm); }
 }
 
 /* Book reader (@document[mode=book]) — leaf through pages one at a time on
@@ -565,7 +561,7 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 }
 .htsl-doc--book:focus { outline: none; }
 .htsl-doc--book:focus-visible { outline: 2px solid #3b5bdb; outline-offset: 3px; }
-.htsl-doc--book .htsl-book-stage { perspective: 2000px; width: min(210mm, 100%); }
+.htsl-doc--book .htsl-book-stage { perspective: 2000px; width: min(var(--htsl-doc-w, 210mm), 100%); }
 .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: none; margin: 0 auto; }
 /* Keep the flex column (base .htsl-doc-page) so the footer stays pinned to the
    bottom of the sheet — a plain block here would let it float under the text. */
