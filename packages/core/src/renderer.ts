@@ -223,7 +223,9 @@ class Renderer {
     // per-format CSS (the page reads --htsl-doc-w/-h/-pad).
     const pad = docPad(Math.min(fmt.w, fmt.h));
     const mm = (v: number) => Math.round(v * 100) / 100; // tidy stray float precision
-    const sizeStyle = ` style="--htsl-doc-w:${mm(fmt.w)}mm;--htsl-doc-h:${mm(fmt.h)}mm;--htsl-doc-pad:${pad}mm"`;
+    const sizeStyle =
+      ` style="--htsl-doc-w:${mm(fmt.w)}mm;--htsl-doc-h:${mm(fmt.h)}mm;` +
+      `--htsl-doc-ar:${mm(fmt.w)}/${mm(fmt.h)};--htsl-doc-pad:${pad}mm"`;
     // A "download as PDF" button, wired by the trusted runtime to print ONLY the
     // document (a real vector PDF via the browser's "Save as PDF"). Hidden in print.
     const pdfBtn =
@@ -774,6 +776,9 @@ const PAGE_FORMATS: Record<string, [number, number]> = {
   letter: [216, 279], legal: [216, 356], tabloid: [279, 432], ledger: [432, 279],
   executive: [184, 267], statement: [140, 216],
   dl: [110, 220], card: [85, 55], carte: [85, 55],
+  // Presentation slides (landscape): 16:9 (modern) and 4:3 (classic), PowerPoint sizes.
+  slide: [338.67, 190.5], slide169: [338.67, 190.5], diapo: [338.67, 190.5],
+  slide43: [254, 190.5],
 };
 
 /** Parse a custom size like "300x400", "30x40cm", "8.5x11in" → [w, h] in mm. */

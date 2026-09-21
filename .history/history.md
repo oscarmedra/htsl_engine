@@ -1023,3 +1023,12 @@ Renderer : PAGE_FORMATS + parseCustomFormat → variables CSS --htsl-doc-w/-h (m
 arrondies) + --htsl-doc-pad (20/15/10/6/4mm selon petit côté) posées sur .htsl-doc ;
 .htsl-doc-page lit les variables (écran flow/livre + print min-height calc(h-1mm)).
 format=string dans le registre. Custom doit être quoté (lexer). Tests 14→16 (402).
+
+## Formats présentation 16:9/4:3 + aperçu à l'échelle (aspect-ratio)
+
+Noms slide/slide169/diapo (16:9, 338.67×190.5mm) et slide43 (4:3, 254×190.5mm).
+Aperçu : la page utilise aspect-ratio: var(--htsl-doc-ar) (posé par le renderer) →
+proportions respectées même quand la largeur est bornée au panneau (une diapo 16:9 ne
+paraît plus carrée) ; print = aspect-ratio auto + min-height mm. Détection de
+débordement basée sur offsetWidth×(h/w) au lieu d'un min-height fixe (marche à toute
+échelle). Tests 16→17 (403).

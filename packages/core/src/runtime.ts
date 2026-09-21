@@ -72,8 +72,13 @@ function markPageOverflow(w: RuntimeWindow): void {
   if (typeof gcs !== "function") return;
   const pages = w.document.querySelectorAll<HTMLElement>(".htsl-doc-page");
   pages.forEach((p) => {
-    const min = parseFloat(gcs.call(w, p).minHeight) || 0;
-    const overflow = min > 0 && p.offsetHeight > min + 2;
+    // Expected sheet height at the current width, from the format's aspect ratio
+    // (works whatever the format or the on-screen scaling). A taller box overflows.
+    const ar = gcs.call(w, p).getPropertyValue("--htsl-doc-ar").split("/");
+    const wn = parseFloat(ar[0] ?? ""),
+      hn = parseFloat(ar[1] ?? "");
+    const expected = wn > 0 && hn > 0 ? p.offsetWidth * (hn / wn) : 0;
+    const overflow = expected > 0 && p.offsetHeight > expected + 2;
     p.classList.toggle("htsl-doc-page--overflow", overflow);
   });
 }

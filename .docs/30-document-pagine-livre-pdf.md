@@ -196,3 +196,19 @@ classe `htsl-doc--<nom>` (ou `--custom`). Note : une taille libre doit être quo
 (le lexer coupe `300x400` en deux jetons sinon) ; les formats plus larges que le
 panneau sont bornés à 100% à l'écran (aspect tassé) mais corrects au format/PDF.
 Tests : paged-document 14→16 (variables de taille, custom mm/cm/in, fallback a4). 402.
+
+## Formats présentation (16:9 / 4:3) + aperçu à l'échelle
+
+Ajout de noms pratiques paysage : `slide` / `slide169` / `diapo` (16:9, 338,67×190,5mm,
+taille PowerPoint) et `slide43` (4:3, 254×190,5mm). Rappel : pour une vraie
+présentation interactive, utiliser `{@slider}` ; `{@document[format=slide]}` sert
+plutôt à exporter des diapos en PDF paysage.
+
+Correctif d'aperçu : un format plus large que le panneau était borné en largeur mais
+pas en hauteur → proportions faussées (une diapo 16:9 paraissait carrée). La page
+utilise désormais `aspect-ratio: var(--htsl-doc-ar)` à l'écran (le renderer pose aussi
+`--htsl-doc-ar:w/h`), donc les proportions sont respectées à toute largeur ; à
+l'impression `aspect-ratio: auto` + `min-height` en mm (le contenu doit paginer). La
+détection de débordement ne dépend plus d'un min-height fixe : elle compare
+`offsetHeight` à `offsetWidth × (h/w)` (ratio du format), donc marche à toute échelle.
+Vérifié : diapo ratio 1.778, A4 0.707, débordement OK. Tests 16→17 (403).

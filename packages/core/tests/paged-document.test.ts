@@ -46,6 +46,14 @@ describe("{@document} — paged document for print / PDF", () => {
     expect(inch).toContain("htsl-doc--custom");
   });
 
+  it("supports landscape presentation formats (16:9 and 4:3)", () => {
+    const s = compile("{@document[format=slide]:{@page:x}}");
+    expect(s).toContain("htsl-doc--slide");
+    expect(s).toContain("--htsl-doc-w:338.67mm;--htsl-doc-h:190.5mm");
+    expect(compile("{@document[format=slide43]:{@page:x}}")).toContain("--htsl-doc-w:254mm;--htsl-doc-h:190.5mm");
+    expect(compile("{@document[format=diapo]:{@page:x}}")).toContain("htsl-doc--diapo");
+  });
+
   it("falls back to a4 for an unknown format", () => {
     const html = compile("{@document[format=banana]:{@page:x}}");
     expect(html).toContain("htsl-doc--a4");

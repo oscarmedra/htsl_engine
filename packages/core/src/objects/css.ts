@@ -463,7 +463,9 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   box-sizing: border-box;
   display: flex; flex-direction: column;
   width: min(var(--htsl-doc-w, 210mm), 100%);
-  min-height: var(--htsl-doc-h, 297mm);
+  /* Keep the sheet's proportions on screen even when the width is clamped to the
+     pane (aspect-ratio drives the height); print uses a real mm min-height instead. */
+  aspect-ratio: var(--htsl-doc-ar, 210 / 297);
   padding: var(--htsl-doc-pad, 20mm);
   background: #fff;
   color: #111827;
@@ -529,7 +531,7 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
    container DUPLICATES / clips its content when it breaks across printed sheets
    (Chrome print bug). Block paginates cleanly. Pages that fit keep the flex layout
    (footer pinned to the bottom, grid filling the sheet) since they never fragment. */
-.htsl-doc-page--overflow { display: block; }
+.htsl-doc-page--overflow { display: block; aspect-ratio: auto; }
 
 @media print {
   .htsl-doc-page--overflow::before { display: none; }
@@ -550,8 +552,9 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
     break-before: page; break-inside: auto;
   }
   .htsl-doc-page:first-child { break-before: auto; }
-  /* Fill the sheet but stay ~1mm under it so a full page never spills a blank one. */
-  .htsl-doc-page { min-height: calc(var(--htsl-doc-h, 297mm) - 1mm); }
+  /* Print: real mm height, no aspect-ratio (content must flow/paginate freely).
+     ~1mm under the sheet so a full page never spills a blank one. */
+  .htsl-doc-page { aspect-ratio: auto; min-height: calc(var(--htsl-doc-h, 297mm) - 1mm); }
 }
 
 /* Book reader (@document[mode=book]) — leaf through pages one at a time on
