@@ -1032,3 +1032,10 @@ proportions respectées même quand la largeur est bornée au panneau (une diapo
 paraît plus carrée) ; print = aspect-ratio auto + min-height mm. Détection de
 débordement basée sur offsetWidth×(h/w) au lieu d'un min-height fixe (marche à toute
 échelle). Tests 16→17 (403).
+
+## PDF au bon format (règle @page size émise par le document)
+
+Le PDF sortait toujours en A4 (le CSS dimensionne l'élément page, pas la feuille @page,
+non pilotable par style inline). Fix : le renderer émet <style>@media print{@page{size:
+<w>mm <h>mm;margin:0}}</style> selon le format → PDF en A3/diapo paysage/etc. (après le
+@page{size:A4} du playground → l'emporte). Tests 17→18 (405).

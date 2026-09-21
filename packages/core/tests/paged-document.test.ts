@@ -46,6 +46,14 @@ describe("{@document} — paged document for print / PDF", () => {
     expect(inch).toContain("htsl-doc--custom");
   });
 
+  it("emits an @page size rule so the PDF sheet matches the format", () => {
+    expect(compile("{@document[format=a3]:{@page:x}}")).toContain(
+      "@page{size:297mm 420mm;margin:0}",
+    );
+    expect(compile("{@document[format=slide]:{@page:x}}")).toContain("size:338.67mm 190.5mm");
+    expect(compile("{@document:{@page:x}}")).toContain("@page{size:210mm 297mm;margin:0}");
+  });
+
   it("supports landscape presentation formats (16:9 and 4:3)", () => {
     const s = compile("{@document[format=slide]:{@page:x}}");
     expect(s).toContain("htsl-doc--slide");

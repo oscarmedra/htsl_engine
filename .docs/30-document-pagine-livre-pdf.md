@@ -212,3 +212,15 @@ l'impression `aspect-ratio: auto` + `min-height` en mm (le contenu doit paginer)
 détection de débordement ne dépend plus d'un min-height fixe : elle compare
 `offsetHeight` à `offsetWidth × (h/w)` (ratio du format), donc marche à toute échelle.
 Vérifié : diapo ratio 1.778, A4 0.707, débordement OK. Tests 16→17 (403).
+
+## Le PDF sort au bon format (règle @page size émise par le document)
+
+Souci : le PDF sortait toujours en A4 même pour un autre format, car le CSS
+dimensionne la *page* (l'élément) mais la *feuille* du PDF dépend de `@page`, qui ne
+peut pas être piloté par le style d'un élément. Correctif : le renderer émet, dans la
+sortie du document, un petit `<style>@media print{@page{size:<w>mm <h>mm;margin:0}}</style>`
+correspondant au format. Le PDF sort donc en A3, en diapo paysage, etc. (émis après le
+`@page{size:A4}` du playground → il l'emporte). Note : un document impose la taille de
+feuille du PDF ; plusieurs documents de formats différents dans une même impression
+partagent la dernière règle (cas rare). Tests 17→18 (405). Choisir « Marges : par
+défaut » dans la boîte d'impression pour respecter le format.

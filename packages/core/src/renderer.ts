@@ -226,6 +226,11 @@ class Renderer {
     const sizeStyle =
       ` style="--htsl-doc-w:${mm(fmt.w)}mm;--htsl-doc-h:${mm(fmt.h)}mm;` +
       `--htsl-doc-ar:${mm(fmt.w)}/${mm(fmt.h)};--htsl-doc-pad:${pad}mm"`;
+    // Set the PRINTED sheet size to the document's format (@page can't be driven by
+    // an element's style, so emit a small rule). This makes the PDF come out A3, a
+    // slide in landscape, etc. — not always A4. A document owns the print page size.
+    const pageRule =
+      `<style>@media print{@page{size:${mm(fmt.w)}mm ${mm(fmt.h)}mm;margin:0}}</style>`;
     // A "download as PDF" button, wired by the trusted runtime to print ONLY the
     // document (a real vector PDF via the browser's "Save as PDF"). Hidden in print.
     const pdfBtn =
@@ -234,8 +239,9 @@ class Renderer {
       `aria-label="Télécharger en PDF">↓ PDF</button>`;
     // Flow mode: a plain stack of sheets. Book mode: a page-flip reader hydrated
     // by the trusted runtime (state in data-htsl-book-index, morph-safe).
-    if (!book) return `<div class="${cls}"${sizeStyle} data-htsl-doc>${pdfBtn}${body}</div>`;
+    if (!book) return `${pageRule}<div class="${cls}"${sizeStyle} data-htsl-doc>${pdfBtn}${body}</div>`;
     return (
+      pageRule +
       `<div class="${cls}"${sizeStyle} data-htsl-doc data-htsl-book data-htsl-book-index="0" tabindex="0">` +
       pdfBtn +
       `<div class="htsl-book-stage">${body}</div>` +
