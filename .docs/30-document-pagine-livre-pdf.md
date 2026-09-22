@@ -273,3 +273,16 @@ intact. `markDocZoom()` calcule le facteur ; `scheduleDeferredRecalc()` relance 
 mesure après le chargement des CSS externes (Tailwind) via `load` + timeouts. Vérifié :
 deck 32 diapos, 0 → toutes en flex, 1 seule réellement signalée, pages 1280×720 (16:9),
 zoom 0.584, 0 erreur.
+
+## PDF paysage tourné (« latéral ») + mode livre ajusté en hauteur
+
+Deux points sur les decks `format=slide` (paysage) :
+- **PDF tourné** : le playground imposait `@page { size: A4 }` (portrait) en plus du
+  `@page { size: <w> <h> }` (paysage) émis par le document → conflit ; Chrome gardait
+  le portrait et **tournait** le contenu paysage (affichage latéral). Fix : `frame.ts`
+  ne met plus de `size` (juste `margin: 0`) → seul le document impose la taille →
+  paysage propre, plus de rotation. (Sans document, le papier par défaut s'applique.)
+- **Mode livre ajusté en hauteur** : `markDocZoom` mesure la page **courante**
+  (`.is-current`, pas une page masquée) et, en mode livre, ajuste le zoom sur la
+  largeur **et** la hauteur du panneau (`viewportH / scrollHeight`) → toute la feuille
+  est visible d'un coup (vraie vue livre/diapo, rien ne dépasse en bas).

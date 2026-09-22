@@ -78,16 +78,28 @@ function targetWindow(win?: RuntimeWindow): RuntimeWindow | undefined {
 function markDocZoom(w: RuntimeWindow): void {
   const gcs = w.getComputedStyle;
   if (typeof gcs !== "function") return;
+  const viewportH = w.document.documentElement?.clientHeight || 0;
   const docs = w.document.querySelectorAll<HTMLElement>(".htsl-doc");
   docs.forEach((doc) => {
     doc.style.setProperty("--htsl-zoom", "1"); // measure natural size first
-    const page = doc.querySelector<HTMLElement>(".htsl-doc-page");
+    // In book mode only the current page is visible; measure it (not a hidden one).
+    const book = doc.classList.contains("htsl-doc--book");
+    const page =
+      (book && doc.querySelector<HTMLElement>(".htsl-doc-page.is-current")) ||
+      doc.querySelector<HTMLElement>(".htsl-doc-page");
     if (!page) return;
     const cs = gcs.call(w, doc);
     const padX = parseFloat(cs.paddingLeft || "0") + parseFloat(cs.paddingRight || "0");
-    const natural = page.getBoundingClientRect().width + padX;
-    const avail = (doc.parentElement ?? doc).clientWidth;
-    const k = natural > avail && natural > 0 ? Math.max(0.1, avail / natural) : 1;
+    const naturalW = page.getBoundingClientRect().width + padX;
+    const availW = (doc.parentElement ?? doc).clientWidth;
+    let k = naturalW > availW && naturalW > 0 ? availW / naturalW : 1;
+    // Book mode = one leaf at a time → also fit the height, so the WHOLE sheet is
+    // visible at once (a real book/slide view; nothing runs off the bottom).
+    if (book && viewportH > 0) {
+      const naturalH = doc.scrollHeight; // current page + nav + padding, unzoomed
+      if (naturalH > 0) k = Math.min(k, viewportH / naturalH);
+    }
+    k = Math.max(0.1, Math.min(1, k));
     doc.style.setProperty("--htsl-zoom", String(Math.round(k * 1000) / 1000));
   });
 }

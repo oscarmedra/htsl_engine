@@ -1068,3 +1068,11 @@ print) pour tenir dans le panneau (pas de reflow) → détection juste, h-full i
 bascule block n'a plus lieu qu'en print. markDocZoom() + scheduleDeferredRecalc()
 (relance après chargement CSS externe). Vérifié (32 diapos toutes flex, 1 signalée,
 1280×720, zoom 0.584). 405 tests.
+
+## PDF paysage tourné corrigé + mode livre fit-hauteur
+
+Deck format=slide : PDF sortait tourné (latéral) car frame.ts imposait @page{size:A4}
+en conflit avec le @page{size:<w> <h>} paysage du document → Chrome gardait portrait +
+tournait le contenu. Fix : frame.ts @page sans size (juste margin:0) → seul le document
+fixe la taille → paysage propre. Mode livre : markDocZoom mesure la page .is-current et
+ajuste le zoom largeur+hauteur (viewportH/scrollHeight) → feuille entière visible.
