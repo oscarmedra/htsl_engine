@@ -448,6 +448,10 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   position: relative;
   display: flex; flex-direction: column; align-items: center; gap: 1.2rem;
   background: #eef1f5; padding: 1.4rem; border-radius: 10px; margin: 1em 0;
+  /* Pages render at their TRUE size (so content wraps exactly as in print and
+     h-full/flex layouts are correct); the runtime zooms the whole doc to fit the
+     pane. Reset to 1 in print. */
+  zoom: var(--htsl-zoom, 1);
 }
 .htsl-doc-pdf {
   position: absolute; top: 0.7rem; right: 0.7rem; z-index: 2;
@@ -462,10 +466,8 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   position: relative;
   box-sizing: border-box;
   display: flex; flex-direction: column;
-  width: min(var(--htsl-doc-w, 210mm), 100%);
-  /* Keep the sheet's proportions on screen even when the width is clamped to the
-     pane (aspect-ratio drives the height); print uses a real mm min-height instead. */
-  aspect-ratio: var(--htsl-doc-ar, 210 / 297);
+  width: var(--htsl-doc-w, 210mm);
+  min-height: var(--htsl-doc-h, 297mm);
   padding: var(--htsl-doc-pad, 20mm);
   background: #fff;
   color: #111827;
@@ -527,14 +529,17 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   font: 600 0.72rem/1.4 system-ui, sans-serif;
   pointer-events: none;
 }
-/* A page that overflows one sheet switches from flex to block layout: a flex
-   container DUPLICATES / clips its content when it breaks across printed sheets
-   (Chrome print bug). Block paginates cleanly. Pages that fit keep the flex layout
-   (footer pinned to the bottom, grid filling the sheet) since they never fragment. */
-.htsl-doc-page--overflow { display: block; aspect-ratio: auto; }
+/* An overflowing page grows past the sheet on screen (flex kept, so h-full/flex
+   layouts stay correct — the warning signals it). The switch to block layout, which
+   a flex container needs to paginate without duplicating across printed sheets, is
+   applied only in print (@media print below). */
 
 @media print {
   .htsl-doc-page--overflow::before { display: none; }
+  .htsl-doc { zoom: 1; } /* no preview scaling in print — real sheet size */
+  /* Overflowing page → block, so it paginates across sheets without the flex
+     container duplicating its content (Chrome print bug). Pages that fit stay flex. */
+  .htsl-doc-page--overflow { display: block; }
   /* Sheet edges = paper edges; each page's own padding (20mm) is the margin. The
      document owns its margins, so neutralise any host body padding/margin (the
      playground adds 1.8cm 2cm for plain docs) — otherwise the near-full-height page
@@ -564,7 +569,7 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
 }
 .htsl-doc--book:focus { outline: none; }
 .htsl-doc--book:focus-visible { outline: 2px solid #3b5bdb; outline-offset: 3px; }
-.htsl-doc--book .htsl-book-stage { perspective: 2000px; width: min(var(--htsl-doc-w, 210mm), 100%); }
+.htsl-doc--book .htsl-book-stage { perspective: 2000px; width: var(--htsl-doc-w, 210mm); }
 .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: none; margin: 0 auto; }
 /* Keep the flex column (base .htsl-doc-page) so the footer stays pinned to the
    bottom of the sheet — a plain block here would let it float under the text. */

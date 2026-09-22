@@ -249,3 +249,27 @@ contrôles (`[data-htsl-pdf]`, `.htsl-book-btn`, `.htsl-deck-btn`) pour ne pas
 sélectionner en naviguant/imprimant. Vérifié : clic page 2 → sélection exacte de
 `{@page:…}` (flow et livre) ; flèche du livre → navigue sans toucher la sélection.
 Tests 18→19 (405).
+
+## Correctif majeur : aperçu à taille réelle + zoom (fausses alertes, h-full, PDF cassé)
+
+Sur un deck `format=slide` avec du Tailwind (`h-full flex justify-center`), presque
+toutes les pages étaient signalées « déborde » et le PDF sortait cassé (pied qui
+monte, contenu en haut, voire rotation). Chaîne de causes : (1) l'aperçu **bornait la
+largeur** au panneau (`min(var,100%)` + `aspect-ratio`) → le contenu s'enroulait plus
+serré → paraissait plus haut que la boîte réduite → **faux débordement** ; (2) Tailwind
+se charge en **asynchrone**, donc la détection tournait avant `h-full`/flex ; (3) une
+page faussement en débordement passait en `display:block` → le `h-full` (qui exige un
+parent à hauteur définie, fournie par le flex) **cassait** → contenu remonté, pied
+flottant, et à l'impression une mise en page incohérente.
+
+Correctif : les pages sont rendues à leur **taille réelle** (`width: var(--htsl-doc-w)`,
+`min-height: var(--htsl-doc-h)`, plus d'`aspect-ratio`), et le runtime **zoome le
+document entier** (`--htsl-zoom` sur `.htsl-doc`, remis à 1 en impression) pour tenir
+dans le panneau — `zoom` met à l'échelle sans reflow ni distorsion, donc le contenu
+s'enroule exactement comme à l'impression et la détection redevient juste. La bascule
+en `block` (nécessaire seulement pour éviter la duplication flex à l'impression) n'a
+plus lieu **qu'en `@media print`** ; à l'écran les pages restent en flex → `h-full`
+intact. `markDocZoom()` calcule le facteur ; `scheduleDeferredRecalc()` relance la
+mesure après le chargement des CSS externes (Tailwind) via `load` + timeouts. Vérifié :
+deck 32 diapos, 0 → toutes en flex, 1 seule réellement signalée, pages 1280×720 (16:9),
+zoom 0.584, 0 erreur.

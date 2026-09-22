@@ -43,10 +43,12 @@ interface RuntimeWindow {
   cancelAnimationFrame?: (id: number) => void;
   addEventListener?: (type: string, cb: (e: Event) => void) => void;
   getComputedStyle?: (el: Element) => CSSStyleDeclaration;
+  setTimeout?: (fn: () => void, ms: number) => number;
   focus?: () => void;
   print?: () => void;
   __htslDeps?: Map<string, Promise<void>>;
   __htslPrintWired?: boolean;
+  __htslDocDeferred?: boolean;
 }
 
 export interface HtslRuntime {
@@ -67,6 +69,46 @@ function targetWindow(win?: RuntimeWindow): RuntimeWindow | undefined {
  * an `offsetHeight` beyond it means the content overflowed. Adds a class the CSS
  * turns into a small red warning; purely informative, never blocks rendering.
  */
+/**
+ * Fit each paged document to the pane by zooming it down when its true sheet width
+ * exceeds the available width. Pages are laid out at their real size (so content
+ * wraps exactly as in print and h-full/flex layouts are correct); `zoom` scales the
+ * whole document uniformly — no reflow, no distortion. Reset to 1 for print by CSS.
+ */
+function markDocZoom(w: RuntimeWindow): void {
+  const gcs = w.getComputedStyle;
+  if (typeof gcs !== "function") return;
+  const docs = w.document.querySelectorAll<HTMLElement>(".htsl-doc");
+  docs.forEach((doc) => {
+    doc.style.setProperty("--htsl-zoom", "1"); // measure natural size first
+    const page = doc.querySelector<HTMLElement>(".htsl-doc-page");
+    if (!page) return;
+    const cs = gcs.call(w, doc);
+    const padX = parseFloat(cs.paddingLeft || "0") + parseFloat(cs.paddingRight || "0");
+    const natural = page.getBoundingClientRect().width + padX;
+    const avail = (doc.parentElement ?? doc).clientWidth;
+    const k = natural > avail && natural > 0 ? Math.max(0.1, avail / natural) : 1;
+    doc.style.setProperty("--htsl-zoom", String(Math.round(k * 1000) / 1000));
+  });
+}
+
+/** Recompute zoom-to-fit then overflow flags (order matters: zoom first). */
+function recalcDocs(w: RuntimeWindow): void {
+  markDocZoom(w);
+  markPageOverflow(w);
+}
+
+/** External stylesheets (e.g. a Tailwind CDN) apply after the first render and change
+ *  page heights, so re-run the doc measurements once things have settled. Wired once. */
+function scheduleDeferredRecalc(w: RuntimeWindow): void {
+  if (w.__htslDocDeferred || w.document.querySelector(".htsl-doc") === null) return;
+  w.__htslDocDeferred = true;
+  const run = (): void => recalcDocs(w);
+  w.addEventListener?.("load", run);
+  w.setTimeout?.(run, 500);
+  w.setTimeout?.(run, 1600);
+}
+
 function markPageOverflow(w: RuntimeWindow): void {
   const gcs = w.getComputedStyle;
   if (typeof gcs !== "function") return;
@@ -161,7 +203,8 @@ export async function hydrate(root: ParentNode, win?: RuntimeWindow): Promise<nu
   if (!w?.document) return 0;
 
   wirePrint(w);
-  markPageOverflow(w);
+  recalcDocs(w);
+  scheduleDeferredRecalc(w);
 
   let drawn = 0;
 

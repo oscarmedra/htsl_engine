@@ -1056,3 +1056,15 @@ data-htsl-range. frame.ts : selectableBlock() = [data-htsl-component],
 garde sur les contrôles (data-htsl-pdf, htsl-book-btn, htsl-deck-btn). Vérifié (clic
 page 2 sélectionne sa source en flow et en livre ; flèches ne sélectionnent pas).
 Tests 18→19.
+
+## Aperçu doc à taille réelle + zoom (corrige fausses alertes / h-full / PDF cassé)
+
+Deck format=slide Tailwind (h-full) : presque toutes les pages signalées déborde + PDF
+cassé (pied qui monte, contenu en haut). Causes : largeur bornée + aspect-ratio →
+contenu plus haut que la boîte réduite → faux débordement ; Tailwind async ; page
+faussement en débordement → display:block → h-full cassé. Fix : pages à taille réelle
+(width var, min-height var, plus d'aspect-ratio) + zoom du doc (--htsl-zoom, reset en
+print) pour tenir dans le panneau (pas de reflow) → détection juste, h-full intact. La
+bascule block n'a plus lieu qu'en print. markDocZoom() + scheduleDeferredRecalc()
+(relance après chargement CSS externe). Vérifié (32 diapos toutes flex, 1 signalée,
+1280×720, zoom 0.584). 405 tests.
