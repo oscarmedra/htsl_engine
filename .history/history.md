@@ -1076,3 +1076,12 @@ en conflit avec le @page{size:<w> <h>} paysage du document → Chrome gardait po
 tournait le contenu. Fix : frame.ts @page sans size (juste margin:0) → seul le document
 fixe la taille → paysage propre. Mode livre : markDocZoom mesure la page .is-current et
 ajuste le zoom largeur+hauteur (viewportH/scrollHeight) → feuille entière visible.
+
+## {@page} → {@document.page} (chemin complet, comme {@slider.slide})
+
+Anti-collision : un {!define page} utilisateur entrait en conflit avec la page intégrée.
+document.page passe en aliases:[] (comme slider.slide) → on écrit {@document.page} ; le
+nom court page/feuille est libre pour les composants utilisateur. Alias parent livre/
+pages conservés. Registre + snippets + tests (perl {@page→{@document.page ; corrigé
+{@pages parent). Vérifié ({@document.page} rend, {@page} ne rend plus). Cassant : migrer
+{@page → {@document.page. 406 tests.

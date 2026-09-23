@@ -286,3 +286,15 @@ Deux points sur les decks `format=slide` (paysage) :
   (`.is-current`, pas une page masquée) et, en mode livre, ajuste le zoom sur la
   largeur **et** la hauteur du panneau (`viewportH / scrollHeight`) → toute la feuille
   est visible d'un coup (vraie vue livre/diapo, rien ne dépasse en bas).
+
+## `{@page}` → `{@document.page}` (chemin complet, comme `{@slider.slide}`)
+
+Les pages ne vivent que dans un `{@document}`, et un utilisateur peut définir son
+propre composant `{!define page}` — le nom court `page` entrait donc en collision avec
+la page intégrée. Aligné sur `{@slider.slide}` (qui n'a aucun alias court), l'enfant
+s'écrit désormais **`{@document.page}`** : les alias `page` / `feuille` sont retirés
+(`aliases: []`), donc `{@page}` est libre pour les composants utilisateur. Les alias du
+parent (`livre`, `pages`) restent. Registre + snippets/exemples + tests mis à jour
+(`{@page` → `{@document.page`) ; `pages` (parent) préservé. Vérifié : `{@document.page}`
+rend les feuilles ; `{@page}` seul ne rend plus de feuille. **Changement cassant** : les
+documents existants doivent remplacer `{@page` par `{@document.page`. Tests → 406.

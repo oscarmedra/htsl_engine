@@ -600,7 +600,7 @@ registerObject({
   category: "document",
   aliases: ["livre", "pages"],
   description:
-    "Document paginé pour l'impression / PDF : contient des {@page:…}. Chaque page démarre sur une nouvelle feuille à l'impression ; si son contenu déborde, il se poursuit tout seul sur la feuille suivante (rien n'est coupé). Idéal pour rédiger un livre.",
+    "Document paginé pour l'impression / PDF : contient des {@document.page:…}. Chaque page démarre sur une nouvelle feuille à l'impression ; si son contenu déborde, il se poursuit tout seul sur la feuille suivante (rien n'est coupé). Idéal pour rédiger un livre.",
   attrs: [
     {
       name: "format",
@@ -630,17 +630,17 @@ registerObject({
     { name: "header", type: "string", required: false, description: "En-tête courant répété en haut de chaque page." },
     { name: "footer", type: "string", required: false, description: "Pied de page courant répété en bas de chaque page." },
   ],
-  snippet: "{@document:\n  {@page: ${1:Contenu de la première page}}\n  {@page: ${2:Contenu de la deuxième page}}\n}",
+  snippet: "{@document:\n  {@document.page: ${1:Contenu de la première page}}\n  {@document.page: ${2:Contenu de la deuxième page}}\n}",
   example:
-    "{@document[numbers=true]:\n  {@page: {h1:Chapitre 1} {p:Le début de l'histoire…}}\n  {@page: {h1:Chapitre 2} {p:La suite…}}\n}",
+    "{@document[numbers=true]:\n  {@document.page: {h1:Chapitre 1} {p:Le début de l'histoire…}}\n  {@document.page: {h1:Chapitre 2} {p:La suite…}}\n}",
 });
 registerObject({
   path: "document.page",
   contentModel: "html",
   category: "document",
-  aliases: ["page", "feuille"],
+  aliases: [],
   description:
-    "Une page d'un {@document:…}. On y écrit librement ; à l'impression elle occupe une feuille, et son trop-plein continue automatiquement sur la feuille suivante. grid/header/footer surchargent, pour cette page, les valeurs du document.",
+    "Une page d'un {@document:…} (chemin complet, comme {@slider.slide}, pour ne pas occuper le nom court « page »). On y écrit librement ; à l'impression elle occupe une feuille, et son trop-plein continue automatiquement sur la feuille suivante. grid/header/footer surchargent, pour cette page, les valeurs du document.",
   attrs: [
     {
       name: "grid",
@@ -652,8 +652,8 @@ registerObject({
     { name: "header", type: "string", required: false, description: "En-tête de cette page seule (surcharge le document)." },
     { name: "footer", type: "string", required: false, description: "Pied de cette page seule (surcharge le document)." },
   ],
-  snippet: "{@page: ${1:contenu de la page}}",
-  example: "{@page: {h2:Titre} {p:Un paragraphe.}}",
+  snippet: "{@document.page: ${1:contenu de la page}}",
+  example: "{@document.page: {h2:Titre} {p:Un paragraphe.}}",
 });
 
 // --- layout & inline touches (columns / deflist / timeline / mark / badge) ---
