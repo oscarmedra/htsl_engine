@@ -666,6 +666,7 @@ registerObject({
     { name: "src", type: "string", required: true, description: "Lien du PDF (http / https)." },
     { name: "page", type: "number", required: false, description: "Ouvrir directement à cette page." },
     { name: "height", type: "string", required: false, default: "600px", description: "Hauteur d'affichage (ex. 600px, 80vh)." },
+    { name: "toolbar", type: "boolean", required: false, default: "false", description: "Afficher la barre d'outils du lecteur (zoom, pages…). Masquée par défaut : affichage minimal (Chrome/Brave/Edge)." },
   ],
   snippet: "{@pdf[src=${1:\"https://…/doc.pdf\"}]/}",
   example: "{@pdf[src=\"https://…/cours.pdf\", page=12]/}",

@@ -50,3 +50,13 @@ validation height (nombre→px, unité conservée, valeur douteuse→600px) ; re
 `javascript:`. Suite : 410. Vérifié navigateur (src/#page/height corrects, 0 erreur ;
 le cadre reste sombre dans le panneau isolé de l'app, le lecteur natif l'affiche dans
 un vrai navigateur).
+
+## Affichage minimal (barre d'outils masquée par défaut)
+
+Le but étant juste d'afficher, le lecteur est **minimal par défaut** : le fragment
+reçoit `toolbar=0&navpanes=0&scrollbar=0` (paramètres d'URL du lecteur PDF, supportés
+par Chrome/Brave/Edge) → plus de barre d'outils ni de volets. Attribut `toolbar=true`
+pour réafficher les contrôles complets (zoom, pages…). Les `&` du fragment sont
+échappés en `&amp;` dans le HTML (correct ; le navigateur les redécode). Best-effort
+selon le lecteur du navigateur (Firefox/PDF.js gère ces paramètres différemment).
+Tests → 411.

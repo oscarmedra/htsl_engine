@@ -137,17 +137,23 @@ describe("{@document} — grid, header & footer", () => {
 });
 
 describe("{@pdf} — PDF viewer", () => {
-  it("embeds the PDF in an iframe with a fallback open link", () => {
+  it("embeds the PDF in an iframe with a fallback open link, toolbar hidden by default", () => {
     const html = compile('{@pdf[src="https://example.com/doc.pdf"]/}');
     expect(html).toContain('class="htsl-pdf-frame"');
-    expect(html).toContain('src="https://example.com/doc.pdf"');
-    expect(html).toContain('href="https://example.com/doc.pdf"');
+    expect(html).toContain('src="https://example.com/doc.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0"');
+    expect(html).toContain('href="https://example.com/doc.pdf"'); // the link stays clean
     expect(html).toContain("Ouvrir le PDF");
   });
 
-  it("opens at a given page via #page=N", () => {
+  it("opens at a given page via #page=N (with the minimal viewer params)", () => {
     const html = compile('{@pdf[src="https://example.com/doc.pdf", page=12]/}');
-    expect(html).toContain('src="https://example.com/doc.pdf#page=12"');
+    expect(html).toContain('src="https://example.com/doc.pdf#page=12&amp;toolbar=0&amp;navpanes=0&amp;scrollbar=0"');
+  });
+
+  it("keeps the full viewer toolbar when toolbar=true", () => {
+    const html = compile('{@pdf[src="https://example.com/doc.pdf", toolbar=true]/}');
+    expect(html).not.toContain("toolbar=0");
+    expect(html).toContain('src="https://example.com/doc.pdf"'); // no fragment at all
   });
 
   it("validates the height (bare number → px, else default 600px)", () => {

@@ -303,7 +303,13 @@ class Renderer {
       return `<div class="htsl-pdf htsl-pdf--invalid">PDF : lien manquant ou non autorisé.</div>`;
     }
     const pageRaw = (node.attrs["page"] ?? "").trim();
-    const frag = /^\d+$/.test(pageRaw) ? `#page=${pageRaw}` : "";
+    // Minimal viewer by default (hide the browser's PDF toolbar / side panes — our
+    // goal is just to display). `toolbar=true` restores the full viewer controls.
+    const params: string[] = [];
+    if (/^\d+$/.test(pageRaw)) params.push(`page=${pageRaw}`);
+    const showToolbar = node.attrs["toolbar"] !== undefined && node.attrs["toolbar"] !== "false";
+    if (!showToolbar) params.push("toolbar=0", "navpanes=0", "scrollbar=0");
+    const frag = params.length ? `#${params.join("&")}` : "";
     const hRaw = (node.attrs["height"] ?? "").trim();
     const hMatch = hRaw.match(/^(\d+(?:\.\d+)?)(px|rem|em|vh|%)?$/);
     const height = hMatch ? `${hMatch[1]}${hMatch[2] ?? "px"}` : "600px";

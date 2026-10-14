@@ -1095,3 +1095,9 @@ iframe + lien de repli « Ouvrir le PDF » (si framing bloqué / download forcé
 à l'impression (visionneuse écran, ne s'imprime pas). Choisi après évaluation vs la
 version PDF.js lourde (CORS/raster/dépendance/couplage écartés). Tests +4 (410).
 Vérifié navigateur. .docs/31.
+
+## {@pdf} : lecteur minimal par défaut (barre masquée)
+
+Attribut toolbar (défaut false) : le fragment reçoit toolbar=0&navpanes=0&scrollbar=0
+(masque barre/volets du lecteur PDF — Chrome/Brave/Edge). toolbar=true réaffiche les
+contrôles. & échappés en &amp; (redécodés par le navigateur). Tests 411.
