@@ -598,4 +598,21 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   .htsl-doc--book .htsl-book-stage { perspective: none; width: auto; }
   .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: flex !important; animation: none !important; }
 }
+
+/* PDF viewer ({@pdf[src=…]}) — native browser embed; screen only. */
+.htsl-pdf { margin: 1em 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.htsl-pdf-frame {
+  width: 100%; border: 1px solid #e3e6ea; border-radius: 8px; background: #f8fafc;
+}
+.htsl-pdf-open {
+  align-self: flex-start; font-size: 0.85rem; font-weight: 600;
+  color: #3b5bdb; text-decoration: none;
+}
+.htsl-pdf-open:hover { text-decoration: underline; }
+.htsl-pdf--invalid {
+  margin: 1em 0; padding: 0.6em 0.9em; border-radius: 8px;
+  background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.9em;
+}
+/* The embedded viewer does not print — keep only the link in the exported PDF. */
+@media print { .htsl-pdf-frame { display: none; } }
 `.trim();

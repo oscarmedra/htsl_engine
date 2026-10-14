@@ -655,6 +655,21 @@ registerObject({
   snippet: "{@document.page: ${1:contenu de la page}}",
   example: "{@document.page: {h2:Titre} {p:Un paragraphe.}}",
 });
+registerObject({
+  path: "pdf",
+  contentModel: "void",
+  category: "document",
+  aliases: ["visionneuse"],
+  description:
+    "Visionneuse d'un PDF depuis un lien (affichage écran, lecteur natif du navigateur). src = lien http/https ; page = ouvrir directement à ce numéro ; height = hauteur d'affichage. Un bouton « Ouvrir le PDF » sert de repli si le serveur interdit l'affichage. Note : visionneuse écran — le PDF embarqué ne s'imprime pas dans ton propre export.",
+  attrs: [
+    { name: "src", type: "string", required: true, description: "Lien du PDF (http / https)." },
+    { name: "page", type: "number", required: false, description: "Ouvrir directement à cette page." },
+    { name: "height", type: "string", required: false, default: "600px", description: "Hauteur d'affichage (ex. 600px, 80vh)." },
+  ],
+  snippet: "{@pdf[src=${1:\"https://…/doc.pdf\"}]/}",
+  example: "{@pdf[src=\"https://…/cours.pdf\", page=12]/}",
+});
 
 // --- layout & inline touches (columns / deflist / timeline / mark / badge) ---
 registerObject({

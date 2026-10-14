@@ -134,6 +134,7 @@ class Renderer {
     if (node.path === "stepper.step") return this.step(node, 0);
     if (node.path === "document") return this.pagedDoc(node);
     if (node.path === "document.page") return this.docPage(node, 0);
+    if (node.path === "pdf") return this.pdfView(node);
     if (node.path === "columns") return this.columns(node);
     if (node.path === "columns.col") return `<div class="htsl-col">${this.childrenHtml(node)}</div>`;
     if (node.path === "deflist") return this.deflist(node);
@@ -288,6 +289,31 @@ class Renderer {
       `<div class="htsl-doc-content">${inner}</div>` +
       footHtml +
       `</section>`
+    );
+  }
+
+  /** PDF viewer ({@pdf[src=…]}) — embeds a PDF from a link in the browser's native
+   *  viewer (screen only; it is not captured in the document's own print/export). A
+   *  visible "open" link is the fallback when a server forbids framing. `page` opens
+   *  at a given page (#page=N), `height` sets the display height. Unsafe URLs are
+   *  rejected (only http/https; never javascript:/data:). */
+  private pdfView(node: ObjectNode): string {
+    const src = (node.attrs["src"] ?? "").trim();
+    if (!src || !isAttrSafe("src", src)) {
+      return `<div class="htsl-pdf htsl-pdf--invalid">PDF : lien manquant ou non autorisé.</div>`;
+    }
+    const pageRaw = (node.attrs["page"] ?? "").trim();
+    const frag = /^\d+$/.test(pageRaw) ? `#page=${pageRaw}` : "";
+    const hRaw = (node.attrs["height"] ?? "").trim();
+    const hMatch = hRaw.match(/^(\d+(?:\.\d+)?)(px|rem|em|vh|%)?$/);
+    const height = hMatch ? `${hMatch[1]}${hMatch[2] ?? "px"}` : "600px";
+    const srcEsc = escapeHtml(src + frag);
+    const hrefEsc = escapeHtml(src);
+    return (
+      `<figure class="htsl-pdf">` +
+      `<iframe class="htsl-pdf-frame" src="${srcEsc}" style="height:${height}" title="PDF" loading="lazy"></iframe>` +
+      `<a class="htsl-pdf-open" href="${hrefEsc}" target="_blank" rel="noopener noreferrer">📄 Ouvrir le PDF</a>` +
+      `</figure>`
     );
   }
 

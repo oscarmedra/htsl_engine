@@ -136,6 +136,33 @@ describe("{@document} — grid, header & footer", () => {
   });
 });
 
+describe("{@pdf} — PDF viewer", () => {
+  it("embeds the PDF in an iframe with a fallback open link", () => {
+    const html = compile('{@pdf[src="https://example.com/doc.pdf"]/}');
+    expect(html).toContain('class="htsl-pdf-frame"');
+    expect(html).toContain('src="https://example.com/doc.pdf"');
+    expect(html).toContain('href="https://example.com/doc.pdf"');
+    expect(html).toContain("Ouvrir le PDF");
+  });
+
+  it("opens at a given page via #page=N", () => {
+    const html = compile('{@pdf[src="https://example.com/doc.pdf", page=12]/}');
+    expect(html).toContain('src="https://example.com/doc.pdf#page=12"');
+  });
+
+  it("validates the height (bare number → px, else default 600px)", () => {
+    expect(compile('{@pdf[src="https://e.com/d.pdf", height=400]/}')).toContain("height:400px");
+    expect(compile('{@pdf[src="https://e.com/d.pdf", height="80vh"]/}')).toContain("height:80vh");
+    expect(compile('{@pdf[src="https://e.com/d.pdf", height="evil;x"]/}')).toContain("height:600px");
+  });
+
+  it("rejects an unsafe (javascript:) URL", () => {
+    const html = compile('{@pdf[src="javascript:alert(1)"]/}');
+    expect(html).toContain("htsl-pdf--invalid");
+    expect(html).not.toContain("<iframe");
+  });
+});
+
 describe("{@document[mode=book]} — flip reader", () => {
   it("adds the book scaffold (stage, nav, index) in book mode", () => {
     const html = compile("{@document[mode=book]:{@document.page:{p:a}}{@document.page:{p:b}}}");

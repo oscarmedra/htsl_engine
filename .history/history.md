@@ -1085,3 +1085,13 @@ nom court page/feuille est libre pour les composants utilisateur. Alias parent l
 pages conservés. Registre + snippets + tests (perl {@page→{@document.page ; corrigé
 {@pages parent). Vérifié ({@document.page} rend, {@page} ne rend plus). Cassant : migrer
 {@page → {@document.page. 406 tests.
+
+## Visionneuse PDF {@pdf[src]/}
+
+Objet void {@pdf} (alias visionneuse) : embed natif d'un PDF depuis un lien (écran).
+Attrs src (http/https, validé via isAttrSafe → rejette javascript:/data:), page
+(#page=N), height (validée regex → style, sinon 600px). renderer.pdfView() → figure >
+iframe + lien de repli « Ouvrir le PDF » (si framing bloqué / download forcé). Masqué
+à l'impression (visionneuse écran, ne s'imprime pas). Choisi après évaluation vs la
+version PDF.js lourde (CORS/raster/dépendance/couplage écartés). Tests +4 (410).
+Vérifié navigateur. .docs/31.
