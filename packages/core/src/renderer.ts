@@ -299,8 +299,13 @@ class Renderer {
    *  rejected (only http/https; never javascript:/data:). */
   private pdfView(node: ObjectNode): string {
     const src = (node.attrs["src"] ?? "").trim();
-    if (!src || !isAttrSafe("src", src)) {
-      return `<div class="htsl-pdf htsl-pdf--invalid">PDF : lien manquant ou non autorisé.</div>`;
+    // Require an absolute http(s) link: a relative/placeholder URL resolves against
+    // the host page and would embed the app itself (recursive playground), not a PDF.
+    if (!src || !/^https?:\/\//i.test(src) || !isAttrSafe("src", src)) {
+      return (
+        `<div class="htsl-pdf htsl-pdf--invalid">PDF : fournis un lien absolu http(s) vers un fichier PDF` +
+        ` — ex. {@pdf[src="https://…/doc.pdf"]/}.</div>`
+      );
     }
     const pageRaw = (node.attrs["page"] ?? "").trim();
     // Minimal viewer by default (hide the browser's PDF toolbar / side panes — our

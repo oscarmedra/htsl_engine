@@ -1101,3 +1101,9 @@ Vérifié navigateur. .docs/31.
 Attribut toolbar (défaut false) : le fragment reçoit toolbar=0&navpanes=0&scrollbar=0
 (masque barre/volets du lecteur PDF — Chrome/Brave/Edge). toolbar=true réaffiche les
 contrôles. & échappés en &amp; (redécodés par le navigateur). Tests 411.
+
+## {@pdf} : exige un lien absolu http(s) (anti-récursion)
+
+Un src relatif/placeholder (…/doc.rien) se résolvait vers la page hôte → l'iframe
+embarquait le playground lui-même (récursion). pdfView exige maintenant ^https?:// →
+sinon encadré d'erreur, pas d'iframe. Tests 412.

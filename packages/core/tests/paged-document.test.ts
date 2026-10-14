@@ -167,6 +167,12 @@ describe("{@pdf} — PDF viewer", () => {
     expect(html).toContain("htsl-pdf--invalid");
     expect(html).not.toContain("<iframe");
   });
+
+  it("rejects a relative/placeholder URL (would embed the app itself)", () => {
+    const html = compile('{@pdf[src="…/doc.pdf"]/}');
+    expect(html).toContain("htsl-pdf--invalid");
+    expect(html).not.toContain("<iframe");
+  });
 });
 
 describe("{@document[mode=book]} — flip reader", () => {

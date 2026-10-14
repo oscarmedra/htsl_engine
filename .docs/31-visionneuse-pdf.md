@@ -60,3 +60,10 @@ pour réafficher les contrôles complets (zoom, pages…). Les `&` du fragment s
 échappés en `&amp;` dans le HTML (correct ; le navigateur les redécode). Best-effort
 selon le lecteur du navigateur (Firefox/PDF.js gère ces paramètres différemment).
 Tests → 411.
+
+## Garde : lien absolu http(s) obligatoire
+
+Un `src` relatif ou placeholder (ex. `…/doc.rien`) se résout contre la page hôte et
+**embarquait l'app elle-même** (playground récursif) au lieu d'un PDF. Désormais
+`pdfView` exige `^https?://` (en plus d'`isAttrSafe`) ; sinon → encadré d'erreur clair
+« fournis un lien absolu http(s) … », sans iframe. Tests +1 (412).
