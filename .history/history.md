@@ -1107,3 +1107,17 @@ contrôles. & échappés en &amp; (redécodés par le navigateur). Tests 411.
 Un src relatif/placeholder (…/doc.rien) se résolvait vers la page hôte → l'iframe
 embarquait le playground lui-même (récursion). pdfView exige maintenant ^https?:// →
 sinon encadré d'erreur, pas d'iframe. Tests 412.
+
+## Skill IA d'authoring HTSL (skills/htsl-authoring/)
+
+Couche de doc orientée génération pour les modèles IA (Claude Code et autres), versionnée
+dans le dépôt. SKILL.md (déclencheurs + méthode 5 étapes + livraison source HTSL / page
+autonome + sécurité) ; reference/objects.md = catalogue EXHAUSTIF des 125 entrées GÉNÉRÉ
+depuis registry.list()/describe() (aligné sur le code, zéro invention, à régénérer si le
+registre change) ; reference/syntax.md (maths, géométrie décor/acteurs + s3/timeline,
+composants/variables, HTML→HTSL, 7 pièges) ; reference/recipes.md (9 recettes) ;
+templates/standalone.html. Règles clés de la page autonome : compiler après window.load
+avec {katex}, injecter htsl_engine.mathCss (le runtime ne le fait pas), Plotly pour
+mg2/mg3/plot/chart (Three.js chargé seul pour s3). Vérifié : 18 blocs htsl du skill
+compilent (2 bugs d'exemple corrigés : {@mtr} vs {@ref} ; {$children} hors corps) +
+standalone.html rendu navigateur (KaTeX + encadrés numérotés stylés). .docs/32.

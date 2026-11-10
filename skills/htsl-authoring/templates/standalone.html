@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ma ressource HTSL</title>
+
+    <!-- Moteur HTSL + runtime auto (hydrate scènes / slides / quiz / onglets).
+         Expose le global `htsl_engine`. -->
+    <script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.auto.global.js"></script>
+
+    <!-- Formules (KaTeX). Retire ces 2 lignes si aucune formule. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <!-- Chimie {@ce} (optionnel, après KaTeX) : -->
+    <!-- <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.min.js"></script> -->
+
+    <!-- Scènes géométriques / graphes {@mg2 @mg3 @plot @chart} (Plotly). Retire si inutile. -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+    <!-- Three.js (scènes {@s3}) est chargé automatiquement par le runtime. -->
+
+    <style>
+      body {
+        font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+        max-width: 820px; margin: 2rem auto; padding: 0 1.1rem; color: #1e293b;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="out"></div>
+
+    <!-- ⬇️ ÉCRIS TON HTSL ICI (entre les balises script, non exécuté) -->
+    <script type="text/htsl" id="source">
+{h1:Théorème de Pythagore}
+{p:Dans un triangle rectangle d'hypoténuse $c$ : $a^2 + b^2 = c^2$.}
+
+{@theorem[title="Pythagore", label=pyth]:
+  {p:Si le triangle est rectangle en $C$, alors {@mtb: a^2 + b^2 = c^2}.}
+}
+
+{@example:
+  {p:Pour $a=3$, $b=4$, on obtient $c=\sqrt{3^2+4^2}=5$.}
+}
+    </script>
+
+    <!-- Amorçage — NE PAS modifier : respecte l'ordre (load → mathCss → compile(katex)). -->
+    <script>
+      window.addEventListener("load", function () {
+        // 1) CSS par défaut du moteur (encadrés, slides, numéros, tableaux…)
+        var style = document.createElement("style");
+        style.textContent = htsl_engine.mathCss;
+        document.head.appendChild(style);
+
+        // 2) Compiler le HTSL en HTML (KaTeX est prêt ici, chargé en defer)
+        var src = document.getElementById("source").textContent;
+        document.getElementById("out").innerHTML = htsl_engine.compile(src, {
+          katex: window.katex,     // formules typographiées (sinon LaTeX brut)
+          prettyPrint: true,
+        });
+        // 3) Le runtime auto (MutationObserver) hydrate scènes/slides/quiz tout seul.
+      });
+    </script>
+  </body>
+</html>
