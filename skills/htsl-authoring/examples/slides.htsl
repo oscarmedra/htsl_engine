@@ -1,0 +1,41 @@
+{!-- Exemple TYPE : présentation en diapositives. Passe lint + verify.
+     Aucune scène Plotly/Three DANS le slider (cf. slides.md). --}
+{@slider[transition=fade, loop=true]:
+
+  {@slider.slide:
+    {h1:Opérateur de Koopman}
+    {p:Rendre {strong:linéaire} une dynamique non linéaire.}
+    {p:{@badge[color=indigo]: systèmes dynamiques}}
+  }
+
+  {@slider.slide:
+    {h2:L’idée}
+    {@panel[color=indigo, title="Changer d’objet d’étude"]:
+      {p:Suivre les {strong:observables} $g$, pas l’état $x$.}
+    }
+    {@mtb: (\mathcal{K} g)(x) = g\big(F(x)\big).}
+  }
+
+  {@slider.slide:
+    {h2:Linéarité}
+    {@theorem[title="Clé", label=lin]:
+      {@mtb: \mathcal{K}(\alpha g + \beta h) = \alpha\,\mathcal{K}g + \beta\,\mathcal{K}h.}
+    }
+  }
+
+  {@slider.slide:
+    {h2:Un mode, une valeur propre}
+    {@columns:
+      {@col: {@panel[color=green, title="|λ| < 1"]: {p:amorti}}}
+      {@col: {@panel[color=amber, title="|λ| = 1"]: {p:entretenu}}}
+      {@col: {@panel[color=red, title="|λ| > 1"]: {p:instable}}}
+    }
+  }
+
+  {@slider.slide:
+    {h2:À retenir}
+    {@panel[color=green, title="L’essentiel"]:
+      {p:Non linéaire fini-dim ⟶ linéaire ∞-dim ; le résultat {@ref[to=lin]/} est la clé.}
+    }
+  }
+}

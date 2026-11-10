@@ -1,0 +1,27 @@
+{!-- Exemple TYPE : page web interactive. Passe lint + verify.
+     Scène autorisée ici : pas de {@slider} autour. --}
+{h1:Explorer la parabole $y = a\,x^2$}
+
+{@param[name="a", min=-3, max=3, step=0.1, value=1, label="a"]/}
+{@plot[fn="a*x^2", xrange="(-4,4)", title="y = a·x²"]/}
+
+{@tabs:
+  {@tabs.tab[title="Quiz"]:
+    {@quiz:
+      {q:Quelle est la dérivée de $x \mapsto x^2$ ?}
+      {opt[correct=true]: $2x$}
+      {opt: $x$}
+      {opt: $x^2/2$}
+      {explain: On applique $(x^n)' = n\,x^{n-1}$.}
+    }
+  }
+  {@tabs.tab[title="Méthode"]:
+    {@stepper[guided=true]:
+      {@step[title="Dériver"]: {@mtb: f'(x) = 2ax.}}
+      {@step[title="Annuler"]: {p:$f'(x) = 0 \iff x = 0$ : sommet en l’origine.}}
+    }
+  }
+  {@tabs.tab[title="À retenir"]:
+    {@reveal[title="Astuce"]: {p:Le signe de $a$ donne l’orientation de la parabole.}}
+  }
+}

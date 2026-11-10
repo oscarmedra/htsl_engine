@@ -1,160 +1,136 @@
 ---
 name: htsl-authoring
 description: >-
-  Rédige des ressources pédagogiques en HTSL (HyperText Structured Language) et
-  les livre, soit en source HTSL propre à coller dans le playground, soit en page
-  HTML autonome prête à ouvrir. À utiliser dès qu'on demande de créer un cours,
-  une fiche d'exercices, un polycopié, un diaporama/slides, un quiz, des
-  flashcards, un document/livre paginé ou PDF, avec formules mathématiques
-  (KaTeX), géométrie 2D/3D animée (Plotly/Three.js), graphes de fonctions,
-  tableaux de variations/signes, encadrés (théorème, définition, exemple…),
-  frises, ou toute « ressource de présentation et de rédaction pédagogique ».
-  Déclencheurs : HTSL, .htsl, cours, exercice, polycopié, diaporama, fiche,
-  théorème, formule, géométrie, quiz, flashcard, slides.
+  Produit tout type de contenu en HTSL (HyperText Structured Language) et le livre
+  (source HTSL à coller dans le playground, ou page HTML autonome prête à ouvrir).
+  HTSL sert à TOUT : livres et romans, cours / manuels / rapports / articles,
+  présentations en diapositives, pages web interactives, fiches d'exercices. À
+  utiliser dès qu'on demande de rédiger, mettre en forme, générer ou convertir une
+  ressource — avec ou sans formules (KaTeX), géométrie 2D/3D (Plotly/Three.js),
+  graphes, tableaux de variations/signes, encadrés (théorème, définition…), quiz,
+  flashcards, frises, slides, document paginé/PDF. Déclencheurs : HTSL, .htsl,
+  livre, roman, cours, manuel, rapport, polycopié, diaporama, slides, présentation,
+  fiche, exercice, quiz, théorème, formule, géométrie.
 ---
 
 # Rédiger en HTSL
 
-HTSL (**HyperText Structured Language**) compile un balisage léger `{tag:contenu}`
-en HTML, avec en prime : formules maths (KaTeX), géométrie 2D/3D et graphes
-(Plotly / Three.js), encadrés pédagogiques numérotés, slides, quiz, flashcards,
-documents paginés… C'est un outil de **rédaction et de présentation de ressources
-pédagogiques**. Ce skill t'apprend à l'écrire correctement et à le **livrer**.
+HTSL compile un balisage léger `{tag:contenu}` en HTML riche. **Il couvre tous les
+usages** : livres et romans, cours et manuels, rapports et articles, présentations
+en diapositives, pages web interactives. Ce skill t'apprend à l'écrire sans erreur,
+à **vérifier avec le moteur**, et à livrer.
 
-## 1. La syntaxe en 30 secondes
+## 0. Syntaxe en 30 secondes
 
 ```
-{tag:contenu}                      → <tag>contenu</tag>
-{tag.classe1.classe2:contenu}      → classes CSS
-{tag#monId:contenu}                → id
-{tag[a=1, b="val 2"]:contenu}      → attributs
-{img[src="a.png"]/}                → élément auto-fermant (pas de contenu)
-{@objet[attrs]:contenu}            → objet riche (maths, scène, encadré…)
-{@objet[attrs]/}                   → objet auto-fermant
-{!-- commentaire --}               → aucune sortie
-$formule$   et   $$formule$$       → raccourcis maths inline / bloc
-\{  \}  \:  \$                     → caractères littéraux (échappement)
+{tag:contenu}  ·  {tag.classe:…}  ·  {tag#id:…}  ·  {tag[a=1, b="val 2"]:…}
+{img[src="a.png"]/}        → élément auto-fermant
+{@objet[attrs]:…}  {@objet/}   → objet riche (maths, encadré, scène, slide…)
+{!-- commentaire --}       → aucune sortie
+$formule$  $$formule$$      → maths inline / bloc
+\{ \} \: \$                → caractères littéraux
 ```
 
-L'imbrication est illimitée : `{div#main.box[data-x=1]: {h1:Titre} {p:…}}`.
+Deux familles : **éléments HTML** (`h1 p ul li table strong em code a img figure…`,
+écrits SANS `@`) et **objets `@`** (tout le reste). Catalogue exhaustif :
+`reference/objects.md` — la source de vérité, **n'invente jamais un objet**.
 
-**Deux familles de briques** :
-- **éléments HTML** écrits en HTSL : `h1 h2 h3 p ul ol li table strong em code
-  a img figure blockquote div…` (voir `reference/objects.md`).
-- **objets `@`** : tout le reste (maths, géométrie, encadrés, slides, quiz…),
-  introspectés depuis le moteur. Ils ont alias, attributs et exemples.
+## 1. Choisir le format AVANT d'écrire
 
-## 2. Méthode (à suivre à chaque demande)
+Refaire un contenu long dans un autre format coûte cher. Décide d'abord :
 
-1. **Cerner l'intention pédagogique** : est-ce un cours à lire, une fiche
-   d'exercices, un diaporama projeté, un document à imprimer/PDF, une démo
-   interactive ? Cela détermine les objets conteneurs (§3) et le livrable (§4).
-2. **Choisir les objets justes** plutôt que du HTML brut : un théorème →
-   `{@theorem}`, pas `{div.theorem}` ; une correction → `{@reveal}` ou
-   `{solution:…}` d'un `{@exercise}` ; des étapes → `{@stepper}`. La liste
-   complète (125 objets, attributs, exemples) est dans
-   **`reference/objects.md`** — consulte-la, ne devine pas un attribut.
-3. **Écrire le HTSL** proprement, indenté, un bloc par idée. Pour les maths,
-   la géométrie, les composants/variables et les pièges, lis
-   **`reference/syntax.md`**.
-4. **Livrer** selon §4. Par défaut, fournis le **source HTSL** dans un bloc de
-   code ; si la personne veut « une page à ouvrir / envoyer / un fichier »,
-   produis la **page HTML autonome** (§4.2) avec le template fourni.
-5. **Vérifier** mentalement : chaque `{` a son `}` ; les attributs avec espaces
-   sont entre guillemets ; les objets conteneurs ne contiennent que leurs
-   enfants attendus (un `{@slider}` ne contient que des `{@slider.slide}`).
+| Intention (mots de l'utilisateur) | Format | Fiche |
+|---|---|---|
+| roman, nouvelle, livre, « à garder / imprimer », polycopié, rapport, manuel, cours long | **`{@document}`** paginé | `reference/book.md` (récit) · `reference/long-document.md` (pédagogie/pro) |
+| exposé, soutenance, conférence, « slides », diaporama, présentation projetée | **`{@slider}`** | `reference/slides.md` |
+| s'entraîner, réviser, page en ligne, démo interactive | **page interactive** (`{@quiz}`, `{@reveal}`, `{@tabs}`, `{@param}`…) | `reference/interactive.md` |
+| élément répété (badge, encadré maison, en-tête de partie) | **composant** `{!define}` | `reference/components.md` |
+| autre / doute | le composant le plus adapté — **en cas de doute, demande avant de commencer** | — |
 
-Des exemples complets prêts à adapter (cours, fiche d'exos, diaporama, document
-imprimable, démo interactive) sont dans **`reference/recipes.md`**.
+Charge **uniquement** la fiche du format choisi (elles disent quels objets utiliser,
+lesquels éviter, et les vérifs propres). Pour les maths/géométrie/composants en
+détail : `reference/syntax.md`.
 
-## 3. Les objets que tu utiliseras le plus
+## 2. Règle absolue : vérifier avec le moteur avant de livrer
 
-Catalogue exhaustif dans `reference/objects.md`. Les essentiels par intention :
+**Aucun fichier n'est livré sans ces trois étapes.** Les deux premières sont
+scriptées (`skills/htsl-authoring/scripts/`) :
 
-**Maths** (alias courts) : `{@mti: …}` inline (≡ `$…$`), `{@mtb: …}` bloc
-(≡ `$$…$$`), `{@mte[label=x]: …}` équation numérotée + `{@mtr[to=x]/}` renvoi,
-`{@mta}` align, `{@mts}` système, `{@mtc}` cas, `{@mof}` fraction, `{@mom}`
-matrice, `{@mov}` vecteur, `{@qty[value=, unit=]/}` grandeur physique,
-`{@ce: …}` chimie (mhchem).
+1. **lint** — compilation stricte, **0 erreur** :
+   ```bash
+   node skills/htsl-authoring/scripts/lint.mjs mon-fichier.htsl
+   ```
+2. **verify** — rendu + contrôles : formules invalides (KaTeX), **objets inexistants**
+   (`{@table}` au lieu de `{table}`…), balisage HTSL resté visible dans le rendu,
+   accolades déséquilibrées, **scène dynamique dans un `{@slider}`** :
+   ```bash
+   node skills/htsl-authoring/scripts/verify.mjs mon-fichier.htsl
+   ```
+   (Accepte un `.htsl` ou le `<script type="text/htsl">` d'un `.html`.)
+3. **vérif visuelle** — rendre dans un vrai navigateur, repérer les **débordements**
+   (page, diapositive, largeur), et **regarder** quelques pages/slides en capture
+   avant de livrer. Les scripts ne voient pas la mise en page ; cette étape si.
 
-**Encadrés pédagogiques** (numérotés, renvoi via `{@ref[to=…]/}`) :
-`{@theorem}` `{@definition}` `{@lemma}` `{@corollary}` `{@proposition}`
-`{@property}` `{@example}` `{@proof}` `{@remark}` `{@warning}` `{@notation}`
-`{@axiom}` … + `{@panel[color=,title=]}` (encadré neutre) et `{@badge}` inline.
+Si tu n'as pas de navigateur fiable sous la main, dis-le et livre le **source HTSL**
+(l'utilisateur le voit dans le playground) plutôt que d'affirmer qu'une page autonome
+« marche » sans l'avoir vue.
 
-**Pédagogie active** : `{@exercise[title=]}` (avec `{solution:…}` repliable),
-`{@quiz}` (`{q}` + `{opt[correct=true]}`), `{@flashcard}` (`{front}`/`{back}`),
-`{@reveal[title=]}` (spoiler), `{@stepper}`+`{@step}`, `{@checklist}`,
-`{@deflist}` (glossaire), `{@timeline}`+`{@event}`.
+## 3. Pièges du moteur (vérifiés — valables partout)
 
-**Mise en page** : `{@columns}`+`{@col}`, `{@tabs}`+`{@tabs.tab}`,
-`{@callout…}`, `{@codeblock[lang=]}` (verbatim).
+1. **Apostrophe droite `'` dans un ATTRIBUT** → erreur de parse. Les valeurs
+   d'attribut se mettent entre guillemets doubles : `title="L'énoncé"`. (Dans le
+   texte courant, `'` passe ; en français soigné, préfère l'apostrophe typographique
+   `’`.)
+2. **Espace seul entre deux éléments inline est supprimé** : `{em:a} {strong:b}` rend
+   `ab`. Idem `$x$ {em:…}`. Correctifs : mettre un **mot** entre les deux (`{em:a} et
+   {strong:b}`), inclure l'espace DANS un élément (`{em:a } {strong:b}` → mets l'espace
+   avant la `}`), ou insérer `​ ` (espace de largeur nulle **puis** espace). Ne
+   mets jamais d'espace juste avant un `$` fermant.
+3. **N'utilise que des objets qui existent.** `{@table}` n'existe pas → sortie cassée
+   silencieuse ; le tableau HTML s'écrit `{table:…}` (sans `@`). En cas de doute,
+   `verify.mjs` le signale (il liste tout `{@…}` absent du registre).
+4. **Accolades déséquilibrées près d'une formule** (`$A} : …`) → rendu faux sans
+   toujours lever d'erreur. Équilibre chaque `{`/`}` et chaque `$…$`.
+5. **Numérotation globale.** Les encadrés (`{@theorem}`…) et exercices sont numérotés
+   sur tout le fichier : renvoie à un élément par son **label** (`{@ref[to=…]/}`),
+   jamais « voir le théorème 3 ».
+6. **`{@mtr}` ≠ `{@ref}`** : `{@mtr[to=…]}` renvoie à une **équation** `{@mte}` ;
+   `{@ref[to=…]}` renvoie à un **encadré** (théorème, définition…). Les confondre
+   lève « référence inconnue ».
+7. **Contenu trop large** (formule, tableau, image) → le couper/réduire ; sur une
+   page web, le rendre défilable (vérif largeur mobile).
 
-**Présentations & documents** : `{@slider[transition=,autoplay=]}` +
-`{@slider.slide}` (diaporama) ; `{@document[numbers=true]}` + `{@document.page}`
-(polycopié/livre imprimable PDF) ; `{@pdf[src=,page=]/}` (visionneuse).
+## 4. Méthode pour les contenus longs
 
-**Visuel & données** : `{@plot[fn=,xrange=]}` (graphe de fonction, plusieurs
-courbes via `{@plot.curve}`), `{@param[name=,min=,max=]/}` (curseur interactif
-lié à un `{@plot}`), `{@chart[type=bar|pie|line|histogram]}`,
-`{@variations}` / `{@signs}` (tableaux), `{@numberline}` (droite graduée),
-`{@truthtable}` (table de vérité).
+- **Écris par morceaux** (chapitre, section, groupe de slides), **teste chaque
+  morceau dès qu'il est écrit** (lint+verify), puis assemble.
+- Si l'utilisateur fournit un **plan / programme / synopsis**, fais-en une liste de
+  contrôle et relis-la point par point à la fin.
+- **Envoie un point d'avancement** après chaque grande partie.
+- **Tout résultat chiffré est vérifié par du code** (Python/sympy/numpy) avant d'être
+  écrit ; tout code inclus est exécuté. Pas de texte qui se corrige lui-même
+  (« …non, en fait… ») : refais et réécris.
+- Factorise le balisage répété en **composants `{!define}`** plutôt que de recopier.
 
-**Géométrie** : scène 2D `{@mg2.scene: {@mg2.frame…/} …acteurs}`
-(point, circle, segment, polygon, droite, cpoint pour le plan complexe) ;
-scène 3D math `{@mg3.scene: {@mg3.space…/} …}` (point, vector, plane, sphere…) ;
-scène 3D animée WebGL `{@s3.scene: …}` (sphere, box, torus, surface z=f(x,y),
-curve paramétrique, vector, line, label + animations `{@s3.animate}`).
-Détails et règles (décor vs acteurs) dans `reference/syntax.md`.
+## 5. Livrer
 
-## 4. Livrer le résultat
-
-### 4.1 Source HTSL (défaut)
-
-Donne le HTSL dans un bloc ` ```htsl ` indenté. La personne le colle dans le
-**playground** (https://oscarmedra.github.io/htsl_engine/) ou tout éditeur
-intégrant `@noah-medra/htsl-core`. Ne mets **jamais** de balises HTML autour du
-HTSL dans ce mode.
-
-### 4.2 Page HTML autonome (quand on veut un fichier à ouvrir / envoyer)
-
-Copie `templates/standalone.html`, remplace le `<title>` et le contenu du
-`<script type="text/htsl">`. La page charge le moteur + le runtime depuis le CDN
-et fonctionne d'un double-clic (aucune installation). Points **non négociables**
-pour que tout s'affiche :
-
-- compiler **après `window.load`** et passer **`{ katex: window.katex }`** à
-  `compile` (KaTeX est chargé en `defer`) ;
-- injecter **`htsl_engine.mathCss`** dans un `<style>` (sinon encadrés, slides,
-  numéros d'équation et tableaux ne sont pas stylés — le runtime ne le fait pas) ;
-- charger **Plotly** si tu utilises `{@mg2/mg3/plot/chart}` ; **Three.js est
-  chargé seul** par le runtime pour `{@s3}` ; **mhchem** si tu utilises `{@ce}` ;
-- le runtime auto (`htsl.auto.global.js`, MutationObserver) hydrate ensuite les
-  scènes, slides, quiz, onglets… tout seul.
-
-Le template respecte déjà ces règles — pars de lui, ne réécris pas le `<script>`
-d'amorçage de mémoire.
-
-## 5. Sécurité & robustesse (ne jamais contourner)
-
-- Tout texte et toute valeur d'attribut sont **échappés** (anti-XSS). Le HTSL ne
-  produit jamais de JS exécutable : un `{script:…code…}` inline est rendu inerte.
-  Pour du dynamisme, utilise les objets (`{@param}`, `{@quiz}`, scènes…), pas du
-  JS injecté.
-- Les attributs dont la valeur contient un espace, une virgule, `(` `)` ou du
-  LaTeX **doivent** être entre guillemets : `center="(0,0)"`, `unit="m\cdot
-  s^{-2}"`, `fn="sin(x)/x"`.
-- Dans `{@codeblock}`, `{script}` et `{style}`, le corps est **verbatim** : ne
-  pas échapper `{` `}` `\` à la main.
-- En cas de doute sur un objet, son alias ou ses attributs : lis
-  `reference/objects.md`. Ne jamais inventer d'objet ou d'attribut absent du
-  catalogue.
+- Par défaut : **source HTSL** dans un bloc ```htsl ``` (collable dans le playground
+  https://oscarmedra.github.io/htsl_engine/). Jamais de HTML autour en ce mode.
+- « Une page à ouvrir / envoyer / un fichier » : **page HTML autonome** depuis
+  `templates/standalone.html` (CDN + runtime + `mathCss` ; compile après `window.load`
+  avec `{ katex }`). Charge Plotly pour `{@mg2/mg3/plot/chart}` ; Three.js est chargé
+  seul pour `{@s3}`.
+- **Message de livraison en 2 lignes** : ce qui a été produit et vérifié (0 erreur,
+  nombre de pages/slides regardés), **sans** résumer tout le contenu.
 
 ## Fichiers de ce skill
 
-| Fichier | Contenu |
-|---------|---------|
-| `reference/objects.md` | **Catalogue exhaustif** des 125 objets/éléments : chemin, alias, attributs, exemple. La source de vérité. |
-| `reference/syntax.md` | Syntaxe approfondie : maths, géométrie (décor/acteurs, scènes 3D animées, timeline), composants `{!define}` & variables `{!set}`, conversion HTML→HTSL, pièges courants. |
-| `reference/recipes.md` | Exemples complets prêts à adapter : cours, fiche d'exercices, diaporama, document imprimable, démo interactive. |
-| `templates/standalone.html` | Gabarit de page HTML autonome (CDN + runtime + mathCss), à remplir. |
+| Chemin | Contenu |
+|---|---|
+| `reference/objects.md` | **Catalogue exhaustif** (125 entrées) généré depuis le registre : chemin, alias, attributs, exemple. |
+| `reference/syntax.md` | Maths, géométrie (décor/acteurs, s3+timeline), composants/variables, HTML→HTSL, pièges. |
+| `reference/book.md` · `long-document.md` · `slides.md` · `interactive.md` · `components.md` | **Une fiche par type de production** : objets à utiliser / à éviter, vérifs propres. Charge celle du format choisi. |
+| `reference/recipes.md` | Mini-recettes variées (snippets). |
+| `examples/*.htsl` | **Un fichier complet par type**, qui passe lint + verify. Imite un exemple qui marche. |
+| `scripts/lint.mjs` · `verify.mjs` | Vérification exécutable (voir §2). |
+| `templates/standalone.html` | Gabarit de page autonome. |

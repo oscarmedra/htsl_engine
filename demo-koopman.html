@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Observables & opérateur de Koopman</title>
+
+    <script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.auto.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+    <style>
+      body {
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+        max-width: 960px; margin: 1.5rem auto; padding: 0 1.1rem; color: #1e293b;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="out"></div>
+
+    <script type="text/htsl" id="source">
+{@slider[transition=fade, loop=true]:
+
+  {@slider.slide:
+    {h1:Théorie des observables}
+    {h2:L'opérateur de Koopman}
+    {p:Comment rendre {strong:linéaire} une dynamique {strong:non linéaire} —
+    au prix de la dimension infinie.}
+    {p:{@badge[color=indigo]: B. O. Koopman, 1931} · {@badge[color=slate]: systèmes dynamiques}}
+  }
+
+  {@slider.slide:
+    {h2:Le problème}
+    {p:Un système dynamique à temps discret sur un espace d'états $\mathcal{M}$ :}
+    {@mtb: x_{k+1} = F(x_k), \qquad F : \mathcal{M} \to \mathcal{M}.}
+    {@warning[title="Difficulté"]:
+      {p:Quand $F$ est {strong:non linéaire}, il n'y a en général ni solution
+      explicite, ni superposition, ni analyse spectrale de la trajectoire.}
+    }
+  }
+
+  {@slider.slide:
+    {h2:L'idée de Koopman}
+    {@panel[color=indigo, title="Changer d'objet d'étude"]:
+      {p:Ne plus suivre l'{em:état} $x$, mais les {strong:observables} — les
+      fonctions de l'état. La dynamique y devient {strong:linéaire}, mais agit
+      dans un espace de dimension {strong:infinie}.}
+    }
+    {@columns:
+      {@col: {h3:État (non linéaire)} {@mtb: x \mapsto F(x)} {p:fini-dimensionnel, courbe.}}
+      {@col: {h3:Observables (linéaire)} {@mtb: g \mapsto \mathcal{K} g} {p:∞-dimensionnel, plat.}}
+    }
+  }
+
+  {@slider.slide:
+    {h2:Une observable}
+    {@definition[title="Observable", label=obs]:
+      {p:Une observable est une fonction à valeurs scalaires de l'état :
+      {@mtb: g : \mathcal{M} \to \mathbb{C}.}}
+      {p:Exemples : une coordonnée $g(x)=x_1$, une énergie, une mesure capteur.}
+    }
+    {@remark:
+      {p:L'ensemble des observables forme un {strong:espace vectoriel} (souvent
+      un Hilbert, ex. $L^2$). C'est là que tout se joue.}
+    }
+  }
+
+  {@slider.slide:
+    {h2:L'opérateur de Koopman}
+    {@definition[title="Opérateur de Koopman", label=koop]:
+      {p:$\mathcal{K}$ fait évoluer une observable en la {strong:composant} avec
+      la dynamique :}
+      {@mtb: (\mathcal{K} g)(x) = g\big(F(x)\big) = (g \circ F)(x).}
+    }
+    {p:Appliquer $\mathcal{K}$ = « avancer d'un pas, puis mesurer ».}
+  }
+
+  {@slider.slide:
+    {h2:$\mathcal{K}$ est linéaire}
+    {@theorem[title="Linéarité", label=lin]:
+      {p:Pour toutes observables $g,h$ et scalaires $\alpha,\beta$ :
+      {@mtb: \mathcal{K}(\alpha g + \beta h) = \alpha\,\mathcal{K} g + \beta\,\mathcal{K} h.}}
+    }
+    {@proof:
+      {p:$\mathcal{K}(\alpha g+\beta h) = (\alpha g+\beta h)\circ F
+      = \alpha\,(g\circ F) + \beta\,(h\circ F) = \alpha\,\mathcal{K}g+\beta\,\mathcal{K}h.$
+      La composition est linéaire en $g$, {em:quelle que soit} la non-linéarité de $F$.}
+    }
+    {p:C'est le résultat {@ref[to=lin]/} — la clé de toute la théorie.}
+  }
+
+  {@slider.slide:
+    {h2:Le compromis}
+    {@panel[color=amber, title="Rien n'est gratuit"]:
+      {p:On a échangé un problème {strong:non linéaire} de dimension {strong:finie}
+      contre un problème {strong:linéaire} de dimension {strong:infinie}.}
+    }
+    {p:Tout l'enjeu : travailler dans un sous-espace de dimension finie,
+    {em:invariant} par $\mathcal{K}$ — d'où les fonctions propres.}
+  }
+
+  {@slider.slide:
+    {h2:Fonctions propres de Koopman}
+    {@definition[title="Fonction propre", label=eig]:
+      {p:$\varphi$ est fonction propre de valeur propre $\lambda$ si
+      {@mte[label=eigeq]: \mathcal{K}\varphi = \lambda\,\varphi
+      \iff \varphi\big(F(x)\big) = \lambda\,\varphi(x).}}
+    }
+    {p:Une fonction propre évolue en se {strong:multipliant} par $\lambda$ à
+    chaque pas : la dynamique y est d'une simplicité totale (voir {@mtr[to=eigeq]/}).}
+  }
+
+  {@slider.slide:
+    {h2:Décomposition spectrale}
+    {p:Si une observable se développe sur les fonctions propres,
+    $g = \sum_j c_j\,\varphi_j$, alors son évolution est {strong:diagonale} :}
+    {@mtb: (\mathcal{K}^k g)(x) = \sum_{j} \lambda_j^{\,k}\, c_j\, \varphi_j(x).}
+    {@remark:
+      {p:$|\lambda_j|$ gouverne la croissance/décroissance, $\arg(\lambda_j)$ la
+      fréquence. On lit la dynamique {strong:dans le spectre}.}
+    }
+  }
+
+  {@slider.slide:
+    {h2:Un mode, une valeur propre}
+    {p:Un mode évolue en $\lambda^k$ : son amplitude est dictée par $|\lambda|$.}
+    {@mtb: |\lambda|^k : \quad 1,\; |\lambda|,\; |\lambda|^2,\; |\lambda|^3,\; \dots}
+    {@columns:
+      {@col:{@panel[color=green, title="|λ| < 1"]: {p:mode {strong:amorti} → 0}}}
+      {@col:{@panel[color=amber, title="|λ| = 1"]: {p:oscillation {strong:entretenue}}}}
+      {@col:{@panel[color=red, title="|λ| > 1"]: {p:mode {strong:instable}}}}
+    }
+  }
+
+  {@slider.slide:
+    {h2:Temps continu : le générateur}
+    {p:Pour $\dot{x} = f(x)$, le semi-groupe $\mathcal{K}^t$ a pour générateur}
+    {@mtb: \mathcal{L} g = f \cdot \nabla g, \qquad
+    \mathcal{K}^t = e^{t\mathcal{L}}.}
+    {p:Les valeurs propres de $\mathcal{L}$ sont les $\mu_j$ avec
+    $\lambda_j = e^{\mu_j t}$ : même spectre, lu en temps continu.}
+  }
+
+  {@slider.slide:
+    {h2:Dualité}
+    {@columns:
+      {@col:
+        {h3:Koopman}
+        {p:Transporte les {strong:observables} (fonctions).}
+        {@mtb: g \mapsto g \circ F}
+      }
+      {@col:
+        {h3:Perron–Frobenius}
+        {p:Transporte les {strong:densités} (mesures). Opérateur {strong:adjoint}.}
+        {@mtb: \langle \mathcal{K} g, \rho\rangle = \langle g, \mathcal{P}\rho\rangle}
+      }
+    }
+  }
+
+  {@slider.slide:
+    {h2:Et en pratique ? La DMD}
+    {@panel[color=teal, title="Dynamic Mode Decomposition"]:
+      {p:À partir de {strong:données} $\{x_0, x_1, \dots\}$ et d'un dictionnaire
+      d'observables, la DMD calcule une matrice qui {strong:approxime}
+      $\mathcal{K}$ en dimension finie → valeurs propres, modes, prévision.}
+    }
+    {@stepper:
+      {@step[title="Mesurer"]: {p:collecter des instantanés de l'état.}}
+      {@step[title="Lever"]: {p:choisir des observables $\{\psi_i\}$.}}
+      {@step[title="Régresser"]: {p:ajuster $K$ tel que $\Psi_{k+1} \approx K\,\Psi_k$.}}
+    }
+  }
+
+  {@slider.slide:
+    {h2:À retenir}
+    {@panel[color=green, title="L'essentiel"]:
+      {ul:
+        {li:Non linéaire + fini-dim ⟶ {strong:linéaire} + ∞-dim (lever dans les observables).}
+        {li:$\mathcal{K}$ est linéaire {em:par construction} : {@ref[to=lin]/}.}
+        {li:Les fonctions propres {@ref[to=eig]/} diagonalisent la dynamique ; le
+        {strong:spectre} encode croissance et fréquences.}
+        {li:La {strong:DMD} en est l'approximation data-driven.}
+      }
+    }
+    {p:{@badge[color=indigo]: Fin} Merci !}
+  }
+
+}
+    </script>
+
+    <script>
+      window.addEventListener("load", function () {
+        var style = document.createElement("style");
+        style.textContent = htsl_engine.mathCss;
+        document.head.appendChild(style);
+        var src = document.getElementById("source").textContent;
+        document.getElementById("out").innerHTML = htsl_engine.compile(src, {
+          katex: window.katex,
+          prettyPrint: true,
+        });
+      });
+    </script>
+  </body>
+</html>

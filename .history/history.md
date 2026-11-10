@@ -1121,3 +1121,18 @@ avec {katex}, injecter htsl_engine.mathCss (le runtime ne le fait pas), Plotly p
 mg2/mg3/plot/chart (Three.js chargé seul pour s3). Vérifié : 18 blocs htsl du skill
 compilent (2 bugs d'exemple corrigés : {@mtr} vs {@ref} ; {$children} hors corps) +
 standalone.html rendu navigateur (KaTeX + encadrés numérotés stylés). .docs/32.
+
+## Skill HTSL v2 : architecture par type + vérification scriptée
+
+Refonte du skill après retour d'usage. SKILL.md : table d'intentions (choisir le format
+avant d'écrire), vérification OBLIGATOIRE (lint+verify+visuel), pièges VÉRIFIÉS contre le
+moteur. Fiches par type chargées à la demande : book (romans), long-document (cours/
+manuels/rapports), slides, interactive, components. scripts/ : lint.mjs (compile strict),
+verify.mjs (formules via KaTeX en Node, objets inexistants via isKnownObject, balisage
+visible resté dans le rendu, accolades, scène dynamique dans un slider), _engine.mjs
+(résolveur portable $HTSL_CORE→npm→packages/core/dist). examples/ : un .htsl par type qui
+passe lint+verify. Pièges confirmés : ' dans attribut = erreur ; espace inline seul
+supprimé (fix ​ ) ; {@table} inexistant (c'est {table}) ; {@mtr}≠{@ref} ; numérotation
+globale → renvoi par label. Découverte de test (diaporama Koopman) : {@plot}/scène Plotly
+DANS un {@slider} fait boucler le runtime auto (page figée) ; plot seul ou slider seul OK
+→ documenté (slides.md) et détecté par verify.mjs. .docs/32 maj.

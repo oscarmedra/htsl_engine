@@ -1,0 +1,23 @@
+{!-- Exemple TYPE : livre / roman. Passe lint + verify. --}
+{@document[numbers=true, header="What Does Not Shine", footer="— roman"]:
+
+  {@document.page:
+    {h1:What Does Not Shine}
+    {p:{em:un roman en trois nuits}}
+  }
+
+  {@document.page:
+    {h1:Chapitre 1 — Le quai}
+    {p:La pluie n’avait pas cessé depuis trois jours, et le quai luisait d’une
+    lumière qui ne venait de nulle part.}
+    {blockquote:« On ne revient jamais au même port », disait sa mère.}
+    {hr/}
+    {p:Plus tard — bien plus tard — elle comprit qu’elle avait menti.}
+  }
+
+  {@document.page:
+    {h1:Chapitre 2 — La lettre}
+    {p:L’enveloppe portait son nom, mais pas son écriture. Elle la retourna
+    longtemps avant de l’ouvrir.}
+  }
+}

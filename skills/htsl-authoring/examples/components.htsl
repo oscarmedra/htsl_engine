@@ -1,0 +1,25 @@
+{!-- Exemple TYPE : composants personnalisés {!define}. Passe lint + verify. --}
+
+{!-- Un encadré « compétence » réutilisable --}
+{!define competence[code, color=teal]:
+  {@panel[color=indigo, title="Compétence {$code}"]:
+    {$children}
+  }
+}
+
+{!-- Un badge de niveau --}
+{!define niveau[n]:
+  {@badge[color=amber]: Niveau {$n}}
+}
+
+{!set matiere: Mathématiques}
+
+{h1:Référentiel — {$matiere}}
+
+{@competence[code="A1"]:
+  {p:{@niveau[n=1]/} Résoudre une équation du premier degré $ax + b = 0$.}
+}
+
+{@competence[code="A2"]:
+  {p:{@niveau[n=2]/} Factoriser une expression du second degré.}
+}

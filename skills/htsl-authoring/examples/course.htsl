@@ -1,0 +1,36 @@
+{!-- Exemple TYPE : document long / cours imprimable. Passe lint + verify. --}
+{@document[numbers=true, header="Analyse — L1"]:
+
+  {@document.page:
+    {h1:Chapitre 1 — Suites et limites}
+
+    {@panel[color=indigo, title="Objectifs"]:
+      {ul:
+        {li:Définir la limite d’une suite.}
+        {li:Reconnaître une suite convergente.}
+      }
+    }
+
+    {@definition[title="Limite finie", label=lim]:
+      {p:On dit que $\lim_{n\to\infty} u_n = \ell$ si tout intervalle ouvert
+      contenant $\ell$ contient tous les $u_n$ à partir d’un certain rang.}
+    }
+
+    {@theorem[title="Unicité", label=uni]:
+      {p:Si une suite converge, sa limite est {strong:unique}.}
+    }
+    {@proof:
+      {p:Supposons deux limites $\ell \neq \ell'$ ; en séparant deux intervalles
+      disjoints autour de chacune, on obtient une contradiction.}
+    }
+
+    {@example:
+      {p:$u_n = \dfrac{1}{n} \to 0$ : c’est la limite au sens de {@ref[to=lim]/}.}
+    }
+
+    {@panel[color=slate, title="Résumé"]:
+      {p:Convergence = tout voisinage de $\ell$ capture la suite ; la limite est
+      unique ({@ref[to=uni]/}).}
+    }
+  }
+}

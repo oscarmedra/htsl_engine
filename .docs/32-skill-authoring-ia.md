@@ -72,6 +72,38 @@ incomplet, silencieusement) :
 - Ailleurs / autre modèle : copier le dossier, ou coller `reference/objects.md` +
   `reference/syntax.md` en contexte.
 
+## v2 — architecture par type + vérification scriptée
+
+Après retour d'usage (recommandations tirées d'une section de génération HTSL
+éprouvée), le skill est restructuré :
+
+- **Table d'intentions** en tête de `SKILL.md` : choisir le format AVANT d'écrire
+  (livre/roman → `{@document}` ; exposé → `{@slider}` ; entraînement → page
+  interactive ; en cas de doute, demander).
+- **Une fiche par type** chargée à la demande : `reference/book.md` (romans),
+  `long-document.md` (cours/manuels/rapports), `slides.md`, `interactive.md`,
+  `components.md` — chacune dit les objets à utiliser, à éviter, et les vérifs propres.
+- **Vérification obligatoire scriptée** (`scripts/`) : `lint.mjs` (compile strict,
+  0 erreur) et `verify.mjs` (formules via KaTeX en Node, objets inexistants via
+  `isKnownObject`, balisage resté visible dans le rendu, accolades, et **scène
+  dynamique dans un `{@slider}`**). Résolveur de moteur portable (`_engine.mjs` :
+  `$HTSL_CORE` → paquet npm → `packages/core/dist`). Troisième étape = vérif visuelle
+  navigateur (débordements, captures), non scriptable.
+- **`examples/`** : un fichier complet par type (`book/course/slides/interactive/
+  components.htsl`) qui passe lint + verify — Claude imite un exemple qui marche.
+- **Pièges vérifiés contre le moteur** (et non recopiés) : apostrophe droite dans un
+  attribut → erreur (OK dans le texte) ; espace seul entre inline supprimé (fix
+  `​ ` ou un mot) ; `{@table}` inexistant (élément = `{table}`) ; `{@mtr}`
+  (équation) ≠ `{@ref}` (encadré) ; numérotation globale → renvoyer par label.
+
+### Découverte de test (opérateur de Koopman)
+
+En générant un diaporama de test, une **scène Plotly (`{@plot}`) placée dans un
+`{@slider}`** fait **boucler** le runtime auto (MutationObserver ↔ slider ↔ Plotly) en
+page autonome → page figée. `{@plot}` seul, ou un slider seul, fonctionnent. Documenté
+dans `slides.md` et détecté par `verify.mjs` ; règle : pas de scène dynamique dans un
+slider (illustrer autrement, sortir la scène, ou utiliser le playground).
+
 ## Note d'entretien
 
 L'index `.docs/README.md` n'est à jour que jusqu'au doc `12` (les docs 13→31 n'y
