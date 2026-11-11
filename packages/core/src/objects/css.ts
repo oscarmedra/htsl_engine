@@ -599,6 +599,13 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: flex !important; animation: none !important; }
 }
 
+/* Forced page break ({@pagebreak}) — print/PDF only, invisible on screen. And in
+   print, a heading is never left alone at the bottom of a page (B1 quick wins). */
+.htsl-pagebreak { break-after: page; height: 0; }
+@media print {
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; break-inside: avoid; }
+}
+
 /* Auto table of contents ({@toc}) — indented links to the headings (B2). */
 .htsl-toc { margin: 1em 0; }
 .htsl-toc-title { font-weight: 700; font-size: 1.1em; margin-bottom: 0.4em; color: #1f2937; }

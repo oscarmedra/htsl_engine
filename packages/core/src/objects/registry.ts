@@ -668,6 +668,16 @@ registerObject({
   example: "{@document.page: {h2:Titre} {p:Un paragraphe.}}",
 });
 registerObject({
+  path: "pagebreak",
+  contentModel: "void",
+  category: "document",
+  aliases: ["saut"],
+  description: "Saut de page forcé à l'impression / en PDF (sans effet à l'écran). À placer entre deux blocs.",
+  attrs: [],
+  snippet: "{@pagebreak/}",
+  example: "{p:Fin du chapitre.}{@pagebreak/}{h1:Chapitre suivant}",
+});
+registerObject({
   path: "toc",
   contentModel: "void",
   category: "document",

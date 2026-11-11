@@ -19,3 +19,13 @@ describe("D1/D2 — wide content scrolls horizontally", () => {
     expect(compile("{p:x}")).toBe("<p>x</p>");
   });
 });
+
+// B1 (quick wins) — forced page break.
+describe("B1 — forced page break", () => {
+  it("{@pagebreak} emits a break element", () => {
+    expect(compile("{p:a}{@pagebreak/}{p:b}")).toContain('<div class="htsl-pagebreak"');
+  });
+  it("supports the alias {@saut}", () => {
+    expect(compile("{@saut/}")).toContain("htsl-pagebreak");
+  });
+});

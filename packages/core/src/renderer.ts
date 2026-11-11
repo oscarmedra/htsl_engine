@@ -137,6 +137,7 @@ class Renderer {
     if (node.path === "stepper.step") return this.step(node, 0);
     if (node.path === "document") return this.pagedDoc(node);
     if (node.path === "document.page") return this.docPage(node, 0);
+    if (node.path === "pagebreak") return `<div class="htsl-pagebreak" aria-hidden="true"></div>`;
     if (node.path === "toc") return this.toc(node);
     if (node.path === "pdf") return this.pdfView(node);
     if (node.path === "columns") return this.columns(node);

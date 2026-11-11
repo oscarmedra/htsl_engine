@@ -17,3 +17,13 @@ pagination que le navigateur ne calcule qu'à l'impression. Les liens sautent au
 
 Tests : `toc.test.ts` (niveaux, ancres, cap, pas d'injection sans toc, slugs uniques).
 Suite 449.
+
+## B1 (gains rapides) — saut de page & titres non orphelins
+
+- `{@pagebreak/}` (alias `{@saut/}`) : saut de page forcé à l'impression/PDF, invisible
+  à l'écran (`.htsl-pagebreak { break-after: page }`).
+- `@media print { h1…h6 { break-after: avoid; break-inside: avoid } }` dans le core →
+  un titre n'est jamais laissé seul en bas d'une page (même en export autonome).
+
+La **pagination automatique mesurée** (couper un tableau/une liste entre deux pages)
+reste le gros chantier non traité (nécessite une mesure JS façon paged.js).
