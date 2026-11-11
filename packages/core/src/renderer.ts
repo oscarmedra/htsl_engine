@@ -84,7 +84,7 @@ class Renderer {
 
   renderTop(nodes: Node[]): string {
     this.ctx = buildMathContext(nodes);
-    this.calloutCtx = buildCalloutContext(nodes);
+    this.calloutCtx = buildCalloutContext(nodes, this.options.chapterNumbering ?? false);
     this.paramCtx = buildParamContext(nodes);
     const visible = nodes.filter((n) => n.type !== "comment");
     if (this.pretty) {

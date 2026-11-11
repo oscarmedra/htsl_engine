@@ -65,11 +65,12 @@ export function calloutId(tone: string, label: string): string {
 export interface CalloutInfo {
   name: string;
   tone: string;
-  number?: number;
+  /** Display number, e.g. "3" or "18.3" with per-chapter numbering. */
+  number?: string;
 }
 export interface CalloutTarget {
   name: string;
-  number: number;
+  number: string;
   id: string;
 }
 export interface CalloutContext {
@@ -78,19 +79,26 @@ export interface CalloutContext {
 }
 
 /** Pre-pass: number callouts per type and record labels (for {@ref}). */
-export function buildCalloutContext(nodes: Node[]): CalloutContext {
+/**
+ * Assign display numbers to callouts. With `chapterNumbering`, each `{h1}` opens a
+ * new chapter: counters reset and numbers become "<chapter>.<n>" (e.g. "18.3"),
+ * the book convention. Before the first `{h1}` (chapter 0) numbers stay plain.
+ */
+export function buildCalloutContext(nodes: Node[], chapterNumbering = false): CalloutContext {
   const counters = new Map<string, number>();
   const info = new Map<ObjectNode, CalloutInfo>();
   const labels = new Map<string, CalloutTarget>();
+  let chapter = 0;
 
   const walk = (node: Node): void => {
     if (node.type === "object") {
       const t = BY_PATH.get(node.path);
       if (t) {
-        let number: number | undefined;
+        let number: string | undefined;
         if (t.numbered) {
-          number = (counters.get(t.path) ?? 0) + 1;
-          counters.set(t.path, number);
+          const n = (counters.get(t.path) ?? 0) + 1;
+          counters.set(t.path, n);
+          number = chapterNumbering && chapter > 0 ? `${chapter}.${n}` : `${n}`;
         }
         info.set(node, { name: t.name, tone: t.tone, ...(number !== undefined ? { number } : {}) });
         const label = node.attrs["label"];
@@ -100,6 +108,11 @@ export function buildCalloutContext(nodes: Node[]): CalloutContext {
       }
       node.children.forEach(walk);
     } else if (node.type === "element") {
+      // A top heading starts a new chapter: reset the per-type counters.
+      if (chapterNumbering && node.tag === "h1") {
+        chapter += 1;
+        counters.clear();
+      }
       node.children.forEach(walk);
     }
   };

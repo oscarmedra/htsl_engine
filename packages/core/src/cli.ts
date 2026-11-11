@@ -66,12 +66,12 @@ function standalone(bodyHtml: string, title: string): string {
   );
 }
 
-async function cmdRender(file: string, out: string | null, full: boolean): Promise<number> {
+async function cmdRender(file: string, out: string | null, full: boolean, chapters: boolean): Promise<number> {
   const src = read(file);
   const katex = await loadKatex();
   let html: string;
   try {
-    html = compile(src, katex ? { katex } : {});
+    html = compile(src, { ...(katex ? { katex } : {}), chapterNumbering: chapters });
   } catch (e) {
     process.stderr.write(`htsl: ${(e as Error).message}\n`);
     return 1;
@@ -86,9 +86,9 @@ async function cmdRender(file: string, out: string | null, full: boolean): Promi
   return 0;
 }
 
-async function cmdPdf(file: string, out: string | null): Promise<number> {
+async function cmdPdf(file: string, out: string | null, chapters: boolean): Promise<number> {
   const target = out ?? file.replace(/\.[^.]+$/, "") + ".html";
-  const code = await cmdRender(file, target, true);
+  const code = await cmdRender(file, target, true, chapters);
   if (code === 0) {
     process.stdout.write(
       `\nPage prête à l'impression : ${target}\n` +
@@ -114,6 +114,7 @@ async function main(): Promise<void> {
   const outIdx = rest.findIndex((a) => a === "-o" || a === "--out");
   const out = outIdx >= 0 ? (rest[outIdx + 1] ?? null) : null;
   const full = rest.includes("--standalone");
+  const chapters = rest.includes("--chapters");
   const file = files[0];
 
   if (!cmd || cmd === "-h" || cmd === "--help" || cmd === "help") {
@@ -128,8 +129,8 @@ async function main(): Promise<void> {
 
   let code = 1;
   if (cmd === "check") code = await cmdCheck(file!);
-  else if (cmd === "render") code = await cmdRender(file!, out, full);
-  else if (cmd === "pdf") code = await cmdPdf(file!, out);
+  else if (cmd === "render") code = await cmdRender(file!, out, full, chapters);
+  else if (cmd === "pdf") code = await cmdPdf(file!, out, chapters);
   else {
     process.stderr.write(`htsl: commande inconnue « ${cmd} ».\n`);
     usage();

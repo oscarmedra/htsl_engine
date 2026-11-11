@@ -186,6 +186,9 @@ export interface KatexLike {
 export interface RenderOptions {
   /** Indent output with 2 spaces per level. Default: false (compact). */
   prettyPrint?: boolean;
+  /** Number theorems/definitions/… per chapter ("18.3") — each `{h1}` opens a new
+   *  chapter and resets the counters. Default: false (global numbering). */
+  chapterNumbering?: boolean;
   /** If provided, any tag not in this list is rendered as escaped text. */
   allowedTags?: string[];
   /** Optional KaTeX module. When absent, formulas fall back to raw LaTeX. */
