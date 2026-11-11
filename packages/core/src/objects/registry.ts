@@ -668,6 +668,20 @@ registerObject({
   example: "{@document.page: {h2:Titre} {p:Un paragraphe.}}",
 });
 registerObject({
+  path: "toc",
+  contentModel: "void",
+  category: "document",
+  aliases: ["sommaire"],
+  description:
+    "Sommaire automatique : liste les titres {h1}…{h6} du document avec un lien vers chacun. levels = profondeur max (défaut 3). title = titre du sommaire. (Les numéros de page réels dépendent de la pagination d'impression.)",
+  attrs: [
+    { name: "levels", type: "number", required: false, default: "3", description: "Profondeur maximale (1 à 6)." },
+    { name: "title", type: "string", required: false, description: "Titre affiché au-dessus (ex. « Sommaire »)." },
+  ],
+  snippet: "{@toc[title=${1:\"Sommaire\"}]/}",
+  example: "{@toc[title=\"Sommaire\", levels=2]/}",
+});
+registerObject({
   path: "pdf",
   contentModel: "void",
   category: "document",

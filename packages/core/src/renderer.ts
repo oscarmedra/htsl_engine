@@ -22,6 +22,7 @@ import { isPlotPath, renderPlot } from "./objects/plot.js";
 import { isChartPath, renderChart } from "./objects/chart.js";
 import { isVariationsPath, renderVariations } from "./objects/variations.js";
 import { isParamPath, renderParam, buildParamContext, paramValues, type ParamContext } from "./objects/param.js";
+import { buildTocContext, renderToc, type TocContext } from "./objects/toc.js";
 import { isSlidePath, deckTransition, parseDurationMs } from "./objects/slides.js";
 import {
   buildCalloutContext,
@@ -73,6 +74,7 @@ class Renderer {
   private ctx: MathContext = { numbers: new Map(), labels: new Map() };
   private calloutCtx: CalloutContext = { info: new Map(), labels: new Map() };
   private paramCtx: ParamContext = new Map();
+  private tocCtx: TocContext = { ids: new Map(), entries: [] };
   private flashcardCounter = 0;
   private exerciseCounter = 0;
 
@@ -86,6 +88,7 @@ class Renderer {
     this.ctx = buildMathContext(nodes);
     this.calloutCtx = buildCalloutContext(nodes, this.options.chapterNumbering ?? false);
     this.paramCtx = buildParamContext(nodes);
+    this.tocCtx = buildTocContext(nodes);
     const visible = nodes.filter((n) => n.type !== "comment");
     if (this.pretty) {
       return visible
@@ -134,6 +137,7 @@ class Renderer {
     if (node.path === "stepper.step") return this.step(node, 0);
     if (node.path === "document") return this.pagedDoc(node);
     if (node.path === "document.page") return this.docPage(node, 0);
+    if (node.path === "toc") return this.toc(node);
     if (node.path === "pdf") return this.pdfView(node);
     if (node.path === "columns") return this.columns(node);
     if (node.path === "columns.col") return `<div class="htsl-col">${this.childrenHtml(node)}</div>`;
@@ -290,6 +294,13 @@ class Renderer {
       footHtml +
       `</section>`
     );
+  }
+
+  /** Auto table of contents ({@toc}) — links to every heading (B2). */
+  private toc(node: ObjectNode): string {
+    const raw = (node.attrs["levels"] ?? "").trim();
+    const levels = /^[1-6]$/.test(raw) ? Number(raw) : 3;
+    return renderToc(this.tocCtx.entries, levels, node.attrs["title"]);
   }
 
   /** PDF viewer ({@pdf[src=…]}) — embeds a PDF from a link in the browser's native
@@ -707,7 +718,8 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return escapeHtml(rawHtml(node));
     }
-    const data = extra + this.rangeAttr(node) + this.componentAttr(node);
+    const tocId = this.tocCtx.ids.get(node);
+    const data = extra + this.rangeAttr(node) + this.componentAttr(node) + (tocId ? ` id="${tocId}"` : "");
     const open = openTag(node, data, this.options.sanitize ?? false);
     if (VOID_TAGS.has(node.tag)) return open;
     if (RAW_TEXT_TAGS.has(node.tag)) return this.rawText(node, open, data);
@@ -751,7 +763,8 @@ class Renderer {
     if (this.isBlocked(node.tag)) {
       return pad + escapeHtml(rawHtml(node));
     }
-    const data = extra + this.rangeAttr(node) + this.componentAttr(node);
+    const tocId = this.tocCtx.ids.get(node);
+    const data = extra + this.rangeAttr(node) + this.componentAttr(node) + (tocId ? ` id="${tocId}"` : "");
     const open = openTag(node, data, this.options.sanitize ?? false);
     if (VOID_TAGS.has(node.tag)) return pad + open;
     if (RAW_TEXT_TAGS.has(node.tag)) return pad + this.rawText(node, open, data);

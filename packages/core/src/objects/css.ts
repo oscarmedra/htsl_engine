@@ -599,6 +599,20 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: flex !important; animation: none !important; }
 }
 
+/* Auto table of contents ({@toc}) — indented links to the headings (B2). */
+.htsl-toc { margin: 1em 0; }
+.htsl-toc-title { font-weight: 700; font-size: 1.1em; margin-bottom: 0.4em; color: #1f2937; }
+.htsl-toc ul { list-style: none; padding-left: 0; margin: 0; }
+.htsl-toc li { margin: 0.15em 0; }
+.htsl-toc a { color: #334155; text-decoration: none; }
+.htsl-toc a:hover { color: #3b5bdb; text-decoration: underline; }
+.htsl-toc-l1 { font-weight: 600; margin-top: 0.5em; }
+.htsl-toc-l2 { padding-left: 1.2em; }
+.htsl-toc-l3 { padding-left: 2.4em; font-size: 0.95em; }
+.htsl-toc-l4 { padding-left: 3.6em; font-size: 0.9em; }
+.htsl-toc-l5 { padding-left: 4.8em; font-size: 0.88em; }
+.htsl-toc-l6 { padding-left: 6em; font-size: 0.86em; }
+
 /* Wide content scrolls horizontally instead of overflowing the page/screen,
    including mobile (D1/D2). Tables are wrapped in .htsl-scroll-x by the renderer;
    display formulas (.htsl-math-block already scrolls) + KaTeX display get it too. */
