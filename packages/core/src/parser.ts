@@ -70,7 +70,7 @@ class Parser {
       // Defensive: never spin without consuming a token.
       if (this.pos === before) this.advance();
     }
-    return nodes;
+    return this.trimEdge(nodes);
   }
 
   /* ----------------------------------------------------------------------- */
@@ -386,7 +386,7 @@ class Parser {
       this.collect(children, node);
       if (this.pos === before) this.advance();
     }
-    return children;
+    return this.trimEdge(children);
   }
 
   private parseTag(startLoc: Loc): string {
@@ -475,11 +475,24 @@ class Parser {
     return { type: "element", tag, id, classes, attrs, selfClosing, children, loc, ...(range ? { range } : {}) };
   }
 
-  /** Push a node, dropping whitespace-only text nodes (insignificant layout). */
+  /** Push a node. A whitespace-only text node is kept **between** two siblings (it
+   *  is a significant inline word separator — HTML behaviour), but dropped when it
+   *  is leading (no previous sibling). Trailing ones are trimmed by {@link trimEdge}
+   *  once the sibling list is complete. */
   private collect(target: Node[], node: Node | null): void {
     if (node === null) return;
-    if (node.type === "text" && node.value.trim() === "") return;
+    if (node.type === "text" && node.value.trim() === "" && target.length === 0) return;
     target.push(node);
+  }
+
+  /** Drop a trailing whitespace-only text node from a finished sibling list. */
+  private trimEdge(nodes: Node[]): Node[] {
+    while (nodes.length > 0) {
+      const last = nodes[nodes.length - 1]!;
+      if (last.type === "text" && last.value.trim() === "") nodes.pop();
+      else break;
+    }
+    return nodes;
   }
 
   private peek(): Token {

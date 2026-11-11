@@ -293,7 +293,12 @@ class Lexer {
         this.push("COMMA", ",", loc);
         return;
       case '"':
-        this.lexString();
+        this.lexString('"');
+        return;
+      case "'":
+        // Single-quoted attribute value (handy for French: title='l'exemple' needs
+        // the apostrophe inside double quotes, but title="l'exemple" also works).
+        this.lexString("'");
         return;
       default:
         if (/[0-9]/.test(ch) || (ch === "-" && /[0-9]/.test(this.peek(1)))) {
@@ -367,7 +372,7 @@ class Lexer {
     this.push("IDENT", value, loc);
   }
 
-  private lexString(): void {
+  private lexString(quote = '"'): void {
     const loc = this.loc();
     this.advance(); // opening quote
     let value = "";
@@ -375,7 +380,7 @@ class Lexer {
       const ch = this.peek();
       if (ch === "\\") {
         const next = this.peek(1);
-        if (next === '"' || next === "\\") {
+        if (next === quote || next === "\\") {
           this.advance();
           value += this.advance();
           continue;
@@ -383,7 +388,7 @@ class Lexer {
         value += this.advance();
         continue;
       }
-      if (ch === '"') {
+      if (ch === quote) {
         this.advance();
         this.push("STRING", value, loc);
         return;
@@ -446,6 +451,12 @@ class Lexer {
           value += this.advance();
           continue;
         }
+        // Only brace-closed math ({@math…:…}) ends on `}`. In `$…$` / `$$…$$` a lone
+        // `}` is literal LaTeX (e.g. `$a \} b$`, a stray `}`), not the HTSL closer.
+        if (frame.closer !== "brace") {
+          value += this.advance();
+          continue;
+        }
         flush();
         const loc = this.loc();
         const start = this.pos;
@@ -500,6 +511,11 @@ class Lexer {
     const loc = this.loc();
     const start = this.pos;
     const js = frame.tag === "script";
+    // `{style}`/`{script}` hold real CSS/JS: tracking strings & comments lets an
+    // unbalanced brace inside a string ("}") not close the block. A `{@codeblock}`
+    // holds arbitrary code (any language, French prose) where a lone apostrophe must
+    // stay literal — so there we only count braces, no string/comment smartness.
+    const smart = frame.tag !== "codeblock";
     let value = "";
     let depth = 0;
 
@@ -511,12 +527,12 @@ class Lexer {
       const ch = this.peek();
 
       // Strings & template literals — copied verbatim, braces inside ignored.
-      if (ch === '"' || ch === "'" || (js && ch === "`")) {
+      if (smart && (ch === '"' || ch === "'" || (js && ch === "`"))) {
         value += this.consumeRawString(ch);
         continue;
       }
       // Block comments (JS and CSS).
-      if (ch === "/" && this.peek(1) === "*") {
+      if (smart && ch === "/" && this.peek(1) === "*") {
         value += this.advance();
         value += this.advance();
         while (!this.eof() && !(this.peek() === "*" && this.peek(1) === "/")) value += this.advance();
@@ -527,7 +543,7 @@ class Lexer {
         continue;
       }
       // Line comments (JS only — `//` is not a CSS comment and may appear in URLs).
-      if (js && ch === "/" && this.peek(1) === "/") {
+      if (smart && js && ch === "/" && this.peek(1) === "/") {
         while (!this.eof() && this.peek() !== "\n") value += this.advance();
         continue;
       }

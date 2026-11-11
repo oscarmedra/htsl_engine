@@ -66,12 +66,14 @@ describe("parser — syntax (§2)", () => {
 });
 
 describe("parser — nesting", () => {
-  it("parses nested elements and drops layout whitespace", () => {
+  it("trims leading/trailing whitespace but keeps separators between siblings", () => {
     const el = firstElement("{div.box:\n  {p:Bonjour}\n  {span.red:Important}\n}");
-    expect(el.children.map((c) => c.type)).toEqual(["element", "element"]);
-    const [p, span] = el.children as ElementNode[];
-    expect(p?.tag).toBe("p");
-    expect(span?.classes).toEqual(["red"]);
+    // Leading "\n  " and trailing "\n" are trimmed; the whitespace between the two
+    // siblings is kept (a significant inline word separator — HTML behaviour).
+    expect(el.children.map((c) => c.type)).toEqual(["element", "text", "element"]);
+    const els = el.children.filter((c) => c.type === "element") as ElementNode[];
+    expect(els[0]?.tag).toBe("p");
+    expect(els[1]?.classes).toEqual(["red"]);
   });
 
   it("preserves the AST shape from the spec", () => {

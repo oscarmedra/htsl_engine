@@ -726,6 +726,9 @@ class Renderer {
     const pad = "  ".repeat(indent);
     switch (node.type) {
       case "text":
+        // Block context: a whitespace-only run is insignificant (the line break
+        // between siblings already separates them). Inline runs use compact().
+        if (node.value.trim() === "") return "";
         return pad + this.textHtml(node, node.value.trim());
       case "comment":
         return "";
@@ -752,7 +755,9 @@ class Renderer {
     if (VOID_TAGS.has(node.tag)) return pad + open;
     if (RAW_TEXT_TAGS.has(node.tag)) return pad + this.rawText(node, open, data);
 
-    const children = node.children.filter((c) => c.type !== "comment");
+    const children = node.children.filter(
+      (c) => c.type !== "comment" && !(c.type === "text" && c.value.trim() === ""),
+    );
     if (children.length === 0) {
       return `${pad}${open}</${node.tag}>`;
     }
