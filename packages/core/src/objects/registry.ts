@@ -159,6 +159,18 @@ export function listObjects(): RegistryEntry[] {
     .sort((a, b) => a.path.localeCompare(b.path));
 }
 
+/**
+ * The whole registry as a JSON-serialisable schema (E3): every object/element with
+ * its aliases, content model, category, full attribute schema (type, required,
+ * default, allowed values, description), a snippet and a minimal example. Meant for
+ * tooling, the reference documentation and AI assistants.
+ */
+export function objectsSchema(): ObjectMeta[] {
+  return [...OBJECTS.values()]
+    .map((m) => ({ ...m, aliases: [...m.aliases], attrs: m.attrs.map((a) => ({ ...a })) }))
+    .sort((a, b) => a.path.localeCompare(b.path));
+}
+
 export function describeObject(pathOrAlias: string): ObjectMeta | null {
   return OBJECTS.get(resolvePath(pathOrAlias)) ?? null;
 }

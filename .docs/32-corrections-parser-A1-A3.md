@@ -44,3 +44,20 @@ et le signalement d'erreurs de l'éditeur.
 - Erreurs de syntaxe récupérées par le parseur tolérant également remontées.
 
 Tests : `diagnose.test.ts` (A4×5, A5×4). Suite : 431.
+
+## D1 / D2 — contenus larges (tableaux, formules)
+
+Les `<table>` (y compris `{@truthtable}`) sont désormais enveloppés par le renderer
+dans `<div class="htsl-scroll-x">` → **défilement horizontal** quand c'est plus large
+que la page/l'écran (et sur mobile), au lieu de déborder. `.katex-display` et
+`.htsl-math-block` (déjà) scrollent aussi. En impression, le défilement redevient
+`visible` (rien n'est coupé). Tests `wide-content.test.ts`.
+
+## E3 — schéma JSON de référence des objets
+
+`objectsSchema()` (exporté) renvoie **tout** le registre, sérialisable en JSON : chaque
+objet/élément avec alias, content model, catégorie, **schéma d'attributs** (type,
+requis, défaut, valeurs, description), snippet et exemple minimal. Pour outils, doc de
+référence et assistants IA. Fichier généré : `packages/core/schema/htsl-objects.schema.json`
+(125 entrées) via `npm run -w @noah-medra/htsl-core schema`. Tests `schema.test.ts`.
+Suite : 437.

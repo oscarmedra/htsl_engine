@@ -1,0 +1,3883 @@
+{
+  "generated": "2026-11-11",
+  "count": 125,
+  "objects": [
+    {
+      "path": "a",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Lien hypertexte.",
+      "attrs": [
+        {
+          "name": "href",
+          "type": "string",
+          "required": false,
+          "description": "URL de destination."
+        }
+      ],
+      "snippet": "{a[href=${1:\"https://exemple.fr\"}]:${2:lien}}",
+      "example": "{a[href=\"https://exemple.fr\"]:un lien}"
+    },
+    {
+      "path": "audio",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Audio (avec contrôles natifs).",
+      "attrs": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": false,
+          "description": "URL du son (ou utiliser {source}/)."
+        },
+        {
+          "name": "controls",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Afficher les contrôles de lecture."
+        },
+        {
+          "name": "autoplay",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Lecture automatique."
+        },
+        {
+          "name": "loop",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Lecture en boucle."
+        },
+        {
+          "name": "muted",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Démarrer sans le son."
+        }
+      ],
+      "snippet": "{audio[src=${1:\"son.mp3\"}, controls]:}",
+      "example": "{audio[src=\"son.mp3\", controls]:}"
+    },
+    {
+      "path": "badge",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "pill",
+        "tag",
+        "etiquette"
+      ],
+      "description": "Petite étiquette inline colorée. Attribut color (mêmes couleurs que {@panel}).",
+      "attrs": [
+        {
+          "name": "color",
+          "type": "enum",
+          "required": false,
+          "default": "slate",
+          "values": [
+            "slate",
+            "indigo",
+            "blue",
+            "green",
+            "red",
+            "amber",
+            "violet",
+            "teal"
+          ],
+          "description": "Couleur (défaut : slate)."
+        }
+      ],
+      "snippet": "{@badge[color=${1:green}]: ${2:Nouveau}}",
+      "example": "{p:{@badge[color=green]: Nouveau} une fonctionnalité.}",
+      "kind": "object"
+    },
+    {
+      "path": "blockquote",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Citation en bloc.",
+      "attrs": [],
+      "snippet": "{blockquote:${1:citation}}",
+      "example": "{blockquote:Une citation.}"
+    },
+    {
+      "path": "callout.algorithm",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "algorithm",
+        "algorithme",
+        "algo"
+      ],
+      "description": "Encadré « Algorithme » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@algorithm: ${1:contenu}}",
+      "example": "{@algorithm: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.axiom",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "axiom",
+        "axiome"
+      ],
+      "description": "Encadré « Axiome » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@axiom: ${1:contenu}}",
+      "example": "{@axiom: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.claim",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "claim",
+        "assertion"
+      ],
+      "description": "Encadré « Assertion » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@claim: ${1:contenu}}",
+      "example": "{@claim: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.conjecture",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "conjecture"
+      ],
+      "description": "Encadré « Conjecture » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@conjecture: ${1:contenu}}",
+      "example": "{@conjecture: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.construction",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "construction",
+        "constr"
+      ],
+      "description": "Encadré « Construction » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@construction: ${1:contenu}}",
+      "example": "{@construction: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.corollary",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "corollary",
+        "corollaire",
+        "cor"
+      ],
+      "description": "Encadré « Corollaire » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@corollary: ${1:contenu}}",
+      "example": "{@corollary: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.definition",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "definition",
+        "def"
+      ],
+      "description": "Encadré « Définition » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@definition: ${1:contenu}}",
+      "example": "{@definition: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.example",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "example",
+        "exemple",
+        "ex"
+      ],
+      "description": "Encadré « Exemple » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@example: ${1:contenu}}",
+      "example": "{@example: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.hypothesis",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "hypothesis",
+        "assumption",
+        "hypothese",
+        "hyp"
+      ],
+      "description": "Encadré « Hypothèse » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@hypothesis: ${1:contenu}}",
+      "example": "{@hypothesis: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.lemma",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "lemma",
+        "lemme",
+        "lem"
+      ],
+      "description": "Encadré « Lemme » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@lemma: ${1:contenu}}",
+      "example": "{@lemma: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.notation",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "notation"
+      ],
+      "description": "Encadré « Notation » — attributs optionnels title.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        }
+      ],
+      "snippet": "{@notation: ${1:contenu}}",
+      "example": "{@notation: …}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.observation",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "observation",
+        "obs"
+      ],
+      "description": "Encadré « Observation » — attributs optionnels title.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        }
+      ],
+      "snippet": "{@observation: ${1:contenu}}",
+      "example": "{@observation: …}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.proof",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "proof",
+        "preuve",
+        "demo"
+      ],
+      "description": "Encadré « Démonstration » — attributs optionnels title.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        }
+      ],
+      "snippet": "{@proof: ${1:contenu}}",
+      "example": "{@proof: …}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.property",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "property",
+        "propriete",
+        "prop"
+      ],
+      "description": "Encadré « Propriété » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@property: ${1:contenu}}",
+      "example": "{@property: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.proposition",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "proposition"
+      ],
+      "description": "Encadré « Proposition » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@proposition: ${1:contenu}}",
+      "example": "{@proposition: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.ref",
+      "contentModel": "void",
+      "category": "document",
+      "aliases": [
+        "ref"
+      ],
+      "description": "Renvoi cliquable vers un encadré numéroté (attribut to = son label).",
+      "attrs": [
+        {
+          "name": "to",
+          "type": "string",
+          "required": true,
+          "description": "Label de l'encadré cible."
+        }
+      ],
+      "snippet": "{@ref[to=${1:pyth}]/}",
+      "example": "{@ref[to=pyth]/}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.remark",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "remark",
+        "remarque",
+        "rem"
+      ],
+      "description": "Encadré « Remarque » — attributs optionnels title.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        }
+      ],
+      "snippet": "{@remark: ${1:contenu}}",
+      "example": "{@remark: …}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.theorem",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "theorem",
+        "theoreme",
+        "thm"
+      ],
+      "description": "Encadré « Théorème » (numéroté) — attributs optionnels title, label.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour un renvoi {@ref}."
+        }
+      ],
+      "snippet": "{@theorem: ${1:contenu}}",
+      "example": "{@theorem: {p:énoncé}}",
+      "kind": "object"
+    },
+    {
+      "path": "callout.warning",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "warning",
+        "attention"
+      ],
+      "description": "Encadré « Attention » — attributs optionnels title.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre court affiché après le numéro."
+        }
+      ],
+      "snippet": "{@warning: ${1:contenu}}",
+      "example": "{@warning: …}",
+      "kind": "object"
+    },
+    {
+      "path": "chart",
+      "contentModel": "html",
+      "category": "géométrie",
+      "aliases": [
+        "graphique"
+      ],
+      "description": "Graphique de données (Plotly) : type bar|pie|line|histogram. Points via {pt[x=…, y=…]/} ; histogramme via l'attribut values=\"a,b,c\".",
+      "attrs": [
+        {
+          "name": "type",
+          "type": "enum",
+          "required": false,
+          "default": "bar",
+          "values": [
+            "bar",
+            "pie",
+            "line",
+            "histogram"
+          ],
+          "description": "Type de graphique."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre."
+        },
+        {
+          "name": "xtitle",
+          "type": "string",
+          "required": false,
+          "description": "Titre de l'axe X."
+        },
+        {
+          "name": "ytitle",
+          "type": "string",
+          "required": false,
+          "description": "Titre de l'axe Y."
+        },
+        {
+          "name": "values",
+          "type": "string",
+          "required": false,
+          "description": "Valeurs « a,b,c » (histogramme)."
+        },
+        {
+          "name": "bins",
+          "type": "number",
+          "required": false,
+          "description": "Nombre de classes (histogramme)."
+        }
+      ],
+      "snippet": "{@chart[type=${1:\"bar\"}, title=${2:\"Titre\"}]:\n  {pt[x=${3:\"A\"}, y=${4:10}]/}\n  {pt[x=${5:\"B\"}, y=${6:20}]/}\n}",
+      "example": "{@chart[type=\"bar\", title=\"Notes\"]:\n  {pt[x=\"Lun\", y=12]/}\n  {pt[x=\"Mar\", y=19]/}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "checklist",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "todo",
+        "cases"
+      ],
+      "description": "Liste à cases à cocher (natives, cochables) : enfants {item:…} ({item[checked=true]:…} = déjà coché).",
+      "attrs": [],
+      "snippet": "{@checklist:\n  {item: ${1:première tâche}}\n  {item: ${2:deuxième tâche}}\n}",
+      "example": "{@checklist:\n  {item[checked=true]: Poser l'équation}\n  {item: Calculer le discriminant}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "code",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Code en ligne.",
+      "attrs": [],
+      "snippet": "{code:${1:code}}",
+      "example": "{p:appelez {code:f(x)}}"
+    },
+    {
+      "path": "codeblock",
+      "contentModel": "raw",
+      "category": "structure",
+      "aliases": [
+        "listing",
+        "source"
+      ],
+      "description": "Bloc de code : contenu pris VERBATIM (les { } et \\ n'ont pas besoin d'être échappés). Attribut lang → classe language-… (compatible highlight.js si chargé).",
+      "attrs": [
+        {
+          "name": "lang",
+          "type": "string",
+          "required": false,
+          "description": "Langage (python, js, c…) pour la coloration."
+        }
+      ],
+      "snippet": "{@codeblock[lang=${1:python}]:\n${2:code}\n}",
+      "example": "{@codeblock[lang=python]:\ndef carre(x):\n    return x * x\n}",
+      "kind": "object"
+    },
+    {
+      "path": "columns",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "colonnes"
+      ],
+      "description": "Colonnes côte à côte : contient des {@col:…} (empilées sur petit écran).",
+      "attrs": [],
+      "snippet": "{@columns:\n  {@col: ${1:gauche}}\n  {@col: ${2:droite}}\n}",
+      "example": "{@columns:\n  {@col: {h3:Énoncé} {p:…}}\n  {@col: {h3:Solution} {p:…}}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "columns.col",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "col",
+        "colonne"
+      ],
+      "description": "Une colonne d'un {@columns:…} (peut contenir n'importe quel HTSL).",
+      "attrs": [],
+      "snippet": "{@col: ${1:contenu}}",
+      "example": "{@col: {p:Contenu de la colonne.}}",
+      "kind": "object"
+    },
+    {
+      "path": "deflist",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "glossaire",
+        "definitions"
+      ],
+      "description": "Liste de définitions / glossaire : paires {term:…} / {def:…} → <dl>.",
+      "attrs": [],
+      "snippet": "{@deflist:\n  {term: ${1:Terme}} {def: ${2:définition}}\n}",
+      "example": "{@deflist:\n  {term: Vitesse} {def: distance parcourue par unité de temps}\n  {term: Accélération} {def: variation de la vitesse}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "div",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Conteneur (avec classes CSS).",
+      "attrs": [
+        {
+          "name": "class",
+          "type": "string",
+          "required": false,
+          "description": "Classes CSS (ex. Tailwind)."
+        }
+      ],
+      "snippet": "{div[class=${1:\"\"}]:${2:contenu}}",
+      "example": "{div[class=\"box\"]:contenu}"
+    },
+    {
+      "path": "document",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "livre",
+        "pages"
+      ],
+      "description": "Document paginé pour l'impression / PDF : contient des {@document.page:…}. Chaque page démarre sur une nouvelle feuille à l'impression ; si son contenu déborde, il se poursuit tout seul sur la feuille suivante (rien n'est coupé). Idéal pour rédiger un livre.",
+      "attrs": [
+        {
+          "name": "format",
+          "type": "string",
+          "required": false,
+          "default": "a4",
+          "description": "Format de la feuille (défaut a4). Noms : a0–a10, b0–b10, c0–c10, letter, legal, tabloid, ledger, executive, statement, dl, card, slide (16:9), slide43 (4:3). Ou taille libre entre guillemets : format=\"300x400\" (mm), format=\"30x40cm\", format=\"8.5x11in\"."
+        },
+        {
+          "name": "numbers",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Numéroter les pages (bas de page)."
+        },
+        {
+          "name": "mode",
+          "type": "enum",
+          "required": false,
+          "default": "flow",
+          "values": [
+            "flow",
+            "book"
+          ],
+          "description": "flow : feuilles empilées (défaut). book : lecture comme un vrai livre, on feuillette page par page (flèches / clic)."
+        },
+        {
+          "name": "grid",
+          "type": "enum",
+          "required": false,
+          "default": "none",
+          "values": [
+            "none",
+            "lines",
+            "squares",
+            "dots"
+          ],
+          "description": "Cadrillage de fond appliqué à toutes les pages (aide à l'écriture). lines : lignes. squares : quadrillage. dots : points. (Coche « Graphiques d'arrière-plan » pour l'imprimer.)"
+        },
+        {
+          "name": "header",
+          "type": "string",
+          "required": false,
+          "description": "En-tête courant répété en haut de chaque page."
+        },
+        {
+          "name": "footer",
+          "type": "string",
+          "required": false,
+          "description": "Pied de page courant répété en bas de chaque page."
+        }
+      ],
+      "snippet": "{@document:\n  {@document.page: ${1:Contenu de la première page}}\n  {@document.page: ${2:Contenu de la deuxième page}}\n}",
+      "example": "{@document[numbers=true]:\n  {@document.page: {h1:Chapitre 1} {p:Le début de l'histoire…}}\n  {@document.page: {h1:Chapitre 2} {p:La suite…}}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "document.page",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [],
+      "description": "Une page d'un {@document:…} (chemin complet, comme {@slider.slide}, pour ne pas occuper le nom court « page »). On y écrit librement ; à l'impression elle occupe une feuille, et son trop-plein continue automatiquement sur la feuille suivante. grid/header/footer surchargent, pour cette page, les valeurs du document.",
+      "attrs": [
+        {
+          "name": "grid",
+          "type": "enum",
+          "required": false,
+          "values": [
+            "none",
+            "lines",
+            "squares",
+            "dots"
+          ],
+          "description": "Cadrillage de cette page seule (surcharge le document)."
+        },
+        {
+          "name": "header",
+          "type": "string",
+          "required": false,
+          "description": "En-tête de cette page seule (surcharge le document)."
+        },
+        {
+          "name": "footer",
+          "type": "string",
+          "required": false,
+          "description": "Pied de cette page seule (surcharge le document)."
+        }
+      ],
+      "snippet": "{@document.page: ${1:contenu de la page}}",
+      "example": "{@document.page: {h2:Titre} {p:Un paragraphe.}}",
+      "kind": "object"
+    },
+    {
+      "path": "em",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Texte en italique.",
+      "attrs": [],
+      "snippet": "{em:${1:texte}}",
+      "example": "{p:de l'{em:italique} ici}"
+    },
+    {
+      "path": "exercise",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "exercice"
+      ],
+      "description": "Exercice numéroté automatiquement (« Exercice N »). Un enfant {solution:…} devient une correction repliable. Attribut title optionnel.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Intitulé affiché après le numéro."
+        }
+      ],
+      "snippet": "{@exercise[title=${1:\"…\"}]:\n  ${2:énoncé}\n  {solution: ${3:correction}}\n}",
+      "example": "{@exercise[title=\"Second degré\"]:\n  {p:Résoudre $x^2 - 2x - 3 = 0$.}\n  {solution: {p:$x_1 = 3$, $x_2 = -1$.}}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "figcaption",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Légende d'une figure.",
+      "attrs": [],
+      "snippet": "{figcaption:${1:Légende}}",
+      "example": "{figcaption:Figure 1.}"
+    },
+    {
+      "path": "figure",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Figure (image + légende).",
+      "attrs": [],
+      "snippet": "{figure:{img[src=${1:\"image.png\"}, alt=${2:\"description\"}]/}{figcaption:${3:Légende}}}",
+      "example": "{figure:{img[src=\"schema.png\", alt=\"schéma\"]/}{figcaption:Figure 1 — le schéma}}"
+    },
+    {
+      "path": "flashcard",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "carte"
+      ],
+      "description": "Carte à retourner : {front:…} (recto) et {back:…} (verso). Clic = retourne (CSS pur).",
+      "attrs": [],
+      "snippet": "{@flashcard:\n  {front: ${1:Question}}\n  {back: ${2:Réponse}}\n}",
+      "example": "{@flashcard:\n  {front: $e^{i\\pi}+1$}\n  {back: $= 0$}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "h1",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Titre de niveau 1.",
+      "attrs": [],
+      "snippet": "{h1:${1:Titre}}",
+      "example": "{h1:Titre principal}"
+    },
+    {
+      "path": "h2",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Titre de niveau 2.",
+      "attrs": [],
+      "snippet": "{h2:${1:Sous-titre}}",
+      "example": "{h2:Sous-titre}"
+    },
+    {
+      "path": "h3",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Titre de niveau 3.",
+      "attrs": [],
+      "snippet": "{h3:${1:Titre}}",
+      "example": "{h3:Titre}"
+    },
+    {
+      "path": "hr",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Séparateur horizontal.",
+      "attrs": [],
+      "snippet": "{hr/}",
+      "example": "{hr/}"
+    },
+    {
+      "path": "iframe",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Cadre embarqué (YouTube, carte, etc.).",
+      "attrs": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "URL à embarquer."
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "description": "Largeur (px)."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "description": "Hauteur (px)."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre accessible du cadre."
+        },
+        {
+          "name": "allowfullscreen",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Autoriser le plein écran."
+        }
+      ],
+      "snippet": "{iframe[src=${1:\"https://www.youtube.com/embed/ID\"}, width=${2:\"560\"}, height=${3:\"315\"}]/}",
+      "example": "{iframe[src=\"https://www.youtube.com/embed/ID\", width=\"560\", height=\"315\"]/}"
+    },
+    {
+      "path": "img",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Image.",
+      "attrs": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Chemin/URL de l'image."
+        },
+        {
+          "name": "alt",
+          "type": "string",
+          "required": false,
+          "description": "Texte alternatif."
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "description": "Largeur (px)."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "description": "Hauteur (px)."
+        }
+      ],
+      "snippet": "{img[src=${1:\"image.png\"}, alt=${2:\"description\"}]/}",
+      "example": "{img[src=\"image.png\", alt=\"une image\"]/}"
+    },
+    {
+      "path": "li",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Élément de liste.",
+      "attrs": [],
+      "snippet": "{li:${1:item}}",
+      "example": "{ul:{li:item}}"
+    },
+    {
+      "path": "mark",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "surligne",
+        "highlight"
+      ],
+      "description": "Surligneur : met en évidence un bout de texte (inline).",
+      "attrs": [],
+      "snippet": "{@mark: ${1:texte}}",
+      "example": "{p:Un point {@mark: important} du cours.}",
+      "kind": "object"
+    },
+    {
+      "path": "math.constant.e",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "mc.e"
+      ],
+      "description": "Constante e (Euler).",
+      "attrs": [],
+      "snippet": "{@mc.e/}",
+      "example": "{@mc.e/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.constant.i",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "mc.i"
+      ],
+      "description": "Unité imaginaire i.",
+      "attrs": [],
+      "snippet": "{@mc.i/}",
+      "example": "{@mc.i/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.constant.inf",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "mc.inf"
+      ],
+      "description": "Infini ∞.",
+      "attrs": [],
+      "snippet": "{@mc.inf/}",
+      "example": "{@mc.inf/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.constant.phi",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "mc.phi"
+      ],
+      "description": "Nombre d'or φ.",
+      "attrs": [],
+      "snippet": "{@mc.phi/}",
+      "example": "{@mc.phi/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.constant.pi",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "mc.pi"
+      ],
+      "description": "Constante π.",
+      "attrs": [],
+      "snippet": "{@mc.pi/}",
+      "example": "{@mc.pi/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.circle",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg2.circle"
+      ],
+      "description": "Cercle 2D.",
+      "attrs": [
+        {
+          "name": "center",
+          "type": "tuple",
+          "required": false,
+          "description": "Centre, ex. (0,0)."
+        },
+        {
+          "name": "radius",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Rayon."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        }
+      ],
+      "snippet": "{@mg2.circle[center=${1:\"(0,0)\"}, radius=${2:2}]/}",
+      "example": "{@mg2.circle[center=\"(0,0)\", radius=2]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.cpoint",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg2.cpoint"
+      ],
+      "description": "Point d'affixe complexe (a+bi).",
+      "attrs": [
+        {
+          "name": "z",
+          "type": "complex",
+          "required": true,
+          "description": "Affixe, ex. 3+2i, -1-2i, i."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg2.cpoint[z=${1:\"3+2i\"}, name=${2:A}]/}",
+      "example": "{@mg2.cpoint[z=\"3+2i\", name=A]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.droite",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg2.droite"
+      ],
+      "description": "Droite 2D (point + direction).",
+      "attrs": [
+        {
+          "name": "point",
+          "type": "tuple",
+          "required": false,
+          "description": "Point de passage."
+        },
+        {
+          "name": "dir",
+          "type": "tuple",
+          "required": false,
+          "description": "Vecteur directeur, ex. (1,1)."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg2.droite[point=${1:\"(0,0)\"}, dir=${2:\"(1,1)\"}]/}",
+      "example": "{@mg2.droite[point=\"(0,0)\", dir=\"(1,1)\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.frame",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "repere",
+        "mg2.frame"
+      ],
+      "description": "Décor : repère cartésien 2D (ou plan complexe avec type=complex).",
+      "attrs": [
+        {
+          "name": "xrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle des abscisses, ex. (-4,4)."
+        },
+        {
+          "name": "yrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle des ordonnées."
+        },
+        {
+          "name": "grid",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "description": "Affiche la grille."
+        },
+        {
+          "name": "ticks",
+          "type": "number",
+          "required": false,
+          "description": "Pas des graduations."
+        },
+        {
+          "name": "equal",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "description": "Repère orthonormé (un cercle reste rond)."
+        },
+        {
+          "name": "axes",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "description": "Affiche les axes."
+        },
+        {
+          "name": "labels",
+          "type": "string",
+          "required": false,
+          "default": "x,y",
+          "description": "Étiquettes des axes."
+        },
+        {
+          "name": "type",
+          "type": "enum",
+          "required": false,
+          "values": [
+            "cartesian",
+            "complex"
+          ],
+          "description": "Type de repère."
+        },
+        {
+          "name": "range",
+          "type": "number",
+          "required": false,
+          "description": "Demi-étendue (plan complexe)."
+        },
+        {
+          "name": "unitcircle",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Trace le cercle unité (plan complexe)."
+        }
+      ],
+      "snippet": "{@mg2.frame[xrange=${1:\"(-4,4)\"}, yrange=${2:\"(-3,3)\"}, grid=true]/}",
+      "example": "{@mg2.frame[xrange=\"(-4,4)\", yrange=\"(-3,3)\", grid=true, ticks=1]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.point",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg2.point"
+      ],
+      "description": "Point 2D.",
+      "attrs": [
+        {
+          "name": "x",
+          "type": "number",
+          "required": true,
+          "description": "Abscisse."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": true,
+          "description": "Ordonnée."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg2.point[x=${1:0}, y=${2:0}, name=${3:A}]/}",
+      "example": "{@mg2.point[x=1, y=2, name=A]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.polygon",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg2.polygon"
+      ],
+      "description": "Polygone 2D rempli.",
+      "attrs": [
+        {
+          "name": "points",
+          "type": "points",
+          "required": true,
+          "description": "Sommets séparés par ;, ex. (0,0);(2,0);(1,2)."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        }
+      ],
+      "snippet": "{@mg2.polygon[points=${1:\"(-2,-2);(2,-2);(0,3)\"}]/}",
+      "example": "{@mg2.polygon[points=\"(-2,-2);(2,-2);(0,3)\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.scene",
+      "contentModel": "html",
+      "category": "géométrie",
+      "aliases": [
+        "mg2.scene"
+      ],
+      "description": "Scène géométrique 2D (conteneur rendu via Plotly).",
+      "attrs": [
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "default": "600",
+          "description": "Largeur en pixels."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "default": "400",
+          "description": "Hauteur en pixels."
+        }
+      ],
+      "snippet": "{@mg2.scene:\n  {@mg2.frame[grid=true]/}\n  {@mg2.circle[center=\"(0,0)\", radius=2]/}\n  {@mg2.point[x=0, y=0, name=O]/}\n  ${1}\n}",
+      "example": "{@mg2.scene:\n  {@mg2.frame[grid=true]/}\n  {@mg2.circle[center=\"(0,0)\", radius=2]/}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.2d.segment",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg2.segment"
+      ],
+      "description": "Segment 2D entre deux points.",
+      "attrs": [
+        {
+          "name": "from",
+          "type": "tuple",
+          "required": true,
+          "description": "Première extrémité, ex. (0,0)."
+        },
+        {
+          "name": "to",
+          "type": "tuple",
+          "required": true,
+          "description": "Seconde extrémité."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg2.segment[from=${1:\"(0,0)\"}, to=${2:\"(3,4)\"}]/}",
+      "example": "{@mg2.segment[from=\"(0,0)\", to=\"(3,4)\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.line",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.line"
+      ],
+      "description": "Droite 3D (point + direction).",
+      "attrs": [
+        {
+          "name": "point",
+          "type": "tuple",
+          "required": false,
+          "description": "Point de passage."
+        },
+        {
+          "name": "dir",
+          "type": "tuple",
+          "required": false,
+          "description": "Vecteur directeur."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg3.line[point=${1:\"(0,0,0)\"}, dir=${2:\"(1,0,0)\"}]/}",
+      "example": "{@mg3.line[point=\"(0,0,0)\", dir=\"(1,0,0)\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.plane",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.plane"
+      ],
+      "description": "Plan 3D (équation normale·X = d), rendu en surface.",
+      "attrs": [
+        {
+          "name": "normal",
+          "type": "tuple",
+          "required": true,
+          "description": "Vecteur normal, ex. (2,-1,3)."
+        },
+        {
+          "name": "d",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Terme constant."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        }
+      ],
+      "snippet": "{@mg3.plane[normal=${1:\"(2,-1,3)\"}, d=${2:5}, opacity=0.5]/}",
+      "example": "{@mg3.plane[normal=\"(2,-1,3)\", d=5, opacity=0.5]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.point",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.point"
+      ],
+      "description": "Point 3D.",
+      "attrs": [
+        {
+          "name": "x",
+          "type": "number",
+          "required": true,
+          "description": "Abscisse."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": true,
+          "description": "Ordonnée."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": true,
+          "description": "Cote."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg3.point[x=${1:1}, y=${2:2}, z=${3:3}, name=${4:A}]/}",
+      "example": "{@mg3.point[x=1, y=2, z=3, name=A]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.scene",
+      "contentModel": "html",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.scene"
+      ],
+      "description": "Scène géométrique 3D (conteneur rendu via Plotly).",
+      "attrs": [
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "default": "600",
+          "description": "Largeur en pixels."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "default": "400",
+          "description": "Hauteur en pixels."
+        }
+      ],
+      "snippet": "{@mg3.scene:\n  {@mg3.space[grid=true]/}\n  {@mg3.sphere[center=\"(0,0,0)\", radius=2]/}\n  ${1}\n}",
+      "example": "{@mg3.scene:\n  {@mg3.space[grid=true]/}\n  {@mg3.sphere[center=\"(0,0,0)\", radius=2]/}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.segment",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.segment"
+      ],
+      "description": "Segment 3D entre deux points.",
+      "attrs": [
+        {
+          "name": "from",
+          "type": "tuple",
+          "required": true,
+          "description": "Première extrémité."
+        },
+        {
+          "name": "to",
+          "type": "tuple",
+          "required": true,
+          "description": "Seconde extrémité."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg3.segment[from=${1:\"(0,0,0)\"}, to=${2:\"(1,1,1)\"}]/}",
+      "example": "{@mg3.segment[from=\"(-2,-2,-2)\", to=\"(2,2,2)\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.space",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.space"
+      ],
+      "description": "Décor : repère 3D.",
+      "attrs": [
+        {
+          "name": "xrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle x."
+        },
+        {
+          "name": "yrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle y."
+        },
+        {
+          "name": "zrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle z."
+        },
+        {
+          "name": "grid",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "description": "Affiche la grille."
+        },
+        {
+          "name": "ticks",
+          "type": "number",
+          "required": false,
+          "description": "Pas des graduations."
+        },
+        {
+          "name": "equal",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "description": "Aspect orthonormé."
+        },
+        {
+          "name": "labels",
+          "type": "string",
+          "required": false,
+          "default": "x,y,z",
+          "description": "Étiquettes des axes."
+        }
+      ],
+      "snippet": "{@mg3.space[xrange=${1:\"(-5,5)\"}, grid=true, ticks=${2:2}]/}",
+      "example": "{@mg3.space[xrange=\"(-5,5)\", grid=true, ticks=2]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.sphere",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.sphere"
+      ],
+      "description": "Sphère 3D (surface paramétrique).",
+      "attrs": [
+        {
+          "name": "center",
+          "type": "tuple",
+          "required": false,
+          "description": "Centre, ex. (0,0,0)."
+        },
+        {
+          "name": "radius",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Rayon."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        }
+      ],
+      "snippet": "{@mg3.sphere[center=${1:\"(0,0,0)\"}, radius=${2:2}]/}",
+      "example": "{@mg3.sphere[center=\"(0,0,0)\", radius=2]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.geometry.3d.vector",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "mg3.vector"
+      ],
+      "description": "Vecteur 3D (flèche avec cône).",
+      "attrs": [
+        {
+          "name": "from",
+          "type": "tuple",
+          "required": true,
+          "description": "Origine, ex. (1,2,3)."
+        },
+        {
+          "name": "to",
+          "type": "tuple",
+          "required": true,
+          "description": "Extrémité."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@mg3.vector[from=${1:\"(0,0,0)\"}, to=${2:\"(1,1,1)\"}]/}",
+      "example": "{@mg3.vector[from=\"(1,2,3)\", to=\"(1,3,4)\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.complex",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "moc",
+        "mo.complex"
+      ],
+      "description": "Nombre complexe a + bi (attributs re, im).",
+      "attrs": [
+        {
+          "name": "re",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Partie réelle."
+        },
+        {
+          "name": "im",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Partie imaginaire."
+        }
+      ],
+      "snippet": "{@moc[re=${1:3}, im=${2:2}]/}",
+      "example": "{@moc[re=3, im=2]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.fraction",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "mof",
+        "mo.fraction"
+      ],
+      "description": "Fraction \\frac{}{} (enfants {num:...} et {den:...}).",
+      "attrs": [],
+      "snippet": "{@mof:{num:${1:1}}{den:${2:2}}}",
+      "example": "{@mof:{num:1}{den:2}}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.interval",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "moi",
+        "mo.interval"
+      ],
+      "description": "Intervalle (attributs from, to, open = none|left|right|both).",
+      "attrs": [
+        {
+          "name": "from",
+          "type": "number",
+          "required": false,
+          "description": "Borne inférieure."
+        },
+        {
+          "name": "to",
+          "type": "number",
+          "required": false,
+          "description": "Borne supérieure."
+        },
+        {
+          "name": "open",
+          "type": "enum",
+          "required": false,
+          "default": "none",
+          "values": [
+            "none",
+            "left",
+            "right",
+            "both"
+          ],
+          "description": "Borne(s) ouverte(s)."
+        }
+      ],
+      "snippet": "{@moi[from=${1:0}, to=${2:1}, open=${3:\"right\"}]/}",
+      "example": "{@moi[from=0, to=1, open=\"right\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.matrix",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "mom",
+        "mo.matrix"
+      ],
+      "description": "Matrice (un enfant {row:a,b,…} par ligne, colonnes séparées par des virgules).",
+      "attrs": [
+        {
+          "name": "delim",
+          "type": "enum",
+          "required": false,
+          "default": "paren",
+          "values": [
+            "paren",
+            "bracket",
+            "brace",
+            "bar",
+            "norm",
+            "none"
+          ],
+          "description": "Délimiteurs : paren ( ), bracket [ ], brace { }, bar |·| (déterminant), norm ‖·‖, none (aucun)."
+        }
+      ],
+      "snippet": "{@mom:{row:${1:1,2}}{row:${2:3,4}}}",
+      "example": "{@mom:{row:1,2}{row:3,4}}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.qty",
+      "contentModel": "void",
+      "category": "formules",
+      "aliases": [
+        "qty",
+        "grandeur",
+        "mo.qty"
+      ],
+      "description": "Grandeur physique : valeur + unité (unité en romain). Ex. {@qty[value=9.81, unit=\"m\\cdot s^{-2}\"]/}.",
+      "attrs": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "description": "Valeur (LaTeX possible, ex. 3 \\times 10^8)."
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false,
+          "description": "Unité en notation LaTeX (ex. m\\cdot s^{-2})."
+        }
+      ],
+      "snippet": "{@qty[value=${1:9.81}, unit=${2:\"m\\\\cdot s^{-2}\"}]/}",
+      "example": "{@qty[value=9.81, unit=\"m\\cdot s^{-2}\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.set",
+      "contentModel": "math",
+      "category": "formules",
+      "aliases": [
+        "mos",
+        "mo.set"
+      ],
+      "description": "Ensemble { … } (le corps en est le contenu).",
+      "attrs": [],
+      "snippet": "{@mos: ${1:1, 2, 3}}",
+      "example": "{@mos: 1, 2, 3}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.tensor",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "mot",
+        "mo.tensor"
+      ],
+      "description": "Tableau unifié : vecteur ({c:…}), matrice ({row:a,b,…}) ou tenseur ({slice:…} de {row:…}). Délimiteur réglable.",
+      "attrs": [
+        {
+          "name": "delim",
+          "type": "enum",
+          "required": false,
+          "default": "paren",
+          "values": [
+            "paren",
+            "bracket",
+            "brace",
+            "bar",
+            "norm",
+            "none"
+          ],
+          "description": "Délimiteurs : paren ( ), bracket [ ], brace { }, bar |·| (déterminant), norm ‖·‖, none (aucun)."
+        },
+        {
+          "name": "orient",
+          "type": "enum",
+          "required": false,
+          "values": [
+            "row",
+            "col"
+          ],
+          "description": "Orientation d'un vecteur à une seule {row:} (col = transposé en colonne)."
+        }
+      ],
+      "snippet": "{@mot:\n  {slice[label=\"k=1\"]:{row:${1:1,0}}{row:${2:0,1}}}\n  {slice[label=\"k=2\"]:{row:${3:0,1}}{row:${4:1,0}}}\n}",
+      "example": "{@mot:{slice[label=\"k=1\"]:{row:1,0}{row:0,1}}{slice[label=\"k=2\"]:{row:0,1}{row:1,0}}}",
+      "kind": "object"
+    },
+    {
+      "path": "math.object.vector",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "mov",
+        "mo.vector"
+      ],
+      "description": "Vecteur colonne (un enfant {c:...} par composante).",
+      "attrs": [
+        {
+          "name": "delim",
+          "type": "enum",
+          "required": false,
+          "default": "paren",
+          "values": [
+            "paren",
+            "bracket",
+            "brace",
+            "bar",
+            "norm",
+            "none"
+          ],
+          "description": "Délimiteurs : paren ( ), bracket [ ], brace { }, bar |·| (déterminant), norm ‖·‖, none (aucun)."
+        }
+      ],
+      "snippet": "{@mov:{c:${1:1}}{c:${2:2}}{c:${3:3}}}",
+      "example": "{@mov:{c:1}{c:2}{c:3}}",
+      "kind": "object"
+    },
+    {
+      "path": "math.plot.curve",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "plot.curve"
+      ],
+      "description": "Une courbe y = f(x) dans un {@plot} (pour superposer plusieurs fonctions).",
+      "attrs": [
+        {
+          "name": "fn",
+          "type": "string",
+          "required": false,
+          "default": "x",
+          "description": "Expression y=f(x)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Nom dans la légende."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@plot.curve[fn=${1:\"sin(x)\"}, label=${2:\"sin\"}]/}",
+      "example": "{@plot.curve[fn=\"sin(x)\", label=\"sin\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.plot.fn",
+      "contentModel": "html",
+      "category": "géométrie",
+      "aliases": [
+        "plot",
+        "plot.fn"
+      ],
+      "description": "Graphe de fonction(s) y = f(x). Une seule (attr fn) ou plusieurs ({@plot.curve}).",
+      "attrs": [
+        {
+          "name": "fn",
+          "type": "string",
+          "required": false,
+          "description": "Expression y=f(x) (forme à une courbe)."
+        },
+        {
+          "name": "xrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle x, ex. (-10,10)."
+        },
+        {
+          "name": "samples",
+          "type": "number",
+          "required": false,
+          "default": "400",
+          "description": "Nombre de points."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre du graphe."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "default": "640",
+          "description": "Largeur en pixels."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "default": "360",
+          "description": "Hauteur en pixels."
+        }
+      ],
+      "snippet": "{@plot[xrange=\"(-6.28,6.28)\", title=${1:\"Trigonométrie\"}]:\n  {@plot.curve[fn=\"sin(x)\", label=\"sin\"]/}\n  {@plot.curve[fn=\"cos(x)\", label=\"cos\"]/}\n}",
+      "example": "{@plot[fn=\"sin(x)/x\", xrange=\"(-15,15)\", title=\"y = sin(x)/x\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.align",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "mta",
+        "mt.align"
+      ],
+      "description": "Équations alignées (enfants {line: ...}).",
+      "attrs": [],
+      "snippet": "{@mta:\n  {line: ${1:f(x) &= x^2}}\n  {line: ${2:&= x \\cdot x}}\n}",
+      "example": "{@mta:\n  {line: f(x) &= x^2}\n  {line: &= x \\cdot x}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.block",
+      "contentModel": "math",
+      "category": "formules",
+      "aliases": [
+        "mtb",
+        "mt.block"
+      ],
+      "description": "Formule centrée sur sa propre ligne.",
+      "attrs": [],
+      "snippet": "{@mtb: ${1:formule}}",
+      "example": "{@mtb: \\int_0^1 x^2 \\, dx}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.cases",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "mtc",
+        "mt.cases"
+      ],
+      "description": "Définition par cas (enfants {case: ...}).",
+      "attrs": [
+        {
+          "name": "intro",
+          "type": "string",
+          "required": false,
+          "description": "Membre de gauche (ex. |x|)."
+        }
+      ],
+      "snippet": "{@mtc[intro=${1:\"|x|\"}]:\n  {case: ${2:x & x \\geq 0}}\n  {case: ${3:-x & x < 0}}\n}",
+      "example": "{@mtc[intro=\"|x|\"]:\n  {case: x & \\text{si } x \\geq 0}\n  {case: -x & \\text{si } x < 0}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.chem",
+      "contentModel": "math",
+      "category": "formules",
+      "aliases": [
+        "ce",
+        "chem",
+        "chimie",
+        "mt.chem"
+      ],
+      "description": "Chimie (mhchem) : {@ce: H2SO4 + H2O -> …} → \\ce{…}. Nécessite l'extension mhchem de KaTeX.",
+      "attrs": [],
+      "snippet": "{@ce: ${1:H2O}}",
+      "example": "{@ce: 2 H2 + O2 -> 2 H2O}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.equation",
+      "contentModel": "math",
+      "category": "document",
+      "aliases": [
+        "mte",
+        "mt.equation"
+      ],
+      "description": "Équation numérotée automatiquement.",
+      "attrs": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette pour les références croisées."
+        }
+      ],
+      "snippet": "{@mte[label=${1:eq1}]: ${2:E = mc^2}}",
+      "example": "{@mte[label=eq1]: E = mc^2}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.inline",
+      "contentModel": "math",
+      "category": "formules",
+      "aliases": [
+        "mti",
+        "mt.inline"
+      ],
+      "description": "Formule LaTeX dans le flux du texte.",
+      "attrs": [],
+      "snippet": "{@mti: ${1:formule}}",
+      "example": "{@mti: x^2 + 1}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.ref",
+      "contentModel": "void",
+      "category": "document",
+      "aliases": [
+        "mtr",
+        "mt.ref"
+      ],
+      "description": "Référence croisée vers une équation numérotée.",
+      "attrs": [
+        {
+          "name": "to",
+          "type": "string",
+          "required": true,
+          "description": "Label de l'équation cible."
+        }
+      ],
+      "snippet": "{@mtr[to=${1:eq1}]/}",
+      "example": "{@mte[label=eq1]: E = mc^2}{p:voir l'équation {@mtr[to=eq1]/}}",
+      "kind": "object"
+    },
+    {
+      "path": "math.text.system",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "mts",
+        "mt.system"
+      ],
+      "description": "Système d'équations avec accolade (enfants {line: ...}).",
+      "attrs": [],
+      "snippet": "{@mts:\n  {line: ${1:2x + y = 5}}\n  {line: ${2:x - y = 1}}\n}",
+      "example": "{@mts:\n  {line: 2x + y = 5}\n  {line: x - y = 1}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "numberline",
+      "contentModel": "html",
+      "category": "géométrie",
+      "aliases": [
+        "droite",
+        "droitegraduee"
+      ],
+      "description": "Droite graduée (SVG) : attributs from, to, ticks. Enfants {point[x, name, color]/}, {segment[from, to, open, color]/} (open : none|left|right|both).",
+      "attrs": [
+        {
+          "name": "from",
+          "type": "number",
+          "required": false,
+          "default": "-5",
+          "description": "Borne gauche."
+        },
+        {
+          "name": "to",
+          "type": "number",
+          "required": false,
+          "default": "5",
+          "description": "Borne droite."
+        },
+        {
+          "name": "ticks",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Pas des graduations."
+        }
+      ],
+      "snippet": "{@numberline[from=${1:-3}, to=${2:3}]:\n  {segment[from=${3:0}, to=${4:2}, open=right]/}\n  {point[x=${5:-1}, name=A]/}\n}",
+      "example": "{@numberline[from=-3, to=3]:\n  {segment[from=0, to=2, open=right, color=crimson]/}\n  {point[x=-1, name=A]/}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "ol",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Liste ordonnée (attribut type : marqueurs num/alpha/Alpha/roman/Roman/paren).",
+      "attrs": [
+        {
+          "name": "type",
+          "type": "enum",
+          "required": false,
+          "default": "num",
+          "values": [
+            "num",
+            "alpha",
+            "Alpha",
+            "roman",
+            "Roman",
+            "paren"
+          ],
+          "description": "Style des marqueurs : num 1. 2. (défaut), alpha (a) (b), Alpha (A) (B), roman (i) (ii), Roman (I) (II), paren 1) 2)."
+        }
+      ],
+      "snippet": "{ol:{li:${1:premier}}{li:${2:deuxième}}}",
+      "example": "{ol[type=alpha]:{li:un}{li:deux}}"
+    },
+    {
+      "path": "p",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Paragraphe de texte.",
+      "attrs": [],
+      "snippet": "{p:${1:Un paragraphe.}}",
+      "example": "{p:Un paragraphe.}"
+    },
+    {
+      "path": "panel",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "overview",
+        "box",
+        "panneau"
+      ],
+      "description": "Encadré neutre, sans étiquette ni numéro (contrairement à {@theorem}…). Attribut color pour l'accent, title optionnel.",
+      "attrs": [
+        {
+          "name": "color",
+          "type": "enum",
+          "required": false,
+          "default": "slate",
+          "values": [
+            "slate",
+            "indigo",
+            "blue",
+            "green",
+            "red",
+            "amber",
+            "violet",
+            "teal"
+          ],
+          "description": "Couleur d'accent (défaut : slate, neutre)."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre optionnel (affiché seulement s'il est fourni)."
+        }
+      ],
+      "snippet": "{@panel[color=${1:indigo}]: ${2:contenu}}",
+      "example": "{@panel[color=indigo, title=\"En bref\"]: {p:Un contenu mis en valeur.}}",
+      "kind": "object"
+    },
+    {
+      "path": "param",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "curseur"
+      ],
+      "description": "Paramètre interactif (curseur). Un {@plot} dont la fn utilise ce nom se met à jour en direct quand on bouge le curseur.",
+      "attrs": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Nom du paramètre (utilisé dans une fn de {@plot})."
+        },
+        {
+          "name": "min",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Valeur minimale."
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "required": false,
+          "default": "10",
+          "description": "Valeur maximale."
+        },
+        {
+          "name": "step",
+          "type": "number",
+          "required": false,
+          "default": "0.1",
+          "description": "Pas."
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "required": false,
+          "description": "Valeur initiale (déf. min)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Libellé affiché (déf. le nom)."
+        }
+      ],
+      "snippet": "{@param[name=${1:\"a\"}, min=${2:-3}, max=${3:3}, step=${4:0.1}, value=${5:1}]/}",
+      "example": "{@param[name=\"a\", min=-3, max=3, step=0.1, value=1]/}",
+      "kind": "object"
+    },
+    {
+      "path": "pdf",
+      "contentModel": "void",
+      "category": "document",
+      "aliases": [
+        "visionneuse"
+      ],
+      "description": "Visionneuse d'un PDF depuis un lien (affichage écran, lecteur natif du navigateur). src = lien http/https ; page = ouvrir directement à ce numéro ; height = hauteur d'affichage. Un bouton « Ouvrir le PDF » sert de repli si le serveur interdit l'affichage. Note : visionneuse écran — le PDF embarqué ne s'imprime pas dans ton propre export.",
+      "attrs": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Lien du PDF (http / https)."
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "required": false,
+          "description": "Ouvrir directement à cette page."
+        },
+        {
+          "name": "height",
+          "type": "string",
+          "required": false,
+          "default": "600px",
+          "description": "Hauteur d'affichage (ex. 600px, 80vh)."
+        },
+        {
+          "name": "toolbar",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Afficher la barre d'outils du lecteur (zoom, pages…). Masquée par défaut : affichage minimal (Chrome/Brave/Edge)."
+        }
+      ],
+      "snippet": "{@pdf[src=${1:\"https://…/doc.pdf\"}]/}",
+      "example": "{@pdf[src=\"https://…/cours.pdf\", page=12]/}",
+      "kind": "object"
+    },
+    {
+      "path": "quiz",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "qcm"
+      ],
+      "description": "Question à choix : {q:…} (énoncé), {opt:…} (options, {opt[correct=true]:…} = bonne réponse), {explain:…} (optionnel). Feedback ✓/✗ au clic (runtime).",
+      "attrs": [],
+      "snippet": "{@quiz:\n  {q: ${1:Question ?}}\n  {opt[correct=true]: ${2:Bonne réponse}}\n  {opt: ${3:Mauvaise}}\n  {opt: ${4:Mauvaise}}\n}",
+      "example": "{@quiz:\n  {q: Quelle est l'hypoténuse ?}\n  {opt[correct=true]: Le côté opposé à l'angle droit}\n  {opt: Le plus petit côté}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "reveal",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "solution",
+        "spoiler"
+      ],
+      "description": "Bloc dépliable (correction cachée). `title` = libellé, `open=true` pour l'ouvrir.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Libellé du bouton (défaut « Solution »)."
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Ouvert au chargement."
+        }
+      ],
+      "snippet": "{@reveal[title=${1:\"Solution\"}]: ${2:contenu caché}}",
+      "example": "{@reveal[title=\"Solution\"]: {p:On a $c=5$.}}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.animate",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.animate"
+      ],
+      "description": "Animation d'un objet (par id) : move / rotate / scale / color / fade / transform.",
+      "attrs": [
+        {
+          "name": "target",
+          "type": "string",
+          "required": true,
+          "description": "id de l'objet à animer."
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "required": false,
+          "default": "move",
+          "description": "move | rotate | scale | color | fade | transform."
+        },
+        {
+          "name": "to",
+          "type": "tuple",
+          "required": false,
+          "description": "Destination : (x,y,z) pour move, ou un id pour transform."
+        },
+        {
+          "name": "axis",
+          "type": "string",
+          "required": false,
+          "default": "y",
+          "description": "Axe de rotation (x/y/z)."
+        },
+        {
+          "name": "angle",
+          "type": "number",
+          "required": false,
+          "default": "90",
+          "description": "Angle de rotation (degrés)."
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "required": false,
+          "description": "Échelle (scale) ou opacité (fade)."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Durée (secondes)."
+        },
+        {
+          "name": "delay",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Délai avant départ."
+        },
+        {
+          "name": "at",
+          "type": "number",
+          "required": false,
+          "description": "Départ absolu (sinon enchaîné après la précédente)."
+        },
+        {
+          "name": "easing",
+          "type": "string",
+          "required": false,
+          "default": "easeInOut",
+          "description": "linear | easeIn | easeOut | easeInOut."
+        }
+      ],
+      "snippet": "{@s3.animate[target=${1:\"A\"}, action=${2:\"move\"}, to=${3:\"(2,2,0)\"}, duration=${4:2}]/}",
+      "example": "{@s3.animate[target=\"A\", action=\"move\", to=\"(2,2,0)\", duration=2]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.axes",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.axes"
+      ],
+      "description": "Repère 3D (axes X/Y/Z) pour la référence.",
+      "attrs": [
+        {
+          "name": "size",
+          "type": "number",
+          "required": false,
+          "default": "3",
+          "description": "Longueur des axes."
+        }
+      ],
+      "snippet": "{@s3.axes[size=${1:3}]/}",
+      "example": "{@s3.axes[size=3]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.box",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.box"
+      ],
+      "description": "Cube/boîte 3D (WebGL) : position, couleur, rotation, orbite.",
+      "attrs": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Identifiant (cible des animations {@s3.animate})."
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Côté."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "spin",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rotation propre par image."
+        },
+        {
+          "name": "orbit",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rayon d'orbite autour de l'origine."
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Vitesse angulaire de l'orbite."
+        },
+        {
+          "name": "glow",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Matériau auto-lumineux (ex. soleil)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée près de l'objet."
+        }
+      ],
+      "snippet": "{@s3.box[size=${1:1}, color=${2:\"#f472b6\"}, spin=${3:0.01}]/}",
+      "example": "{@s3.box[size=1, color=\"#f472b6\", spin=0.01]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.cone",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.cone"
+      ],
+      "description": "Cône 3D : rayon de base + hauteur.",
+      "attrs": [
+        {
+          "name": "radius",
+          "type": "number",
+          "required": false,
+          "default": "0.5",
+          "description": "Rayon de base."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Hauteur."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Identifiant (cible des animations {@s3.animate})."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        },
+        {
+          "name": "spin",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rotation propre par image."
+        },
+        {
+          "name": "orbit",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rayon d'orbite autour de l'origine."
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Vitesse angulaire de l'orbite."
+        },
+        {
+          "name": "glow",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Matériau auto-lumineux (ex. soleil)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée près de l'objet."
+        }
+      ],
+      "snippet": "{@s3.cone[radius=${1:0.5}, height=${2:1.5}, color=${3:\"#fb923c\"}]/}",
+      "example": "{@s3.cone[radius=0.6, height=1.5, color=\"#fb923c\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.curve",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.curve"
+      ],
+      "description": "Courbe paramétrique 3D (x(t), y(t), z(t)).",
+      "attrs": [
+        {
+          "name": "x",
+          "type": "string",
+          "required": false,
+          "default": "cos(t)",
+          "description": "x(t)."
+        },
+        {
+          "name": "y",
+          "type": "string",
+          "required": false,
+          "default": "sin(t)",
+          "description": "y(t)."
+        },
+        {
+          "name": "z",
+          "type": "string",
+          "required": false,
+          "default": "t/3",
+          "description": "z(t)."
+        },
+        {
+          "name": "trange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle de t, ex. (0, 6.28)."
+        },
+        {
+          "name": "samples",
+          "type": "number",
+          "required": false,
+          "default": "200",
+          "description": "Nombre de points."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@s3.curve[x=${1:\"cos(3*t)\"}, y=${2:\"sin(2*t)\"}, z=${3:\"sin(5*t)/2\"}, trange=\"(0, 6.28)\", color=${4:\"#22d3ee\"}]/}",
+      "example": "{@s3.curve[x=\"cos(t)\", y=\"sin(t)\", z=\"t/3\", trange=\"(0, 18)\", color=\"#22d3ee\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.cylinder",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.cylinder"
+      ],
+      "description": "Cylindre 3D : rayon + hauteur.",
+      "attrs": [
+        {
+          "name": "radius",
+          "type": "number",
+          "required": false,
+          "default": "0.5",
+          "description": "Rayon."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Hauteur."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Identifiant (cible des animations {@s3.animate})."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        },
+        {
+          "name": "spin",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rotation propre par image."
+        },
+        {
+          "name": "orbit",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rayon d'orbite autour de l'origine."
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Vitesse angulaire de l'orbite."
+        },
+        {
+          "name": "glow",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Matériau auto-lumineux (ex. soleil)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée près de l'objet."
+        }
+      ],
+      "snippet": "{@s3.cylinder[radius=${1:0.5}, height=${2:1.5}, color=${3:\"#a78bfa\"}]/}",
+      "example": "{@s3.cylinder[radius=0.5, height=1.5, color=\"#a78bfa\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.grid",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.grid"
+      ],
+      "description": "Grille au sol 3D (plan de référence).",
+      "attrs": [
+        {
+          "name": "size",
+          "type": "number",
+          "required": false,
+          "default": "10",
+          "description": "Étendue de la grille."
+        },
+        {
+          "name": "divisions",
+          "type": "number",
+          "required": false,
+          "default": "10",
+          "description": "Nombre de divisions."
+        }
+      ],
+      "snippet": "{@s3.grid[size=${1:10}, divisions=${2:10}]/}",
+      "example": "{@s3.grid[size=10, divisions=10]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.label",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.label"
+      ],
+      "description": "Étiquette texte 3D (billboard, toujours face caméra).",
+      "attrs": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": false,
+          "description": "Texte affiché."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "required": false,
+          "default": "0.4",
+          "description": "Taille."
+        }
+      ],
+      "snippet": "{@s3.label[text=${1:\"A\"}, x=${2:1}, y=${3:1}, z=${4:0}]/}",
+      "example": "{@s3.label[text=\"O\", x=0, y=0, z=0]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.line",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.line"
+      ],
+      "description": "Ligne / trajectoire 3D : liste de points séparés par ';'.",
+      "attrs": [
+        {
+          "name": "points",
+          "type": "tuple",
+          "required": false,
+          "description": "Points, ex. (0,0,0);(1,1,0);(2,0,1)."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@s3.line[points=${1:\"(0,0,0);(1,1,0);(2,0,1)\"}, color=${2:\"#22d3ee\"}]/}",
+      "example": "{@s3.line[points=\"(0,0,0);(1,1,0);(2,0,1);(3,1,0)\", color=\"#22d3ee\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.plane",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.plane"
+      ],
+      "description": "Plan 3D (carré, horizontal par défaut).",
+      "attrs": [
+        {
+          "name": "size",
+          "type": "number",
+          "required": false,
+          "default": "6",
+          "description": "Côté du plan."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Identifiant (cible des animations {@s3.animate})."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        },
+        {
+          "name": "spin",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rotation propre par image."
+        },
+        {
+          "name": "orbit",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rayon d'orbite autour de l'origine."
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Vitesse angulaire de l'orbite."
+        },
+        {
+          "name": "glow",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Matériau auto-lumineux (ex. soleil)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée près de l'objet."
+        }
+      ],
+      "snippet": "{@s3.plane[size=${1:6}, color=${2:\"#1e293b\"}, opacity=0.6]/}",
+      "example": "{@s3.plane[size=6, color=\"#1e293b\", opacity=0.6]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.point",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.point"
+      ],
+      "description": "Point 3D (petit marqueur) ; orbit = trajectoire animée.",
+      "attrs": [
+        {
+          "name": "radius",
+          "type": "number",
+          "required": false,
+          "default": "0.12",
+          "description": "Taille du marqueur."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Identifiant (cible des animations {@s3.animate})."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        },
+        {
+          "name": "spin",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rotation propre par image."
+        },
+        {
+          "name": "orbit",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rayon d'orbite autour de l'origine."
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Vitesse angulaire de l'orbite."
+        },
+        {
+          "name": "glow",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Matériau auto-lumineux (ex. soleil)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée près de l'objet."
+        }
+      ],
+      "snippet": "{@s3.point[x=${1:1}, y=${2:1}, z=${3:1}, color=${4:\"#f87171\"}, label=${5:\"A\"}]/}",
+      "example": "{@s3.point[x=1, y=1, z=1, color=\"#f87171\", label=\"A\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.scene",
+      "contentModel": "html",
+      "category": "géométrie",
+      "aliases": [
+        "s3.scene"
+      ],
+      "description": "Scène 3D animée (WebGL, rendue via Three.js).",
+      "attrs": [
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "default": "600",
+          "description": "Largeur en pixels."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "default": "400",
+          "description": "Hauteur en pixels."
+        },
+        {
+          "name": "background",
+          "type": "string",
+          "required": false,
+          "default": "#020617",
+          "description": "Couleur de fond."
+        },
+        {
+          "name": "distance",
+          "type": "number",
+          "required": false,
+          "default": "6",
+          "description": "Distance de la caméra."
+        },
+        {
+          "name": "controls",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Rotation à la souris (OrbitControls)."
+        },
+        {
+          "name": "autorotate",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Rotation automatique lente."
+        }
+      ],
+      "snippet": "{@s3.scene[height=480]:\n  {@s3.sphere[radius=0.8, color=\"#facc15\", glow=true, spin=0.003]/}\n  {@s3.sphere[radius=0.3, color=\"#60a5fa\", orbit=3, speed=0.02]/}\n  ${1}\n}",
+      "example": "{@s3.scene[height=480]:\n  {@s3.sphere[radius=0.8, color=\"#facc15\", glow=true, spin=0.003]/}\n  {@s3.sphere[radius=0.3, color=\"#60a5fa\", orbit=3, speed=0.02]/}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.sphere",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.sphere"
+      ],
+      "description": "Sphère 3D (WebGL) : position, couleur, rotation, orbite.",
+      "attrs": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Identifiant (cible des animations {@s3.animate})."
+        },
+        {
+          "name": "radius",
+          "type": "number",
+          "required": false,
+          "default": "0.5",
+          "description": "Rayon."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "spin",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rotation propre par image."
+        },
+        {
+          "name": "orbit",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rayon d'orbite autour de l'origine."
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Vitesse angulaire de l'orbite."
+        },
+        {
+          "name": "glow",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Matériau auto-lumineux (ex. soleil)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée près de l'objet."
+        }
+      ],
+      "snippet": "{@s3.sphere[radius=${1:0.5}, color=${2:\"#60a5fa\"}, orbit=${3:3}, speed=${4:0.02}]/}",
+      "example": "{@s3.sphere[radius=0.4, color=\"#60a5fa\", orbit=3, speed=0.02]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.surface",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.surface"
+      ],
+      "description": "Surface z = f(x, y) (expression mathématique évaluée).",
+      "attrs": [
+        {
+          "name": "z",
+          "type": "string",
+          "required": false,
+          "default": "0",
+          "description": "Expression z=f(x,y), ex. sin(x)*cos(y)."
+        },
+        {
+          "name": "xrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle x, ex. (-3,3)."
+        },
+        {
+          "name": "yrange",
+          "type": "tuple",
+          "required": false,
+          "description": "Intervalle y, ex. (-3,3)."
+        },
+        {
+          "name": "res",
+          "type": "number",
+          "required": false,
+          "default": "36",
+          "description": "Résolution de la grille."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        }
+      ],
+      "snippet": "{@s3.surface[z=${1:\"sin(x)*cos(y)\"}, xrange=\"(-3,3)\", yrange=\"(-3,3)\", color=${2:\"#60a5fa\"}]/}",
+      "example": "{@s3.surface[z=\"sin(x)*cos(y)\", xrange=\"(-3,3)\", yrange=\"(-3,3)\", color=\"#60a5fa\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.torus",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.torus"
+      ],
+      "description": "Tore (donut) 3D : rayon + rayon du tube.",
+      "attrs": [
+        {
+          "name": "radius",
+          "type": "number",
+          "required": false,
+          "default": "1",
+          "description": "Rayon principal."
+        },
+        {
+          "name": "tube",
+          "type": "number",
+          "required": false,
+          "default": "0.3",
+          "description": "Rayon du tube."
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "Identifiant (cible des animations {@s3.animate})."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position x."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position y."
+        },
+        {
+          "name": "z",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Position z."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Opacité (0–1)."
+        },
+        {
+          "name": "spin",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rotation propre par image."
+        },
+        {
+          "name": "orbit",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Rayon d'orbite autour de l'origine."
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "default": "0",
+          "description": "Vitesse angulaire de l'orbite."
+        },
+        {
+          "name": "glow",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Matériau auto-lumineux (ex. soleil)."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Étiquette affichée près de l'objet."
+        }
+      ],
+      "snippet": "{@s3.torus[radius=${1:1}, tube=${2:0.3}, color=${3:\"#34d399\"}, spin=0.01]/}",
+      "example": "{@s3.torus[radius=1, tube=0.3, color=\"#34d399\", spin=0.01]/}",
+      "kind": "object"
+    },
+    {
+      "path": "scene.3d.vector",
+      "contentModel": "void",
+      "category": "géométrie",
+      "aliases": [
+        "s3.vector"
+      ],
+      "description": "Vecteur 3D (flèche) — forces, champs, déplacements.",
+      "attrs": [
+        {
+          "name": "from",
+          "type": "tuple",
+          "required": false,
+          "description": "Origine, ex. (0,0,0)."
+        },
+        {
+          "name": "to",
+          "type": "tuple",
+          "required": false,
+          "description": "Extrémité, ex. (1,2,1)."
+        },
+        {
+          "name": "color",
+          "type": "color",
+          "required": false,
+          "description": "Couleur de l'objet."
+        }
+      ],
+      "snippet": "{@s3.vector[from=${1:\"(0,0,0)\"}, to=${2:\"(2,1,1)\"}, color=${3:\"#f59e0b\"}]/}",
+      "example": "{@s3.vector[from=\"(0,0,0)\", to=\"(2,1,1)\", color=\"#f59e0b\"]/}",
+      "kind": "object"
+    },
+    {
+      "path": "signs",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [],
+      "description": "Tableau de signes : enfants {pt[x=…]/} (et {pt[x=…, zero=true]/} pour une racine) et {s: +|-} entre eux. Attributs var, fn.",
+      "attrs": [
+        {
+          "name": "var",
+          "type": "string",
+          "required": false,
+          "description": "Nom de la variable (déf. x)."
+        },
+        {
+          "name": "fn",
+          "type": "string",
+          "required": false,
+          "description": "Expression (déf. f(x))."
+        }
+      ],
+      "snippet": "{@signs[var=${1:\"x\"}, fn=${2:\"f(x)\"}]:\n  {pt[x=${3:\"-\\\\infty\"}]/} {s: ${4:-}} {pt[x=${5:\"0\"}, zero=true]/} {s: ${6:+}} {pt[x=${7:\"+\\\\infty\"}]/}\n}",
+      "example": "{@signs[var=\"x\", fn=\"x-2\"]:\n  {pt[x=\"-\\\\infty\"]/} {s: -} {pt[x=\"2\", zero=true]/} {s: +} {pt[x=\"+\\\\infty\"]/}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "slider.deck",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "slider"
+      ],
+      "description": "Présentation : conteneur de slides {@slider.slide:…}, navigable par boutons/flèches (runtime). Transitions et défilement auto optionnels. Les enfants qui ne sont pas des slides sont ignorés.",
+      "attrs": [
+        {
+          "name": "transition",
+          "type": "enum",
+          "required": false,
+          "default": "none",
+          "values": [
+            "none",
+            "fade",
+            "slide",
+            "zoom"
+          ],
+          "description": "Effet de changement de slide : none, fade (fondu), slide (glissement), zoom."
+        },
+        {
+          "name": "autoplay",
+          "type": "string",
+          "required": false,
+          "description": "Défilement automatique : durée par slide (ex. « 8s », « 2m », « 500ms »). Ajoute un bouton ▶/⏸."
+        },
+        {
+          "name": "loop",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Avec autoplay : revenir au premier slide après le dernier (sinon s'arrête)."
+        }
+      ],
+      "snippet": "{@slider[transition=fade]:\n  {@slider.slide: ${1:Premier slide}}\n  {@slider.slide: ${2:Deuxième slide}}\n}",
+      "example": "{@slider[transition=fade, autoplay=\"6s\", loop=true]:\n  {@slider.slide: {h1:Titre}}\n  {@slider.slide: {h2:Suite} {@mtb: E=mc^2}}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "slider.slide",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Un slide d'une présentation {@slider:…} (peut contenir n'importe quel HTSL).",
+      "attrs": [],
+      "snippet": "{@slider.slide: ${1:contenu du slide}}",
+      "example": "{@slider.slide: {h2:Mon slide} {p:…}}",
+      "kind": "object"
+    },
+    {
+      "path": "source",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Source média (dans {video}/{audio}).",
+      "attrs": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "URL de la ressource média."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "description": "Type MIME (ex. video/mp4)."
+        }
+      ],
+      "snippet": "{source[src=${1:\"film.mp4\"}, type=${2:\"video/mp4\"}]/}",
+      "example": "{source[src=\"film.mp4\", type=\"video/mp4\"]/}"
+    },
+    {
+      "path": "stepper",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "etapes"
+      ],
+      "description": "Suite d'étapes numérotées automatiquement : contient des {@step:…} (boîte à étiquette « Étape N »). guided=true = étapes repliées à révéler une à une.",
+      "attrs": [
+        {
+          "name": "guided",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Étapes repliées (révélation pas à pas, sans JS)."
+        }
+      ],
+      "snippet": "{@stepper:\n  {@step[title=${1:\"Étape 1\"}]: ${2:…}}\n  {@step[title=${3:\"Étape 2\"}]: ${4:…}}\n}",
+      "example": "{@stepper:\n  {@step[title=\"Poser le problème\"]: {p:On écrit l'équation.}}\n  {@step[title=\"Résoudre\"]: {@mtb: \\Delta = b^2 - 4ac}}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "stepper.step",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [
+        "step",
+        "etape"
+      ],
+      "description": "Une étape d'un {@stepper:…} (numérotée automatiquement). Attribut title optionnel.",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre de l'étape (affiché après le numéro)."
+        }
+      ],
+      "snippet": "{@step[title=${1:\"Étape\"}]: ${2:contenu}}",
+      "example": "{@step[title=\"Calculer\"]: {@mtb: x = \\frac{-b}{2a}}}",
+      "kind": "object"
+    },
+    {
+      "path": "strong",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Texte en gras.",
+      "attrs": [],
+      "snippet": "{strong:${1:texte}}",
+      "example": "{p:du {strong:gras} ici}"
+    },
+    {
+      "path": "table",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Tableau.",
+      "attrs": [],
+      "snippet": "{table:{tr:{th:${1:Colonne 1}}{th:${2:Colonne 2}}}{tr:{td:${3:a}}{td:${4:b}}}}",
+      "example": "{table:{tr:{th:A}{th:B}}{tr:{td:1}{td:2}}}"
+    },
+    {
+      "path": "tabs",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Onglets : conteneur de {@tabs.tab[title=…]:…} (navigation gérée par le runtime).",
+      "attrs": [],
+      "snippet": "{@tabs:\n  {@tabs.tab[title=${1:\"Énoncé\"}]: ${2:…}}\n  {@tabs.tab[title=${3:\"Solution\"}]: ${4:…}}\n}",
+      "example": "{@tabs:\n  {@tabs.tab[title=\"Énoncé\"]: {p:…}}\n  {@tabs.tab[title=\"Solution\"]: {p:…}}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "tabs.tab",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Un onglet d'un {@tabs:…} (attribut title = libellé de l'onglet).",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Libellé de l'onglet."
+        }
+      ],
+      "snippet": "{@tabs.tab[title=${1:\"Onglet\"}]: ${2:contenu}}",
+      "example": "{@tabs.tab[title=\"Indice\"]: {p:…}}",
+      "kind": "object"
+    },
+    {
+      "path": "timeline",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "chronologie"
+      ],
+      "description": "Frise chronologique : contient des {@event[date=…]:…} (point + date + contenu).",
+      "attrs": [],
+      "snippet": "{@timeline:\n  {@event[date=${1:\"1687\"}]: ${2:…}}\n  {@event[date=${3:\"1905\"}]: ${4:…}}\n}",
+      "example": "{@timeline:\n  {@event[date=\"1687\"]: {p:Newton — Principia}}\n  {@event[date=\"1905\"]: {p:Einstein — relativité restreinte}}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "timeline.event",
+      "contentModel": "html",
+      "category": "document",
+      "aliases": [
+        "event",
+        "evenement"
+      ],
+      "description": "Un évènement d'une {@timeline:…} (attribut date).",
+      "attrs": [
+        {
+          "name": "date",
+          "type": "string",
+          "required": false,
+          "description": "Date/étiquette affichée."
+        }
+      ],
+      "snippet": "{@event[date=${1:\"1905\"}]: ${2:contenu}}",
+      "example": "{@event[date=\"1905\"]: {p:Un évènement.}}",
+      "kind": "object"
+    },
+    {
+      "path": "truthtable",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [
+        "verite",
+        "tabverite"
+      ],
+      "description": "Table de vérité : un {head: a, b, …} (en-tête) et des {row: V, F, …} (colonnes séparées par des virgules). V/1/vrai et F/0/faux sont colorés.",
+      "attrs": [],
+      "snippet": "{@truthtable:\n  {head: p, q, p ∧ q}\n  {row: V, V, V}\n  {row: V, F, F}\n  {row: F, V, F}\n  {row: F, F, F}\n}",
+      "example": "{@truthtable:\n  {head: p, q, p ∧ q}\n  {row: V, V, V}\n  {row: V, F, F}\n  {row: F, V, F}\n  {row: F, F, F}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "ul",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Liste à puces.",
+      "attrs": [],
+      "snippet": "{ul:{li:${1:premier}}{li:${2:deuxième}}}",
+      "example": "{ul:{li:premier}{li:deuxième}}"
+    },
+    {
+      "path": "variations",
+      "contentModel": "html",
+      "category": "formules",
+      "aliases": [],
+      "description": "Tableau de variations : enfants {pt[x=…, y=…]/} (abscisses + valeurs) et {up/}/{down/} entre eux. Attributs var, fn.",
+      "attrs": [
+        {
+          "name": "var",
+          "type": "string",
+          "required": false,
+          "description": "Nom de la variable (déf. x)."
+        },
+        {
+          "name": "fn",
+          "type": "string",
+          "required": false,
+          "description": "Nom de la fonction (déf. f(x))."
+        }
+      ],
+      "snippet": "{@variations[var=${1:\"x\"}, fn=${2:\"f(x)\"}]:\n  {pt[x=${3:\"-\\\\infty\"}, y=${4:\"+\\\\infty\"}]/} {down/}\n  {pt[x=${5:\"0\"}, y=${6:\"-3\"}]/} {up/}\n  {pt[x=${7:\"+\\\\infty\"}, y=${8:\"+\\\\infty\"}]/}\n}",
+      "example": "{@variations[var=\"x\", fn=\"f(x)\"]:\n  {pt[x=\"-\\\\infty\", y=\"+\\\\infty\"]/} {down/}\n  {pt[x=\"0\", y=\"-3\"]/} {up/}\n  {pt[x=\"+\\\\infty\", y=\"+\\\\infty\"]/}\n}",
+      "kind": "object"
+    },
+    {
+      "path": "video",
+      "kind": "element",
+      "contentModel": "html",
+      "category": "structure",
+      "aliases": [],
+      "description": "Vidéo (avec contrôles natifs).",
+      "attrs": [
+        {
+          "name": "src",
+          "type": "string",
+          "required": false,
+          "description": "URL de la vidéo (ou utiliser {source}/)."
+        },
+        {
+          "name": "poster",
+          "type": "string",
+          "required": false,
+          "description": "Image d'aperçu."
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "description": "Largeur (px)."
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "description": "Hauteur (px)."
+        },
+        {
+          "name": "controls",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Afficher les contrôles de lecture."
+        },
+        {
+          "name": "autoplay",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Lecture automatique (souvent exige muted)."
+        },
+        {
+          "name": "loop",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Lecture en boucle."
+        },
+        {
+          "name": "muted",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Démarrer sans le son."
+        },
+        {
+          "name": "playsinline",
+          "type": "boolean",
+          "required": false,
+          "default": "false",
+          "description": "Lecture en ligne sur mobile (pas de plein écran forcé)."
+        }
+      ],
+      "snippet": "{video[src=${1:\"film.mp4\"}, controls]:}",
+      "example": "{video[src=\"film.mp4\", controls, width=\"480\"]:}"
+    }
+  ]
+}

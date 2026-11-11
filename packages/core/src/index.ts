@@ -53,7 +53,7 @@ export { compileExpr, safeExpr } from "./objects/expr.js";
 export type { CompiledExpr } from "./objects/expr.js";
 export { loadDependency, hydrate, purge, installHtslRuntime } from "./runtime.js";
 export type { HtslRuntime } from "./runtime.js";
-export { resolvePath, isKnownObject, contentModelOf } from "./objects/registry.js";
+export { resolvePath, isKnownObject, contentModelOf, listObjects, describeObject, objectsSchema } from "./objects/registry.js";
 export { registry, documentComponents, documentVariables } from "./introspect.js";
 export type { ComponentInfo } from "./introspect.js";
 export type { ObjectMeta, AttrSchema, AttrType, RegistryEntry, ContentModel, Category, EntryKind } from "./objects/registry.js";

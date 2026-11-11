@@ -40,7 +40,8 @@
     "typecheck": "tsc --noEmit",
     "demo": "tsx scripts/demo.ts",
     "demo:formulas": "tsx scripts/demo-formulas.ts",
-    "demo:geometry": "tsx scripts/demo-geometry.ts"
+    "demo:geometry": "tsx scripts/demo-geometry.ts",
+    "schema": "node scripts/gen-schema.mjs"
   },
   "keywords": [
     "htsl",

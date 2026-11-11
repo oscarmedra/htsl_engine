@@ -77,10 +77,17 @@ Si tu n'as pas de navigateur fiable sous la main, dis-le et livre le **source HT
 
 ## 3. Pièges du moteur (vérifiés — valables partout)
 
-1. **Apostrophe droite `'` dans un ATTRIBUT** → erreur de parse. Les valeurs
-   d'attribut se mettent entre guillemets doubles : `title="L'énoncé"`. (Dans le
-   texte courant, `'` passe ; en français soigné, préfère l'apostrophe typographique
-   `’`.)
+> Les pièges #1, #2 et #4 ont été **corrigés dans le moteur** (bugs A1–A3). La build
+> **CDN publiée** peut rester en retard : si tu génères une page autonome via le CDN,
+> garde les habitudes sûres indiquées tant qu'une nouvelle version n'est pas publiée.
+
+
+1. **Apostrophes & guillemets d'attribut** (corrigé, bug A2). Les valeurs d'attribut
+   acceptent guillemets **doubles ou simples** ; une apostrophe passe dans le texte et
+   dans un `{@codeblock}`. Seul reste : une apostrophe **à l'intérieur d'une valeur
+   single-quote** la ferme (`title='l'eau'` → erreur) → mets des guillemets doubles
+   pour une valeur contenant `'` : `title="l'eau"`. En français soigné, apostrophe
+   typographique `’` dans le texte.
 2. **Espace entre deux éléments inline — désormais préservé.** Le moteur conserve
    l'espace source : `{em:a} {strong:b}` → `a b` (idem `$x$ {em:…}`). ⚠ La build
    **CDN publiée** peut être en retard sur cette correction : si tu cibles une page
@@ -89,8 +96,9 @@ Si tu n'as pas de navigateur fiable sous la main, dis-le et livre le **source HT
 3. **N'utilise que des objets qui existent.** `{@table}` n'existe pas → sortie cassée
    silencieuse ; le tableau HTML s'écrit `{table:…}` (sans `@`). En cas de doute,
    `verify.mjs` le signale (il liste tout `{@…}` absent du registre).
-4. **Accolades déséquilibrées près d'une formule** (`$A} : …`) → rendu faux sans
-   toujours lever d'erreur. Équilibre chaque `{`/`}` et chaque `$…$`.
+4. **Accolade dans une formule** (corrigé, bug A3) : un `}` dans `$…$`/`$$…$$` est
+   désormais du LaTeX littéral (`$x}$` passe). Équilibre quand même tes `{`/`}` de
+   balisage et tes `$…$` : un vrai déséquilibre de balises reste une erreur.
 5. **Numérotation globale.** Les encadrés (`{@theorem}`…) et exercices sont numérotés
    sur tout le fichier : renvoie à un élément par son **label** (`{@ref[to=…]/}`),
    jamais « voir le théorème 3 ».

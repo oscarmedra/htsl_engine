@@ -548,7 +548,7 @@ class Renderer {
     const tbody = `<tbody>${rows
       .map((r) => `<tr>${cellsOf(r).map((c) => `<td${cellClass(c)}>${escapeHtml(c)}</td>`).join("")}</tr>`)
       .join("")}</tbody>`;
-    return `<table class="htsl-truthtable">${thead}${tbody}</table>`;
+    return `<div class="htsl-scroll-x"><table class="htsl-truthtable">${thead}${tbody}</table></div>`;
   }
 
   /** Verbatim code block ({@codeblock[lang]:…}). The content is raw text (lexer);
@@ -715,7 +715,8 @@ class Renderer {
       .filter((c) => c.type !== "comment")
       .map((c) => this.compact(c))
       .join("");
-    return `${open}${inner}</${node.tag}>`;
+    const html = `${open}${inner}</${node.tag}>`;
+    return node.tag === "table" ? `<div class="htsl-scroll-x">${html}</div>` : html;
   }
 
   /* ----------------------------------------------------------------------- */
@@ -769,7 +770,9 @@ class Renderer {
     const lines = [pad + open];
     for (const child of children) lines.push(this.pretty0(child, indent + 1));
     lines.push(`${pad}</${node.tag}>`);
-    return lines.join("\n");
+    const body = lines.join("\n");
+    // Wide tables scroll horizontally instead of overflowing the page/screen (D1/D2).
+    return node.tag === "table" ? `${pad}<div class="htsl-scroll-x">\n${body}\n${pad}</div>` : body;
   }
 
   /**

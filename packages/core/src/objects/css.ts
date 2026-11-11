@@ -599,6 +599,16 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   .htsl-doc--book .htsl-book-stage > .htsl-doc-page { display: flex !important; animation: none !important; }
 }
 
+/* Wide content scrolls horizontally instead of overflowing the page/screen,
+   including mobile (D1/D2). Tables are wrapped in .htsl-scroll-x by the renderer;
+   display formulas (.htsl-math-block already scrolls) + KaTeX display get it too. */
+.htsl-scroll-x { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.katex-display { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+@media print {
+  .htsl-scroll-x { overflow-x: visible; }
+  .katex-display { overflow-x: visible; }
+}
+
 /* PDF viewer ({@pdf[src=…]}) — native browser embed; screen only. */
 .htsl-pdf { margin: 1em 0; display: flex; flex-direction: column; gap: 0.4rem; }
 .htsl-pdf-frame {
