@@ -81,11 +81,11 @@ Si tu n'as pas de navigateur fiable sous la main, dis-le et livre le **source HT
    d'attribut se mettent entre guillemets doubles : `title="L'énoncé"`. (Dans le
    texte courant, `'` passe ; en français soigné, préfère l'apostrophe typographique
    `’`.)
-2. **Espace seul entre deux éléments inline est supprimé** : `{em:a} {strong:b}` rend
-   `ab`. Idem `$x$ {em:…}`. Correctifs : mettre un **mot** entre les deux (`{em:a} et
-   {strong:b}`), inclure l'espace DANS un élément (`{em:a } {strong:b}` → mets l'espace
-   avant la `}`), ou insérer `​ ` (espace de largeur nulle **puis** espace). Ne
-   mets jamais d'espace juste avant un `$` fermant.
+2. **Espace entre deux éléments inline — désormais préservé.** Le moteur conserve
+   l'espace source : `{em:a} {strong:b}` → `a b` (idem `$x$ {em:…}`). ⚠ La build
+   **CDN publiée** peut être en retard sur cette correction : si tu cibles une page
+   autonome via le CDN, garde l'habitude sûre de mettre un vrai mot entre deux inline
+   (`{em:a} et {strong:b}`) ou l'espace DANS un élément (`{em:a } {strong:b}`).
 3. **N'utilise que des objets qui existent.** `{@table}` n'existe pas → sortie cassée
    silencieuse ; le tableau HTML s'écrit `{table:…}` (sans `@`). En cas de doute,
    `verify.mjs` le signale (il liste tout `{@…}` absent du registre).

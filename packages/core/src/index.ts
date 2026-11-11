@@ -23,6 +23,7 @@ import type { CompileOptions, Node } from "./types.js";
 
 export { parse } from "./parser.js";
 export { render } from "./renderer.js";
+export { diagnose, type Diagnostic, type DiagnoseOptions } from "./diagnose.js";
 export { tokenize } from "./lexer.js";
 export { fromHtml, parseHtml, toHtsl } from "./from-html.js";
 export type { ToHtslOptions } from "./from-html.js";

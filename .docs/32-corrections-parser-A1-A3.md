@@ -29,3 +29,18 @@ une formule délimitée par accolades (`{@mtb:…}`) se ferme sur `}` ; dans `$�
 un `}` est du LaTeX littéral (la fermeture est le `$`).
 
 Tests : `inline-whitespace.test.ts` (A1×4, A2×4, A3×2) + `parser.test.ts` mis à jour.
+
+## A4 / A5 — diagnostic statique (`diagnose()`)
+
+Nouvelle fonction `diagnose(source, { katex? })` → `Diagnostic[]` (ligne, col, message,
+extrait, suggestion), exportée depuis `index.ts`. Ne lève jamais. Base pour `htsl check`
+et le signalement d'erreurs de l'éditeur.
+- **A4** : objet inconnu `{@table}` → « objet inconnu {@table} » + suggestion
+  `{table} (élément, sans @)` si c'est un élément connu, sinon l'objet le plus proche
+  (distance d'édition ≤ 2, ex. `{@truthtabl}` → `{@truthtable}`). Les composants
+  `{!define}` et les objets du registre ne sont pas signalés.
+- **A5** : si un `katex` est fourni, chaque formule est validée (`throwOnError`) → erreur
+  « formule invalide : <message KaTeX> » avec la bonne ligne/colonne.
+- Erreurs de syntaxe récupérées par le parseur tolérant également remontées.
+
+Tests : `diagnose.test.ts` (A4×5, A5×4). Suite : 431.

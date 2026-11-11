@@ -30,8 +30,8 @@ choix délibéré.
 
 - Guillemets `«  »` (avec espace insécable intérieure), tirets de dialogue, espace
   insécable avant `; : ! ?`, apostrophe typographique `’` (pas `'`).
-- Pas d'espace juste avant un `$` fermant ; espace entre deux inline → cf. piège §3
-  du `SKILL.md` (mettre un mot, ou `​ `).
+- Espace entre deux éléments inline : désormais préservé par le moteur (cf. piège §3
+  du `SKILL.md` ; attention à la build CDN qui peut être en retard).
 
 ## Mise en page
 
