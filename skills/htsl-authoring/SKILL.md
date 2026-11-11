@@ -128,6 +128,9 @@ Si tu n'as pas de navigateur fiable sous la main, dis-le et livre le **source HT
   `templates/standalone.html` (CDN + runtime + `mathCss` ; compile après `window.load`
   avec `{ katex }`). Charge Plotly pour `{@mg2/mg3/plot/chart}` ; Three.js est chargé
   seul pour `{@s3}`.
+- **Page autonome contenant un `{@slider}`** : utilise `templates/standalone-slides.html`
+  (bundle **non-auto** + `htsl_engine.hydrate()` appelé **une seule fois**). Le bundle
+  auto (MutationObserver) peut boucler avec un slider → page figée. Détails : `slides.md`.
 - **Message de livraison en 2 lignes** : ce qui a été produit et vérifié (0 erreur,
   nombre de pages/slides regardés), **sans** résumer tout le contenu.
 
@@ -141,4 +144,4 @@ Si tu n'as pas de navigateur fiable sous la main, dis-le et livre le **source HT
 | `reference/recipes.md` | Mini-recettes variées (snippets). |
 | `examples/*.htsl` | **Un fichier complet par type**, qui passe lint + verify. Imite un exemple qui marche. |
 | `scripts/lint.mjs` · `verify.mjs` | Vérification exécutable (voir §2). |
-| `templates/standalone.html` | Gabarit de page autonome. |
+| `templates/standalone.html` · `standalone-slides.html` | Gabarits de page autonome (le second : slider en hydratation explicite, anti-boucle). |

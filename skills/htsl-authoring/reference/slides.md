@@ -45,6 +45,32 @@ une scène Plotly/Three dans un slide peut déclencher une **boucle de ré-hydra
 }
 ```
 
+## Page autonome : hydratation explicite (anti-boucle)
+
+Pour livrer un deck en page HTML autonome, **n'utilise pas le bundle auto**
+(`htsl.auto.global.js`) : son `MutationObserver` peut **boucler** avec un slider
+(ré-hydratation en cascade → page figée). Utilise le bundle **non-auto**
+`htsl.global.js` et **hydrate toi-même, une seule fois** :
+
+```html
+<script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.global.js"></script>
+…
+<script>
+  window.addEventListener("load", function () {
+    var out = document.getElementById("out");
+    document.head.appendChild(
+      Object.assign(document.createElement("style"), { textContent: htsl_engine.mathCss })
+    );
+    out.innerHTML = htsl_engine.compile(src, { katex: window.katex, prettyPrint: true });
+    htsl_engine.hydrate(out);   // UNE fois — pas de MutationObserver
+  });
+</script>
+```
+
+Gabarit prêt : **`templates/standalone-slides.html`**. (Rappel : la build CDN publiée
+peut être en retard sur le moteur local — un `{@badge}` ou un objet récent peut y être
+rendu en repli math ; vérifie, et republie le paquet si besoin.)
+
 ## Vérifs propres
 
 - `lint` + `verify` (verify alerte si une scène est dans le slider).

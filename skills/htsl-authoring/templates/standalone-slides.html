@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ma présentation</title>
+
+    <!-- Bundle NON-auto : on hydrate nous-mêmes, UNE seule fois. Important pour un
+         {@slider} : le bundle auto (htsl.auto.global.js) installe un MutationObserver
+         qui, avec un slider, peut boucler (ré-hydratation en cascade → page figée).
+         L'hydratation explicite ci-dessous l'évite. -->
+    <script src="https://unpkg.com/@noah-medra/htsl-core/dist-min/htsl.global.js"></script>
+
+    <!-- Formules (KaTeX). Retire si aucune formule. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <!-- PAS de scène Plotly/Three DANS un {@slider} (cf. slides.md). -->
+
+    <style>
+      body {
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+        max-width: 960px; margin: 1.5rem auto; padding: 0 1.1rem; color: #1e293b;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="out"></div>
+
+    <!-- ⬇️ ÉCRIS TON {@slider}…{@slider.slide} ICI -->
+    <script type="text/htsl" id="source">
+{@slider[transition=fade, loop=true]:
+  {@slider.slide:
+    {h1:Titre de la présentation}
+    {p:Sous-titre ou auteur.}
+  }
+  {@slider.slide:
+    {h2:Une idée par diapo}
+    {@mtb: E = mc^2}
+  }
+  {@slider.slide:
+    {h2:À retenir}
+    {@panel[color=green, title="L’essentiel"]: {p:Le message principal.}}
+  }
+}
+    </script>
+
+    <!-- Amorçage — ordre : load → mathCss → compile(katex) → hydrate UNIQUE. -->
+    <script>
+      window.addEventListener("load", function () {
+        var style = document.createElement("style");
+        style.textContent = htsl_engine.mathCss;
+        document.head.appendChild(style);
+
+        var out = document.getElementById("out");
+        out.innerHTML = htsl_engine.compile(
+          document.getElementById("source").textContent,
+          { katex: window.katex, prettyPrint: true }
+        );
+        // Hydratation explicite UNIQUE (slides) — surtout pas de MutationObserver.
+        htsl_engine.hydrate(out);
+      });
+    </script>
+  </body>
+</html>
