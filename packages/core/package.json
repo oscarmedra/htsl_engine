@@ -1,6 +1,6 @@
 {
   "name": "@noah-medra/htsl-core",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "HTSL (HyperText Structured Language) — declarative markup engine for math/physics documents: parser, renderer and runtime that compiles to HTML through an AST.",
   "type": "module",
   "main": "./dist/index.js",
@@ -17,7 +17,8 @@
     "dist",
     "dist-min",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "schema"
   ],
   "repository": {
     "type": "git",

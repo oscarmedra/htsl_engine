@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-11",
-  "count": 125,
+  "generated": "2026-11-12",
+  "count": 128,
   "objects": [
     {
       "path": "a",
@@ -721,6 +721,26 @@
       "attrs": [],
       "snippet": "{@col: ${1:contenu}}",
       "example": "{@col: {p:Contenu de la colonne.}}",
+      "kind": "object"
+    },
+    {
+      "path": "corriges",
+      "contentModel": "void",
+      "category": "document",
+      "aliases": [
+        "solutions"
+      ],
+      "description": "Regroupe les corrigés — solutions des {@exercise} et réponses des {@quiz} qui précèdent (depuis le dernier {@corriges}) — avec un renvoi depuis chaque exercice. À placer en fin de chapitre ou de document. title optionnel (défaut « Corrigés »).",
+      "attrs": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre du bloc (défaut « Corrigés »)."
+        }
+      ],
+      "snippet": "{@corriges/}",
+      "example": "{@exercise:énoncé {solution:la réponse}}\n{@corriges/}",
       "kind": "object"
     },
     {
@@ -2285,6 +2305,19 @@
       "example": "{p:Un paragraphe.}"
     },
     {
+      "path": "pagebreak",
+      "contentModel": "void",
+      "category": "document",
+      "aliases": [
+        "saut"
+      ],
+      "description": "Saut de page forcé à l'impression / en PDF (sans effet à l'écran). À placer entre deux blocs.",
+      "attrs": [],
+      "snippet": "{@pagebreak/}",
+      "example": "{p:Fin du chapitre.}{@pagebreak/}{h1:Chapitre suivant}",
+      "kind": "object"
+    },
+    {
       "path": "panel",
       "contentModel": "html",
       "category": "structure",
@@ -3757,6 +3790,33 @@
       ],
       "snippet": "{@event[date=${1:\"1905\"}]: ${2:contenu}}",
       "example": "{@event[date=\"1905\"]: {p:Un évènement.}}",
+      "kind": "object"
+    },
+    {
+      "path": "toc",
+      "contentModel": "void",
+      "category": "document",
+      "aliases": [
+        "sommaire"
+      ],
+      "description": "Sommaire automatique : liste les titres {h1}…{h6} du document avec un lien vers chacun. levels = profondeur max (défaut 3). title = titre du sommaire. (Les numéros de page réels dépendent de la pagination d'impression.)",
+      "attrs": [
+        {
+          "name": "levels",
+          "type": "number",
+          "required": false,
+          "default": "3",
+          "description": "Profondeur maximale (1 à 6)."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Titre affiché au-dessus (ex. « Sommaire »)."
+        }
+      ],
+      "snippet": "{@toc[title=${1:\"Sommaire\"}]/}",
+      "example": "{@toc[title=\"Sommaire\", levels=2]/}",
       "kind": "object"
     },
     {
