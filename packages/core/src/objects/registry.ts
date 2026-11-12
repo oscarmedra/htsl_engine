@@ -678,6 +678,17 @@ registerObject({
   example: "{p:Fin du chapitre.}{@pagebreak/}{h1:Chapitre suivant}",
 });
 registerObject({
+  path: "corriges",
+  contentModel: "void",
+  category: "document",
+  aliases: ["solutions"],
+  description:
+    "Regroupe les corrigés — solutions des {@exercise} et réponses des {@quiz} qui précèdent (depuis le dernier {@corriges}) — avec un renvoi depuis chaque exercice. À placer en fin de chapitre ou de document. title optionnel (défaut « Corrigés »).",
+  attrs: [{ name: "title", type: "string", required: false, description: "Titre du bloc (défaut « Corrigés »)." }],
+  snippet: "{@corriges/}",
+  example: "{@exercise:énoncé {solution:la réponse}}\n{@corriges/}",
+});
+registerObject({
   path: "toc",
   contentModel: "void",
   category: "document",

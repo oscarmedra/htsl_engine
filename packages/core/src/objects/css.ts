@@ -606,6 +606,28 @@ details.htsl-step--guided > .htsl-step-body { padding: 0.8rem 0.95rem 0.6rem; }
   h1, h2, h3, h4, h5, h6 { break-after: avoid; break-inside: avoid; }
 }
 
+/* Regrouped answers ({@corriges}) + the exercise → corrigé link (B3). */
+.htsl-corriges { margin: 2em 0; border-top: 2px solid #e3e6ea; padding-top: 1em; break-before: page; }
+.htsl-corriges-title { font-size: 1.3em; margin: 0 0 0.6em; color: #15803d; }
+.htsl-corrige { margin: 0.8em 0; }
+.htsl-corrige-head { font-weight: 700; color: #334155; }
+.htsl-corrige-back { text-decoration: none; color: #94a3b8; font-size: 0.85em; }
+.htsl-corrige-back:hover { color: #3b5bdb; }
+.htsl-corrige-body > :first-child { margin-top: 0.2em; }
+.htsl-corrige-explain { color: #475569; }
+.htsl-exo-corrige { display: inline-block; margin-top: 0.4em; color: #15803d; font-weight: 600; text-decoration: none; font-size: 0.9em; }
+.htsl-exo-corrige:hover { text-decoration: underline; }
+.htsl-quiz-letter { font-weight: 700; color: #6b7280; }
+/* Static QCM in print: options as a plain, non-interactive list; the answer is NOT
+   marked inline (it lives in {@corriges}). */
+@media print {
+  .htsl-quiz-opt {
+    display: block; width: 100%; cursor: default;
+    background: #fff !important; border-color: #cbd5e1 !important; color: inherit !important;
+  }
+  .htsl-quiz-opt::after { content: none !important; }
+}
+
 /* Auto table of contents ({@toc}) — indented links to the headings (B2). */
 .htsl-toc { margin: 1em 0; }
 .htsl-toc-title { font-weight: 700; font-size: 1.1em; margin-bottom: 0.4em; color: #1f2937; }

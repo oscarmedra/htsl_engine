@@ -23,6 +23,7 @@ import { isChartPath, renderChart } from "./objects/chart.js";
 import { isVariationsPath, renderVariations } from "./objects/variations.js";
 import { isParamPath, renderParam, buildParamContext, paramValues, type ParamContext } from "./objects/param.js";
 import { buildTocContext, renderToc, type TocContext } from "./objects/toc.js";
+import { buildCorrigeContext, type CorrigeContext, type CorrigeItem } from "./objects/corriges.js";
 import { isSlidePath, deckTransition, parseDurationMs } from "./objects/slides.js";
 import {
   buildCalloutContext,
@@ -75,6 +76,7 @@ class Renderer {
   private calloutCtx: CalloutContext = { info: new Map(), labels: new Map() };
   private paramCtx: ParamContext = new Map();
   private tocCtx: TocContext = { ids: new Map(), entries: [] };
+  private corrigeCtx: CorrigeContext = { byNode: new Map(), sections: new Map() };
   private flashcardCounter = 0;
   private exerciseCounter = 0;
 
@@ -89,6 +91,7 @@ class Renderer {
     this.calloutCtx = buildCalloutContext(nodes, this.options.chapterNumbering ?? false);
     this.paramCtx = buildParamContext(nodes);
     this.tocCtx = buildTocContext(nodes);
+    this.corrigeCtx = buildCorrigeContext(nodes);
     const visible = nodes.filter((n) => n.type !== "comment");
     if (this.pretty) {
       return visible
@@ -138,6 +141,7 @@ class Renderer {
     if (node.path === "document") return this.pagedDoc(node);
     if (node.path === "document.page") return this.docPage(node, 0);
     if (node.path === "pagebreak") return `<div class="htsl-pagebreak" aria-hidden="true"></div>`;
+    if (node.path === "corriges") return this.corriges(node);
     if (node.path === "toc") return this.toc(node);
     if (node.path === "pdf") return this.pdfView(node);
     if (node.path === "columns") return this.columns(node);
@@ -468,7 +472,9 @@ class Renderer {
   /** Numbered exercise ({@exercise[title=…]: … {solution:…}}). The optional
    *  {solution:…} child becomes a collapsible <details>. Numbered per document. */
   private exercise(node: ObjectNode): string {
-    const n = ++this.exerciseCounter;
+    const item = this.corrigeCtx.byNode.get(node);
+    const n = item?.n ?? ++this.exerciseCounter;
+    const id = item ? ` id="${item.id}"` : "";
     const title = node.attrs["title"];
     const head = `Exercice ${n}${title ? ` — ${escapeHtml(title)}` : ""}`;
     const solution = this.els(node, "solution")[0];
@@ -477,16 +483,47 @@ class Renderer {
       .map((c) => this.compact(c))
       .join("")
       .trim();
-    const sol = solution
-      ? `<details class="htsl-exo-solution"><summary>Solution</summary>` +
-        `<div class="htsl-exo-solution-body">${this.elementBody(solution)}</div></details>`
-      : "";
+    // When a {@corriges} regroups it, link there instead of an inline collapsible.
+    const sol = !solution
+      ? ""
+      : item?.inCorriges
+        ? `<a class="htsl-exo-corrige" href="#${item.solId}">→ voir le corrigé</a>`
+        : `<details class="htsl-exo-solution"><summary>Solution</summary>` +
+          `<div class="htsl-exo-solution-body">${this.elementBody(solution)}</div></details>`;
     return (
-      `<div class="htsl-exo">` +
+      `<div class="htsl-exo"${id}>` +
       `<div class="htsl-exo-head">${head}</div>` +
       `<div class="htsl-exo-body">${body}</div>` +
       sol +
       `</div>`
+    );
+  }
+
+  /** Regrouped answers ({@corriges}) — exercise solutions + quiz answers of the
+   *  preceding section, each with a back-link. Placed by the author (e.g. per chapter). */
+  private corriges(node: ObjectNode): string {
+    const items = this.corrigeCtx.sections.get(node) ?? [];
+    const title = escapeHtml(node.attrs["title"] ?? "Corrigés");
+    const body = items.map((it) => this.corrigeItem(it)).join("");
+    return `<section class="htsl-corriges"><h2 class="htsl-corriges-title">${title}</h2>${body}</section>`;
+  }
+
+  private corrigeItem(it: CorrigeItem): string {
+    const back = ` <a class="htsl-corrige-back" href="#${it.id}" aria-label="Retour">↩</a>`;
+    if (it.kind === "exercise") {
+      const sol = it.solution ? this.elementBody(it.solution) : "";
+      return (
+        `<div class="htsl-corrige" id="${it.solId}">` +
+        `<div class="htsl-corrige-head">Exercice ${it.n}${back}</div>` +
+        `<div class="htsl-corrige-body">${sol}</div></div>`
+      );
+    }
+    const letters = (it.correct ?? []).map((i) => String.fromCharCode(65 + i)).join(", ") || "—";
+    const explain = it.explain ? `<div class="htsl-corrige-explain">${this.elementBody(it.explain)}</div>` : "";
+    return (
+      `<div class="htsl-corrige" id="${it.solId}">` +
+      `<div class="htsl-corrige-head">Question ${it.n}${back}</div>` +
+      `<div class="htsl-corrige-body"><strong>Réponse : ${letters}</strong>${explain}</div></div>`
     );
   }
 
@@ -650,16 +687,19 @@ class Renderer {
     const explain = this.els(node, "explain")[0];
     const question = q ? this.elementBody(q) : "";
     const opts = this.els(node, "opt")
-      .map((o) => {
+      .map((o, i) => {
         const correct = o.attrs["correct"] !== undefined && o.attrs["correct"] !== "false" ? "1" : "0";
-        return `<button type="button" class="htsl-quiz-opt" data-correct="${correct}">${this.elementBody(o)}</button>`;
+        const letter = `<span class="htsl-quiz-letter">${String.fromCharCode(65 + i)}.</span> `;
+        return `<button type="button" class="htsl-quiz-opt" data-correct="${correct}">${letter}${this.elementBody(o)}</button>`;
       })
       .join("");
     const explainHtml = explain
       ? `<div class="htsl-quiz-explain" hidden>${this.elementBody(explain)}</div>`
       : "";
+    const item = this.corrigeCtx.byNode.get(node);
+    const id = item ? ` id="${item.id}"` : "";
     return (
-      `<div class="htsl-quiz" data-htsl-quiz${hashAttr}>` +
+      `<div class="htsl-quiz" data-htsl-quiz${id}${hashAttr}>` +
       `<div class="htsl-quiz-q">${question}</div>` +
       `<div class="htsl-quiz-opts">${opts}</div>` +
       explainHtml +
